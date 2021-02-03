@@ -1,5 +1,5 @@
 <template>
-    <div class="three_menu_list01">
+    <div class="three_menu_list">
         <ul>
             <li
                     v-for="(item, index) in classList"
