@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html data-time="<%= htmlWebpackPlugin.options.getTime%>" style="font-size:50px">
+    <head>
+        <meta charset="utf-8" />
+        <meta http-equiv="x-dns-prefetch-control" content="on" />
+        <meta http-equiv="cache-control" content="no-store" />
+        <meta http-equiv="cache-control" content="no-cache" />
+        <meta http-equiv="expires" content="0" />
+        <link rel="icon" href="favicon.ico" type="image/x-icon" />
+        <meta http-equiv="pragma" content="no-cache" />
+        <meta content="telephone=no" name="format-detection" />
+        <meta name="applicable-device" content="mobile" />
+        <meta name="apple-mobile-web-app-title" content="盛大汽车" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="white" />
+        <meta name="theme-color" content="#ff6900" />
+        <meta
+            name="viewport"
+            content="width=device-width,initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"
+        />
+        <title>加载中...</title>
+        
+        <% htmlWebpackPlugin.options.src &&
+        htmlWebpackPlugin.options.src.map(function(item) { %> <% if(item.async){ %>
+        <script
+          src="<%= item.url %>"
+          async="<%= item.async %>"
+          data-name="<%= item.name %>"
+          data-cdn="<%= item.cdn %>"
+          onerror="SCRIPT_ERROR(this)"
+        ></script>
+        <% }else{ %>
+        <script
+          src="<%= item.url %>"
+          data-name="<%= item.name %>"
+          data-cdn="<%= item.cdn %>"
+          onerror="SCRIPT_ERROR(this)"
+        ></script>
+        <% } %> <% }) %>
+        <script type="text/javascript">
+            window.globalConfig = {
+                imagePath: "<%= htmlWebpackPlugin.options.imagePath%>"
+            };
+        </script>
+        
+        <script type="text/javascript" src="/pano/tour.js"></script>
+        <script type="text/javascript" src="/pano/jquery.js"></script>
+        <script src="/pano/layui/layui.js"></script>
+        <script
+            type="text/javascript"
+            src="/pano/panotour.js"
+        ></script>
+        <script type="text/javascript" src="/pano/md5.js"></script>
+        <script
+            type="text/javascript"
+            src="/pano/src/ios-weixin-config.js"
+        ></script>
+        <script
+            type="text/javascript"
+            src="/pano/src/app.js"
+        ></script>
+
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/xiangyuecn/Recorder@latest/src/recorder-core.js?v=<%=htmlWebpackPlugin.options.getTime%>"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/xiangyuecn/Recorder@latest/src/engine/mp3.js?v=<%=htmlWebpackPlugin.options.getTime%>"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/xiangyuecn/Recorder@latest/src/engine/mp3-engine.js?v=<%=htmlWebpackPlugin.options.getTime%>"></script>
+        <script type="text/javascript" src="https://cdn.jsdelivr.net/gh/xiangyuecn/Recorder@latest/src/engine/wav.js?v=<%=htmlWebpackPlugin.options.getTime%>"></script>
+
+    </head>
+    <body>
+        <div id="app"></div>
+    </body>
+</html>
