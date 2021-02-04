@@ -5,10 +5,29 @@
             <div style="padding: 5px;">
                 <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">"延展67"轮</p>
                 <div class="bottom clearfix">
-                    <el-button type="text" class="button">查看内容</el-button>
+                    <el-button type="text" class="button">船舶参数</el-button>
                 </div>
             </div>
         </el-card>
+        <el-card class="box-card">
+            <img src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2004208792,3609046340&fm=26&gp=0.jpg" class="image">
+            <div style="padding: 5px;">
+                <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">"鼓浪屿"轮</p>
+                <div class="bottom clearfix">
+                    <el-button type="text" class="button">船舶参数</el-button>
+                </div>
+            </div>
+        </el-card>
+        <el-card class="box-card">
+            <img src="https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=2108061896,2747657363&fm=26&gp=0.jpg" class="image">
+            <div style="padding: 5px;">
+                <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">"大智"轮</p>
+                <div class="bottom clearfix">
+                    <el-button type="text" class="button">船舶参数</el-button>
+                </div>
+            </div>
+        </el-card>
+
     </div>
 </template>
 
@@ -33,6 +52,7 @@
     .box-card {
         width: 92%;
         margin-left: 4%;
+        margin-bottom: 20px;
     }
 
     .time {

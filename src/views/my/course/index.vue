@@ -24,7 +24,7 @@
             <Title title="船舶资源" :isMore="false"></Title>
             <div class="course_list">
                 <!--<Nav :modulesList="modulesList" path="/my/course"></Nav>-->
-                <blocklist v-for="o in 4" :key="o"></blocklist>
+                <blocklist></blocklist>
             </div>
         </div>
         <div class="course_content">
@@ -117,13 +117,14 @@ export default {
     overflow: hidden;
     .course_nav {
         width: 294px;
-        height: 100%;
+        height:calc(100% - 55px);
+        min-width: 294px;
         .course_list {
             background-color: #fff;
-            height: 100%;
             padding-top:20px;
-            overflow: scroll;
-/*
+            overflow-y: scroll;
+            height: 100%;
+            /*
             & > nav {
                 ul {
                     li {
@@ -136,7 +137,7 @@ export default {
                     }
                 }
             }
-                    */
+            */
 
         }
 
@@ -146,6 +147,7 @@ export default {
         margin-left: 8px;
         flex: 1;
         background: #fff;
+        min-width: 666px;
         // height: 100%;
         .course_list {
             overflow-y: scroll;
