@@ -23,9 +23,7 @@
         <div class="course_nav">
             <Title title="船舶资源" :isMore="false"></Title>
             <div class="course_list">
-
                 <Nav :modulesList="modulesList" path="/my/course"></Nav>
-
             </div>
         </div>
         <div class="course_content">
