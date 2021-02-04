@@ -1,36 +1,16 @@
 <template>
-    <!--
-    <div class="course">
-        <div class="course_nav">
-            <Title title="船舶资源" :isMore="false"></Title>
-            <div class="course_list">
-                <Nav :modulesList="modulesList" path="/my/course"></Nav>
-            </div>
-        </div>
-        <div class="course_content">
-            <Submenu :modulesList="modulesList" path="/my/course"></Submenu>
-            <div class="course_list" v-loading="loading">
-                <CourseItem
-                    v-for="(item, index) in recommendProjectList"
-                    :key="index"
-                    :item="item"
-                ></CourseItem>
-            </div>
-        </div>
-    </div>
-    -->
     <div class="course">
         <div class="course_nav">
             <Title title="船舶资源" :isMore="false"></Title>
             <div class="course_list">
                 <!--<Nav :modulesList="modulesList" path="/my/course"></Nav>-->
-                <blocklist></blocklist>
+                <blocklistmenu></blocklistmenu>
             </div>
         </div>
         <div class="course_content">
             <!--<Submenu :modulesList="modulesList" path="/my/course"></Submenu>-->
-            <modulelist></modulelist>
-            <classlist></classlist>
+            <modulelistmenu></modulelistmenu>
+            <classlistmenu></classlistmenu>
             <div class="course_list" v-loading="loading">
                 <CourseItem
                         v-for="(item, index) in recommendProjectList"
@@ -49,10 +29,10 @@ import Submenu from "../../course/Submenu";
 import CourseItem from "@/components/course";
 import { project } from "@/model/api";
 import store from "@/widget/store";
-import blocklist from "./blocklist";
-import modulelist from "./modulelist";
+import blocklistmenu from "./blocklistmenu";
+import modulelistmenu from "./modulelistmenu";
+import classlistmenu from "./classlistmenu";
 import utils from "@/widget/utils";
-import Classlist from "./classlist";
 export default {
     data() {
         return {
@@ -66,13 +46,13 @@ export default {
         };
     },
     components: {
-        Classlist,
         Nav,
         Title,
         Submenu,
         CourseItem,
-        blocklist,
-        modulelist
+        blocklistmenu,
+        modulelistmenu,
+        classlistmenu
     },
     methods: {
         getCourseList() {

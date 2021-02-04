@@ -26,7 +26,9 @@ const mutations = {
 };
 
 const getters ={
-    getUserResource: state => state.user.blocks
+    getUserResource(state){
+      return state.user.blocks
+    }
 };
 
 export default {
