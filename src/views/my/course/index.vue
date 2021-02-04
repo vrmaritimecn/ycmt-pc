@@ -23,11 +23,14 @@
         <div class="course_nav">
             <Title title="船舶资源" :isMore="false"></Title>
             <div class="course_list">
-                <Nav :modulesList="modulesList" path="/my/course"></Nav>
+                <!--<Nav :modulesList="modulesList" path="/my/course"></Nav>-->
+                <blocklist v-for="o in 4" :key="o"></blocklist>
             </div>
         </div>
         <div class="course_content">
-            <Submenu :modulesList="modulesList" path="/my/course"></Submenu>
+            <!--<Submenu :modulesList="modulesList" path="/my/course"></Submenu>-->
+            <modulelist></modulelist>
+            <classlist></classlist>
             <div class="course_list" v-loading="loading">
                 <CourseItem
                         v-for="(item, index) in recommendProjectList"
@@ -46,7 +49,10 @@ import Submenu from "../../course/Submenu";
 import CourseItem from "@/components/course";
 import { project } from "@/model/api";
 import store from "@/widget/store";
+import blocklist from "./blocklist";
+import modulelist from "./modulelist";
 import utils from "@/widget/utils";
+import Classlist from "./classlist";
 export default {
     data() {
         return {
@@ -60,10 +66,13 @@ export default {
         };
     },
     components: {
+        Classlist,
         Nav,
         Title,
         Submenu,
-        CourseItem
+        CourseItem,
+        blocklist,
+        modulelist
     },
     methods: {
         getCourseList() {
@@ -110,8 +119,11 @@ export default {
         width: 294px;
         height: 100%;
         .course_list {
-            background: #fff;
+            background-color: #fff;
             height: 100%;
+            padding-top:20px;
+            overflow: scroll;
+/*
             & > nav {
                 ul {
                     li {
@@ -124,11 +136,14 @@ export default {
                     }
                 }
             }
+                    */
+
         }
+
     }
     .course_content {
         padding: 16px;
-        margin-left: 16px;
+        margin-left: 8px;
         flex: 1;
         background: #fff;
         // height: 100%;
