@@ -1,34 +1,15 @@
 <template xmlns="http://www.w3.org/1999/html">
     <div class="block-list-content">
-        <el-card class="box-card" v-for="item in blist">
-            <img src="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=3288116853,4251236604&fm=26&gp=0.jpg" class="image">
-            <div style="padding: 5px;">
-                <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">"{{item.name}}"</p>
+        <el-card class="box-card" v-for="(item, index) in blist" >
+          <!--img src="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=3288116853,4251236604&fm=26&gp=0.jpg" class="image"-->
+          <img :src="globalConfig.imagePath + item.imageUrl" :alt="item.name" :class="ind==index? 'image-active' : 'image'" @click="handClick(index)"/>
+          <div style="padding: 5px;">
+                <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">船名："{{item.name}}"</p>
                 <div class="bottom clearfix">
-                    <el-button type="text" class="button">船舶参数</el-button>
+                    <el-button type="text" class="button" >船舶参数</el-button>
                 </div>
             </div>
         </el-card>
-      <!--
-        <el-card class="box-card">
-            <img src="https://ss2.bdstatic.com/70cFvnSh_Q1YnxGkpoWK1HF6hhy/it/u=2004208792,3609046340&fm=26&gp=0.jpg" class="image">
-            <div style="padding: 5px;">
-                <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">"鼓浪屿"轮</p>
-                <div class="bottom clearfix">
-                    <el-button type="text" class="button">船舶参数</el-button>
-                </div>
-            </div>
-        </el-card>
-        <el-card class="box-card">
-            <img src="https://ss3.bdstatic.com/70cFv8Sh_Q1YnxGkpoWK1HF6hhy/it/u=2108061896,2747657363&fm=26&gp=0.jpg" class="image">
-            <div style="padding: 5px;">
-                <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">"大智"轮</p>
-                <div class="bottom clearfix">
-                    <el-button type="text" class="button">船舶参数</el-button>
-                </div>
-            </div>
-        </el-card>
-     -->
     </div>
 </template>
 
@@ -38,12 +19,20 @@
         data() {
             return {
               currentDate: new Date(),
+              ind: -1
             };
         },
 
         computed:{
           blist(){
-            return this.$store.getters.getUserResource
+            return this.$store.getters.getUserBlockResource
+          }
+        },
+
+        methods:{
+          handClick(index){
+            this.$store.commit('SETBLOCKINDEX', index);
+            this.ind = index;
           }
         }
     };
@@ -78,9 +67,18 @@
     }
 
     .image {
+      width: 100%;
+      border-radius: 2px;
+      display: block;
+      cursor: pointer;
+    }
+
+    .image-active {
         width: 100%;
         border-radius: 2px;
         display: block;
+        box-shadow: 0px 0px 8px #888888;
+        cursor: pointer;
     }
 
     .clearfix:before,

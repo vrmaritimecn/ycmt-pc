@@ -1,23 +1,25 @@
 <template>
     <div class="modulelist">
-        <div class="module-name-card">
-            <img class="moduleicon" src="./image/icon-1.png"/><span class="modulename">技术解读</span>
-        </div>
-        <div class="module-name-card">
-            <img class="moduleicon" src="./image/icon-2.png"/><span class="modulename">专业英语</span>
-        </div>
-        <div class="module-name-card">
-            <img class="moduleicon" src="./image/icon-3.png"/><span class="modulename">模拟训练</span>
-        </div>
-        <div class="module-name-card">
-            <img class="moduleicon" src="./image/icon-1.png"/><span class="modulename">技术解读</span>
+        <div class="module-name-card" v-for="(item,index) in mlist" @click="handclick(index)">
+            <img class="moduleicon" src="./image/icon-1.png"/><span class="modulename" >{{item.name}}</span>
         </div>
     </div>
 </template>
 
 <script>
     export default {
-        name: "modulelist"
+      name: "modulelist",
+      computed:{
+        mlist(){
+          return this.$store.getters.getUserModuleResource
+        }
+      },
+      methods:{
+        handclick(index){
+          console.log(index)
+          this.$store.commit('SETBMODULEINDEX', index)
+        }
+      }
     };
 </script>
 
@@ -42,6 +44,7 @@
             margin-top: 20px;
             margin-bottom: 5px;
             line-height: 60px;
+            cursor: pointer;
             .moduleicon{
                 width:40px;
                 height:40px;

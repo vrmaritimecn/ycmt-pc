@@ -11,7 +11,9 @@ const baseUrl = "/api";
 
 export const home = (data, url) => request(`${baseUrl}/home/${url}`, data);
 
-export const user = (data, url) => request(`${baseUrl}/user/${url}`, data);
+//export const user = (data, url) => request(`${baseUrl}/user/${url}`, data);
+
+export const user = (data, url) => request(`${baseUrl}/user/personal`, data);
 
 export const news = data => request(`${baseUrl}/home/news`, data);
 

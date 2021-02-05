@@ -3,7 +3,10 @@ const state = {
     isOpenForget: false,
     isOpenFesetPassword: false,
     user: {},
-    mobile: ""
+    mobile: "",
+    blockIndex: 0,
+    moduleIndex: 0,
+    classIndex: -1
 };
 
 const mutations = {
@@ -22,12 +25,33 @@ const mutations = {
     },
     SETMOBILE(state, mobile) {
         state.mobile = mobile;
+    },
+    SETBLOCKINDEX(state, index) {
+      state.blockIndex = parseInt(index);
+      state.moduleIndex = 0;
+      state.classIndex = -1;
+    },
+    SETBMODULEINDEX(state, index) {
+      state.moduleIndex = parseInt(index);
+      state.classIndex = -1;
+    },
+    SETCLASSINDEX(state, index) {
+      state.classIndex = parseInt(index);
     }
 };
 
 const getters ={
-    getUserResource(state){
-      return state.user.blocks
+    getUserBlockResource(state)
+    {
+      return state.user["blocks"]
+    },
+    getUserModuleResource(state)
+    {
+      return state.user["blocks"][state.blockIndex]["moduleList"]
+    },
+    getUserClassResource(state)
+    {
+      return state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["classList"]
     }
 };
 

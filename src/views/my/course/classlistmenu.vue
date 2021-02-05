@@ -1,23 +1,18 @@
 <template>
     <div class="classlist">
         <span class="span">全部</span>
-        <span class="span">船舶结构和布置</span>
-        <span class="span">轮机设备</span>
-        <span class="span">救生设备</span>
-        <span class="span">消防设备</span>
-        <span class="span">防污染设备</span>
-        <span class="span">航行安全设备</span>
-        <span class="span">无线电设备</span>
-        <span class="span">船舶结构和布置</span>
-        <span class="span">轮机设备</span>
-        <span class="span">救生设备</span>
-        <span class="span">消防设备</span>
+        <span class="span" v-for="item in clist">{{item.name}}</span>
     </div>
 </template>
 
 <script>
     export default {
-        name: "classlist"
+      name: "classlist",
+      computed:{
+        clist(){
+          return this.$store.getters.getUserClassResource
+        }
+      }
     };
 </script>
 
