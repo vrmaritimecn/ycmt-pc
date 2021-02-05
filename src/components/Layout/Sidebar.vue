@@ -17,6 +17,7 @@
                 </div>
             </div>
         </div>
+
         <div class="menu">
             <ul>
                 <li
@@ -189,7 +190,7 @@ aside {
                 margin-top: 15px;
                 text-align: center;
                 font-size: 16px;
-                font-family: MicrosoftYaHei;
+                font-family: "PingFang SC";
                 color: rgba(255, 255, 255, 1);
                 line-height: 26px;
                 -webkit-background-clip: text;

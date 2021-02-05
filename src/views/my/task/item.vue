@@ -3,7 +3,7 @@
  * @Date: 2020-04-20 22:10:56
  * @Email: 1367511704@qq.com
  * @LastEditTime: 2020-06-01 21:20:39
- * @Description: 
+ * @Description:
  -->
 <template>
     <div
@@ -104,11 +104,13 @@ export default {
 <style lang="less">
 .task-item-content {
     margin: 0 auto;
+    width: 96%;
     background: rgba(255, 255, 255, 1);
     box-shadow: 0px 0.01px 1px 0px rgba(0, 0, 0, 0.5);
     border-radius: 5px;
     filter: blur(px);
-    margin-bottom: 9px;
+    margin-top: 15px;
+    margin-bottom: 15px;
     padding: 16px 8px 16px 8px;
     cursor: pointer;
     &:last-child {

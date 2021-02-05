@@ -32,6 +32,7 @@ import store from "@/widget/store";
 import blocklistmenu from "./blocklistmenu";
 import modulelistmenu from "./modulelistmenu";
 import classlistmenu from "./classlistmenu";
+import {mapGetters} from 'vuex';
 import utils from "@/widget/utils";
 export default {
     data() {
@@ -54,7 +55,15 @@ export default {
         modulelistmenu,
         classlistmenu
     },
+
+    computed:{
+      ...mapGetters([
+        'getModuleId '
+      ])
+    },
+
     methods: {
+      /*
         getCourseList() {
             this.loading = true;
             let { moduleId, blockId, classListId } = this.$route.query;
@@ -78,6 +87,36 @@ export default {
                 }
             });
         }
+        */
+
+      getCourseList() {
+        this.loading = true;
+        //let { moduleId, blockId, classListId } = this.$route.query;
+        //classListId = classListId.toString() === "-1" ? "" : classListId;
+        this.recommendProjectList = []; // 清空
+        let cid= this.$store.getters.getClassId;
+        if(cid<0)
+        {
+          cid="";
+        }
+        project({
+          type: "GET",
+          data: {
+            page: 1,
+            size: 100000,
+            moduleId: this.$store.getters.getModuleId,
+            classId: cid,
+            blockId: this.$store.getters.getBlockId,
+            publishFlg: 1
+          }
+        }).then(res => {
+          if (res.suceeded) {
+            this.loading = false;
+            const { content, total } = res.data;
+            this.recommendProjectList = this.recommendProjectList.concat(content || []);
+          }
+        });
+      }
     },
     watch: {
         $route: function() {

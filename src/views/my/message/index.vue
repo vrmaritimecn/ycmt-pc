@@ -147,6 +147,7 @@ export default {
             height: calc(100% - 55px);
             position: relative;
             padding-right: 4px;
+            background-color: #ffffff;
             &::-webkit-scrollbar {
                 width: 4px;
                 /*height: 4px;*/

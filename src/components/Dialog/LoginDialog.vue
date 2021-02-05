@@ -131,7 +131,7 @@ export default {
                     {
                         type: "get"
                     },
-                    userId
+                    "/personal"
                 ).then(res => {
                     if (res.suceeded) {
                         this.$store.commit({

@@ -3,7 +3,7 @@
  * @Date: 2020-04-19 18:58:59
  * @Email: 1367511704@qq.com
  * @LastEditTime: 2020-06-01 21:25:43
- * @Description: 
+ * @Description:
  -->
 <template>
     <div class="message-item-content cursor" @click="message(item)">
@@ -70,8 +70,11 @@ export default {
 .message-item-content {
     // width: 363px;
     height: 181px;
+    width: 90%;
+    margin-left:5%;
     // margin: 0 auto;
-    margin-bottom: 10px;
+    margin-top: 15px;
+    margin-bottom: 15px;
     background: rgba(255, 255, 255, 1);
     box-shadow: 0px 1 2px 0px rgba(0, 0, 0, 0.5);
     border-radius: 5px;
@@ -84,7 +87,7 @@ export default {
     }
     .role {
         height: 90px;
-        background: rgba(96, 175, 255, 1);
+        background-color: #324155;
         display: flex;
         border-radius: 5px 5px 0 0;
         position: relative;
@@ -104,7 +107,7 @@ export default {
                 span {
                     font-size: 14px;
                     font-family: MicrosoftYaHei;
-                    color: rgba(22, 61, 163, 1);
+                    color: rgba(255, 255, 255, 1);
                     line-height: 18px;
                     -webkit-background-clip: text;
                 }
@@ -144,12 +147,13 @@ export default {
     }
     .digest {
         padding: 14px 17px;
+        background-color: #f5f7fa;
         p {
             font-size: 14px;
             font-family: MicrosoftYaHei;
             color: rgba(51, 51, 51, 1);
-            line-height: 19px;
-            letter-spacing: 1;
+            line-height: 21px;
+            letter-spacing: 1px;
             -webkit-background-clip: text;
         }
     }

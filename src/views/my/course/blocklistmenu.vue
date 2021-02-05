@@ -19,7 +19,7 @@
         data() {
             return {
               currentDate: new Date(),
-              ind: -1
+              ind: 0
             };
         },
 
@@ -33,7 +33,20 @@
           handClick(index){
             this.$store.commit('SETBLOCKINDEX', index);
             this.ind = index;
+            const query = {
+            };
+            query.blockId=this.$store.getters.getBlockId;
+            query.moduleId=this.$store.getters.getModuleId;
+            query.classId=this.$store.getters.getClassId;
+            this.$router.push({
+              path: this.path,
+              query
+            });
           }
+        },
+
+        mounted() {
+          this.$store.commit('SETBLOCKINDEX', 0);
         }
     };
 </script>
@@ -46,8 +59,8 @@
     }
 
     .box-card {
-        width: 92%;
-        margin-left: 4%;
+        width: 90%;
+        margin-left: 5%;
         margin-bottom: 20px;
     }
 
@@ -77,7 +90,7 @@
         width: 100%;
         border-radius: 2px;
         display: block;
-        box-shadow: 0px 0px 8px #888888;
+        box-shadow: 0px 0px 16px #333333;
         cursor: pointer;
     }
 

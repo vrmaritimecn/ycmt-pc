@@ -149,7 +149,8 @@ export default {
                 background: #fff;
                 // min-height: 100%;
                 overflow-y: scroll;
-                height: calc(100% - 275px);
+                margin-top: 4px;
+                height: calc(100% - 279px);
                 .common {
                     display: flex;
                     align-items: center;

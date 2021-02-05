@@ -6,7 +6,10 @@ const state = {
     mobile: "",
     blockIndex: 0,
     moduleIndex: 0,
-    classIndex: -1
+    classIndex: -1,
+    blockId: 0,
+    moduleId: 0,
+    classId: 0
 };
 
 const mutations = {
@@ -30,13 +33,26 @@ const mutations = {
       state.blockIndex = parseInt(index);
       state.moduleIndex = 0;
       state.classIndex = -1;
+
+      state.blockId =  state.user["blocks"][state.blockIndex]["id"];
+      state.moduleId = state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["id"];
+      state.classId = "";
     },
-    SETBMODULEINDEX(state, index) {
+    SETMODULEINDEX(state, index) {
       state.moduleIndex = parseInt(index);
       state.classIndex = -1;
+
+      state.moduleId = state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["id"];
+      state.classId = "";
     },
     SETCLASSINDEX(state, index) {
       state.classIndex = parseInt(index);
+      if(state.classIndex < 0) {
+        state.classId=-1;
+      }
+      else {
+        state.classId = state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["classList"][state.classIndex]["id"];
+      }
     }
 };
 
@@ -52,7 +68,20 @@ const getters ={
     getUserClassResource(state)
     {
       return state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["classList"]
+    },
+    getBlockId(state)
+    {
+      return state.blockId
+    },
+    getModuleId(state)
+    {
+      return state.moduleId
+    },
+    getClassId(state)
+    {
+      return state.classId
     }
+
 };
 
 export default {
