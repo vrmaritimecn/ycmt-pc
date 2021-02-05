@@ -6,7 +6,14 @@
           <div style="padding: 5px;">
                 <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">船名："{{item.name}}"</p>
                 <div class="bottom clearfix">
-                    <el-button type="text" class="button" >船舶参数</el-button>
+                  <el-popover
+                    placement="bottom"
+                    width="300"
+                    trigger="hover"
+                    :content="item.detail"
+                    v-model="visible">
+                    <el-button  type="text" class="button" slot="reference">船舶参数</el-button>
+                  </el-popover>
                 </div>
             </div>
         </el-card>
