@@ -1,6 +1,24 @@
 <template xmlns="http://www.w3.org/1999/html">
     <div class="block-list-content">
-        <el-card class="box-card" v-for="(item, index) in blist" >
+      <!--
+      <el-card class="box-card" >
+        <img src="https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3552687017,2503111443&fm=26&gp=0.jpg" :class="ind==firstIndex? 'image-active' : 'image'"  onclick="handClick(-1)"/>
+        <div style="padding: 5px;">
+          <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">云船码头@船福科技</p>
+          <div class="bottom clearfix">
+            <el-popover
+              placement="bottom"
+              width="300"
+              trigger="hover"
+              content="***"
+              v-model="visible">
+              <el-button  type="text" class="button" slot="reference">平台介绍</el-button>
+            </el-popover>
+          </div>
+        </div>
+      </el-card>
+      -->
+      <el-card class="box-card" v-for="(item, index) in blist" >
           <!--img src="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=3288116853,4251236604&fm=26&gp=0.jpg" class="image"-->
           <img :src="globalConfig.imagePath + item.imageUrl" :alt="item.name" :class="ind==index? 'image-active' : 'image'" @click="handClick(index)"/>
           <div style="padding: 5px;">
@@ -16,7 +34,7 @@
                   </el-popover>
                 </div>
             </div>
-        </el-card>
+      </el-card>
     </div>
 </template>
 
@@ -26,7 +44,8 @@
         data() {
             return {
               currentDate: new Date(),
-              ind: 0
+              ind: 0,
+              firstIndex:-1
             };
         },
 
