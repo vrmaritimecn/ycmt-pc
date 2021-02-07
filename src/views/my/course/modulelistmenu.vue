@@ -1,13 +1,19 @@
 <template>
-    <div class="modulelist">
-        <div v-for="(item,index) in mlist" :class="ind==index? 'module-name-card-active' : 'module-name-card'" @click="handclick(index)">
+    <div class="modulelist" v-if="plateformState==0">
+        <div  v-for="(item,index) in mlist" :class="ind==index? 'module-name-card-active' : 'module-name-card'" @click="handclick(index,item.id)">
+            <img class="moduleicon" src="./image/icon-1.png"/><span class="modulename" >{{item.name}}</span>
+        </div>
+    </div>
+    <div class="modulelist" v-else>
+        <div  v-for="(item,index) in pmlist" :class="ind==index? 'module-name-card-active' : 'module-name-card'" @click="firsthandclick(index,item.id)">
             <img class="moduleicon" src="./image/icon-1.png"/><span class="modulename" >{{item.name}}</span>
         </div>
     </div>
 </template>
 
 <script>
-  import {mapGetters} from 'vuex'
+    import { projectClass } from "@/model/api";
+    import {mapGetters} from 'vuex'
     export default {
       name: "modulelist",
       data() {
@@ -19,28 +25,47 @@
         mlist(){
           return this.$store.getters.getUserModuleResource
         },
+          pmlist(){
+              return this.$store.getters.getPlatformResource
+          },
+          plateformState(){
+              return this.$store.getters.getPlatformState
+          },
         ...mapGetters([
-          'getBlockId'
+          'getBlockId',
+           'getModuleId',
         ])
       },
       methods:{
-        handclick(index){
-          this.$store.commit('SETMODULEINDEX', index);
+        handclick(index,id){
+          this.$store.commit('SETMODULEID', id);
           this.ind = index;
-          const query = {
-          };
-          query.blockId=this.$store.getters.getBlockId;
-          query.moduleId=this.$store.getters.getModuleId;
-          query.classId=this.$store.getters.getClassId;
-          this.$router.push({
-            path: this.path,
-            query
-          });
-        }
+        },
+          firsthandclick(index,id)
+          {
+              this.ind = index;
+              this.$store.commit("SETMODULEID",id);
+              this.$nextTick(() => {
+                  projectClass({
+                      type:"GET",
+                      data:{
+                          blockId: 5,
+                          moduleId: id
+                      }
+                  }).then(res => {
+                      if (res.suceeded) {
+                          this.$store.commit({
+                              type: "SET_PLATFORMCLASS_INFO",
+                              plylaod: res.data.content
+                          });
+                      }
+                  });
+              });
+          }
       },
       watch:{
         getBlockId: function(){
-          this.ind = 0;
+            this.ind = 0;
         }
       }
     };

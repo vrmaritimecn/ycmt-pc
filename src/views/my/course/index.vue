@@ -12,11 +12,7 @@
             <modulelistmenu></modulelistmenu>
             <classlistmenu></classlistmenu>
             <div class="course_list" v-loading="loading">
-                <CourseItem
-                        v-for="(item, index) in recommendProjectList"
-                        :key="index"
-                        :item="item"
-                ></CourseItem>
+                <courselist></courselist>
             </div>
         </div>
     </div>
@@ -27,11 +23,12 @@ import Nav from "@/components/common/Nav";
 import Title from "@/components/common/Title";
 import Submenu from "../../course/Submenu";
 import CourseItem from "@/components/course";
-import { project } from "@/model/api";
+import { project , projectModule} from "@/model/api";
 import store from "@/widget/store";
 import blocklistmenu from "./blocklistmenu";
 import modulelistmenu from "./modulelistmenu";
 import classlistmenu from "./classlistmenu";
+import courselist from "./courselist";
 import {mapGetters} from 'vuex';
 import utils from "@/widget/utils";
 export default {
@@ -53,7 +50,8 @@ export default {
         CourseItem,
         blocklistmenu,
         modulelistmenu,
-        classlistmenu
+        classlistmenu,
+        courselist
     },
 
     computed:{
@@ -63,68 +61,31 @@ export default {
     },
 
     methods: {
-      /*
-        getCourseList() {
-            this.loading = true;
-            let { moduleId, blockId, classListId } = this.$route.query;
-            classListId = classListId.toString() === "-1" ? "" : classListId;
-            this.recommendProjectList = []; // 清空
-            project({
-                type: "GET",
-                data: {
-                    page: 1,
-                    size: 100000,
-                    moduleId,
-                    classId: classListId,
-                    blockId,
-                    publishFlg: 1
-                }
-            }).then(res => {
-                if (res.suceeded) {
-                    this.loading = false;
-                    const { content, total } = res.data;
-                    this.recommendProjectList = this.recommendProjectList.concat(content || []);
-                }
+        getPlatformModule() {
+            this.$nextTick(() => {
+                projectModule({
+                    type:"GET",
+                    data:{
+                        blockId: 5
+                    }
+                }).then(res => {
+                    if (res.suceeded) {
+                        console.log(res.data);
+                        this.$store.commit({
+                            type: "SET_PLATFORMBLOCK_INFO",
+                            plylaod: res.data
+                        });
+                        this.$store.commit("SETBLOCKID", 5); //parseInt(res.data[0]["blockId"]));
+                        this.$store.commit("SETMODULEID",parseInt(res.data[0]["id"]));
+                    }
+                });
             });
         }
-        */
-
-      getCourseList() {
-        this.loading = true;
-        //let { moduleId, blockId, classListId } = this.$route.query;
-        //classListId = classListId.toString() === "-1" ? "" : classListId;
-        this.recommendProjectList = []; // 清空
-        let cid= this.$store.getters.getClassId;
-        if(cid<0)
-        {
-          cid="";
-        }
-        project({
-          type: "GET",
-          data: {
-            page: 1,
-            size: 100000,
-            moduleId: this.$store.getters.getModuleId,
-            classId: cid,
-            blockId: this.$store.getters.getBlockId,
-            publishFlg: 1
-          }
-        }).then(res => {
-          if (res.suceeded) {
-            this.loading = false;
-            const { content, total } = res.data;
-            this.recommendProjectList = this.recommendProjectList.concat(content || []);
-          }
-        });
-      }
     },
     watch: {
-        $route: function() {
-            this.getCourseList();
-        }
     },
     mounted() {
-        this.getCourseList();
+        this.getPlatformModule();
     }
 };
 </script>
@@ -143,21 +104,6 @@ export default {
             padding-top:20px;
             overflow-y: scroll;
             height: 100%;
-            /*
-            & > nav {
-                ul {
-                    li {
-                        margin: 0 auto;
-                        margin-top: 40px;
-                        &.active {
-                            transform: scale(1.1);
-                            // box-shadow: 0px 2px 4px 0px rgba(0, 0, 0, 0.5);
-                        }
-                    }
-                }
-            }
-            */
-
         }
 
     }

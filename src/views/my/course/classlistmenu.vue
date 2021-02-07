@@ -1,7 +1,11 @@
 <template>
-    <div class="classlist">
+    <div class="classlist" v-if="plateformState == 0">
         <span class="span-all" @click="handclick(-1)">全部</span>
-        <span v-for="(item,index) in clist" :class="ind==index? 'span-active' : 'span'"  @click="handclick(index)">{{item.name}}</span>
+        <span v-for="(item,index) in clist" :class="ind==index? 'span-active' : 'span'"  @click="handclick(index,item.id)">{{item.name}}</span>
+    </div>
+    <div class="classlist" v-else>
+        <span class="span-all" @click="handclick(-1)">全部</span>
+        <span v-for="(item,index) in pClasslist" :class="ind==index? 'span-active' : 'span'"  @click="handclick(index,item.id)">{{item.name}}</span>
     </div>
 </template>
 
@@ -20,30 +24,27 @@
         clist(){
           return this.$store.getters.getUserClassResource
         },
+          plateformState(){
+              return this.$store.getters.getPlatformState
+          },
+          pClasslist(){
+              return this.$store.getters.getPlatformClassList
+          },
         ...mapGetters([
             'getModuleId'
           ])
       },
       methods:{
-        handclick(index){
+        handclick(index,id){
           console.log(index)
-          this.$store.commit('SETCLASSINDEX', index);
+          this.$store.commit('SETCLASSID', id);
           this.ind = index;
-          const query = {
-          };
-          query.blockId=this.$store.getters.getBlockId;
-          query.moduleId=this.$store.getters.getModuleId;
-          query.classId=this.$store.getters.getClassId;
-          this.$router.push({
-            path: this.path,
-            query
-          });
         }
       },
       watch:{
-        getModuleId: function(){
-          this.ind = -1;
-        }
+          getModuleId: function(){
+              this.ind = -1;
+            }
       }
     };
 </script>

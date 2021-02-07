@@ -1,26 +1,23 @@
 <template xmlns="http://www.w3.org/1999/html">
     <div class="block-list-content">
-      <!--
-      <el-card class="box-card" >
-        <img src="https://ss0.bdstatic.com/70cFuHSh_Q1YnxGkpoWK1HF6hhy/it/u=3552687017,2503111443&fm=26&gp=0.jpg" :class="ind==firstIndex? 'image-active' : 'image'"  onclick="handClick(-1)"/>
-        <div style="padding: 5px;">
-          <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">云船码头@船福科技</p>
-          <div class="bottom clearfix">
-            <el-popover
-              placement="bottom"
-              width="300"
-              trigger="hover"
-              content="***"
-              v-model="visible">
-              <el-button  type="text" class="button" slot="reference">平台介绍</el-button>
-            </el-popover>
-          </div>
-        </div>
-      </el-card>
-      -->
+        <el-card class="box-card">
+            <img src="http://www.delacie.com//uploads/allimg/190814/193A94446_0.jpg" alt="云船码头" :class="ind==-1? 'image-active' : 'image'"  @click="handFirstClick(-1)"/>
+            <div style="padding: 5px;">
+                <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">云船码头</p>
+                <div class="bottom clearfix">
+                    <el-popover
+                            placement="bottom"
+                            width="300"
+                            trigger="hover"
+                            content="*******"
+                    >
+                        <el-button  type="text" class="button" slot="reference">应用简介</el-button>
+                    </el-popover>
+                </div>
+            </div>
+        </el-card>
       <el-card class="box-card" v-for="(item, index) in blist" >
-          <!--img src="https://ss1.bdstatic.com/70cFuXSh_Q1YnxGkpoWK1HF6hhy/it/u=3288116853,4251236604&fm=26&gp=0.jpg" class="image"-->
-          <img :src="globalConfig.imagePath + item.imageUrl" :alt="item.name" :class="ind==index? 'image-active' : 'image'" @click="handClick(index)"/>
+          <img :src="globalConfig.imagePath + item.imageUrl" :alt="item.name" :class="ind==index? 'image-active' : 'image'" @click="handClick(index, item.id)"/>
           <div style="padding: 5px;">
                 <p style="font-size: 16px; font-weight: bold; padding-top: 5px;">船名："{{item.name}}"</p>
                 <div class="bottom clearfix">
@@ -29,7 +26,7 @@
                     width="300"
                     trigger="hover"
                     :content="item.detail"
-                    v-model="visible">
+                    >
                     <el-button  type="text" class="button" slot="reference">船舶参数</el-button>
                   </el-popover>
                 </div>
@@ -40,12 +37,10 @@
 
 <script>
     export default {
-        name: "block-list",
+        name: "blocklist",
         data() {
             return {
-              currentDate: new Date(),
-              ind: 0,
-              firstIndex:-1
+              ind: -1,
             };
         },
 
@@ -56,23 +51,20 @@
         },
 
         methods:{
-          handClick(index){
-            this.$store.commit('SETBLOCKINDEX', index);
+          handClick(index,id){
             this.ind = index;
-            const query = {
-            };
-            query.blockId=this.$store.getters.getBlockId;
-            query.moduleId=this.$store.getters.getModuleId;
-            query.classId=this.$store.getters.getClassId;
-            this.$router.push({
-              path: this.path,
-              query
-            });
-          }
+              this.$store.commit('SETUSERSTATE');
+            this.$store.commit("SETBLOCKID",id);
+          },
+            handFirstClick(index){
+                this.ind = parseInt(index);
+                this.$store.commit('SETPLATFORMSTATE');
+                this.$store.commit("SETBLOCKID",5);//this.$store.state.platformblock[0]["blockId"]);
+                this.$store.commit("SETMODULEID",this.$store.state.platformblock[0]["id"]);
+            }
         },
 
         mounted() {
-          this.$store.commit('SETBLOCKINDEX', 0);
         }
     };
 </script>

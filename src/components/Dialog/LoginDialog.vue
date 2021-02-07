@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { user, messageDetail } from "@/model/api";
+import { user, messageDetail, projectModule } from "@/model/api";
 import validate from "@/widget/validate";
 import store from "@/widget/store";
 import { mapState } from "vuex";
@@ -116,6 +116,7 @@ export default {
                             this.$message.success("登录成功");
                             this.getUserDetail();
                             this.getMessageDetail();
+                            this.getPlatformModule();
                             window.location.href = "/";
                         } else {
                             res.message && this.$message.error(res.message);
@@ -135,10 +136,32 @@ export default {
                 ).then(res => {
                     if (res.suceeded) {
                         this.$store.commit({
+                            type: "SET_USERBLOCK_INFO",
+                            plylaod: res.data
+                        });
+
+                        this.$store.commit({
                             type: "SET_USER_INFO",
                             plylaod: res.data
                         });
                         this.user = res.data;
+                    }
+                });
+            });
+        },
+        getPlatformModule() {
+            this.$nextTick(() => {
+                projectModule({
+                    type:"GET",
+                    data:{
+                        blockId: 5
+                    }
+                }).then(res => {
+                    if (res.suceeded) {
+                        this.$store.commit({
+                            type: "SET_PLATFORMBLOCK_INFO",
+                            plylaod: res.data
+                        });
                     }
                 });
             });

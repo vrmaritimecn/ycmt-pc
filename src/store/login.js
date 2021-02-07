@@ -4,12 +4,15 @@ const state = {
     isOpenFesetPassword: false,
     user: {},
     mobile: "",
+    /*
     blockIndex: 0,
     moduleIndex: 0,
     classIndex: -1,
     blockId: 0,
     moduleId: 0,
-    classId: 0
+    classId: -1
+
+     */
 };
 
 const mutations = {
@@ -29,63 +32,70 @@ const mutations = {
     SETMOBILE(state, mobile) {
         state.mobile = mobile;
     },
-    SETBLOCKINDEX(state, index) {
-      state.blockIndex = parseInt(index);
-      state.moduleIndex = 0;
-      state.classIndex = -1;
+/*
+SETBLOCKINDEX(state, index) {
+  state.blockIndex = parseInt(index);
+  state.moduleIndex = 0;
+  state.classIndex = -1;
 
-      state.blockId =  state.user["blocks"][state.blockIndex]["id"];
-      state.moduleId = state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["id"];
-      state.classId = "";
-    },
-    SETMODULEINDEX(state, index) {
-      state.moduleIndex = parseInt(index);
-      state.classIndex = -1;
+  state.blockId =  state.user["blocks"][state.blockIndex]["id"];
+  state.moduleId = state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["id"];
+  state.classId = -1;
+},
+SETMODULEINDEX(state, index) {
+  state.moduleIndex = parseInt(index);
+  state.classIndex = -1;
+  state.classId = -1;
 
-      state.moduleId = state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["id"];
-      state.classId = "";
-    },
-    SETCLASSINDEX(state, index) {
-      state.classIndex = parseInt(index);
-      if(state.classIndex < 0) {
-        state.classId=-1;
-      }
-      else {
-        state.classId = state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["classList"][state.classIndex]["id"];
-      }
-    }
+  state.moduleId = state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["id"];
+  state.classId = -1;
+},
+SETCLASSINDEX(state, index) {
+  state.classIndex = parseInt(index);
+  if(state.classIndex < 0) {
+    state.classId=-1;
+  }
+  else {
+    state.classId = state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["classList"][state.classIndex]["id"];
+  }
+}
+
+ */
 };
 
 const getters ={
-    getUserBlockResource(state)
-    {
-      return state.user["blocks"]
-    },
-    getUserModuleResource(state)
-    {
-      return state.user["blocks"][state.blockIndex]["moduleList"]
-    },
-    getUserClassResource(state)
-    {
-      return state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["classList"]
-    },
-    getBlockId(state)
-    {
-      return state.blockId
-    },
-    getModuleId(state)
-    {
-      return state.moduleId
-    },
-    getClassId(state)
-    {
-      return state.classId
-    }
+    /*
+getUserBlockResource(state)
+{
+  return state.user["blocks"]
+},
+getUserModuleResource(state)
+{
+  return state.user["blocks"][state.blockIndex]["moduleList"]
+},
+getUserClassResource(state)
+{
+  return state.user["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["classList"]
+},
+getBlockId(state)
+{
+  return state.blockId
+},
+getModuleId(state)
+{
+  return state.moduleId
+},
+getClassId(state)
+{
+  return state.classId
+}
 
+
+     */
 };
 
 export default {
-    state,
-    mutations,
-    getters
+state,
+mutations,
+getters
 };

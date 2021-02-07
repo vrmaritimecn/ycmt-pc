@@ -13,6 +13,10 @@ export const home = (data, url) => request(`${baseUrl}/home/${url}`, data);
 
 export const user = (data, url) => request(`${baseUrl}/user/${url}`, data);
 
+export const projectModule = data => request(`${baseUrl}/projectModule`, data);
+
+export const projectClass = data => request(`${baseUrl}/projectClass`, data);
+
 export const news = data => request(`${baseUrl}/home/news`, data);
 
 export const newsDetail = (data, url) => request(`${baseUrl}/home/news/${url}`, data);
@@ -46,3 +50,7 @@ export const hotspotContentDetail = (data, url) => request(`${baseUrl}/hotspotCo
 export const youdao = (data, url) => request(`${baseUrl}/youdao/tts/${url}`, data);
 
 export const appConst = data => request(`${baseUrl}/appConst/all`, data);
+
+
+
+

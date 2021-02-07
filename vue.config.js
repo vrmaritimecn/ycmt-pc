@@ -31,7 +31,7 @@ module.exports = {
         config.plugins.push(
             new HtmlWebpackPlugin({
                 template: "public/index.html",
-                filename: path.resolve(__dirname, "msa_pc/index.html"),
+                filename: path.resolve(__dirname, "tutor-pc/index.html"),
                 imagePath: process.env.VUE_APP_IMAGE_PATH,
                 getTime: new Date().getTime(),
                 // src: process.env.NODE_ENV == "production" ? External : "",
@@ -102,7 +102,7 @@ module.exports = {
         }
     },
     //   baseUrl: 'activity', // 部署应用时的根路径(默认'/'),也可用相对路径(存在使用限制)
-    outputDir: "msa_pc", // 运行时生成的生产环境构建文件的目录(默认''dist''，构建之前会被清除)
+    outputDir: "tutor-pc", // 运行时生成的生产环境构建文件的目录(默认''dist''，构建之前会被清除)
     assetsDir: "./", // 放置生成的静态资源(s、css、img、fonts)的(相对于 outputDir 的)目录(默认'')
     indexPath: "index.html", // 指定生成的 index.html 的输出路径(相对于 outputDir)也可以是一个绝对路径。
     productionSourceMap: false,
@@ -128,12 +128,12 @@ module.exports = {
         proxy: {
             // https://api-pano.vr2shipping.com/home/pageInfo //socket会gg
             "/api": {
-                target: "https://api-msa.vr2shipping.com",
+                target: "https://api-tutor.vr2shipping.com",
                 changeOrigin: true,
                 pathRewrite: (path, req) => path.replace("/api", "")
             },
             "/pano": {
-                target: "http://msa_pc.vr2shipping.com",
+                target: "http://tutor-pc.vr2shipping.com",
                 changeOrigin: true
             }
         }

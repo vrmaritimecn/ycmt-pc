@@ -38,7 +38,7 @@
 
 <script>
 import { mapState } from "vuex";
-import { user, messageDetail } from "@/model/api";
+import { user, messageDetail} from "@/model/api";
 import store from "@/widget/store";
 export default {
     data() {
@@ -104,6 +104,7 @@ export default {
             }
 
             if (path === "/course" || path === "/my/course") {
+                /*
                 const { name, children } = store.get("modulesList", "local")[0];
                 const query = {
                     name
@@ -115,9 +116,11 @@ export default {
                         query.classListId = children[0].classList[0].id;
                     }
                 }
+                */
+
                 this.$router.push({
                     path,
-                    query
+                    //query
                 });
             } else {
                 this.$router.push({ path });
@@ -141,6 +144,12 @@ export default {
                                 });
                             }
                             store.set("userId", res.data.id, "local");
+
+                            this.$store.commit({
+                                type: "SET_USERBLOCK_INFO",
+                                plylaod: res.data
+                            });
+
                             this.$store.commit({
                                 type: "SET_USER_INFO",
                                 plylaod: res.data
@@ -150,6 +159,7 @@ export default {
                 });
             }
         },
+
         goMy() {
             if (!this.user.sgname) {
                 this.$store.commit("TOGGLE_LOGIN");
@@ -160,6 +170,7 @@ export default {
     },
     mounted() {
         this.getUserDetail();
+        //this.getPlatformDetail();
     }
 };
 </script>

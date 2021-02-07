@@ -4,6 +4,7 @@ import loginStore from "./login";
 import toolbarStore from "./toolbar";
 import histroyStore from "./histroy";
 import attachmentStore from "./attachment";
+import blockStore from "./block";
 
 Vue.use(Vuex);
 
@@ -12,6 +13,7 @@ export default new Vuex.Store({
         loginStore,
         toolbarStore,
         histroyStore,
-        attachmentStore
+        attachmentStore,
+        blockStore
     }
 });

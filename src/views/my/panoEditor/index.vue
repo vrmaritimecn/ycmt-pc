@@ -27,8 +27,8 @@ export default {
             this.$nextTick(() => {
                 embedpano({
                     id: "kr",
-                    swf: "/pano/tour.swf",
-                    xml: `/pano/${this.isShowToobar ? "main" : "main_c"}.xml`,
+                    swf: globalConfig.imagePath +"/pano/tour.swf",
+                    xml: globalConfig.imagePath +`/pano/${this.isShowToobar ? "main" : "main_c"}.xml`,
                     target: "p_editor",
                     html5: "prefer",
                     mobilescale: 1.0,
