@@ -1,77 +1,64 @@
 <template>
-    <!-- <el-drawer
-        title="我是标题"
-        :visible.sync="drawerHotContent"
-        :with-header="false"
-        :size="296"
-        :before-close="handleClose"
-        :modal="false"
-        :wrapperClosable="false"
-    > -->
     <div class="panel_sidebar" v-if="drawerHotContent">
-        <div class="attachment common">
-            <div class="title">
-                <span>添加场景资源</span>
-                <i class="iconfont icontubiaoweb-24 cursor" @click="addScene"></i>
-            </div>
-            <div class="attachment_list">
-                <div class="header">
-                    <!-- <span>链接内容</span> -->
-                    <span style="text-align:left">场景名称</span>
-                    <span>操作</span>
-                </div>
-                <div class="body">
-                    <div
-                        class="item"
-                        v-for="(item, index) in attachmentList"
-                        :key="index"
-                        @click="select(index, item)"
-                        :class="{ active: index === currentIndex }"
-                    >
-                        <!-- <div class="link" @click="editOpenEditAttachmentName(item)">
-                                <i class="iconfont icontubiaoweb-29"></i>
-                            </div> -->
-                        <div class="link_name ellipsis" @click="loadpanoscene(item)">
-                            <el-tooltip
-                                class="item"
-                                effect="light"
-                                :content="item.name"
-                                placement="left"
-                                offset="30"
-                                :enterable="false"
-                            >
-                                <span>{{ item.name }}</span>
-                            </el-tooltip>
-                        </div>
-                        <div class="operate">
-                            <i
-                                class="iconfont icontubiaoweb-21 cursor"
-                                @click="handleDel(item, index)"
-                            ></i>
-                            <i
-                                class="iconfont icontubiaoweb-22 cursor"
-                                @click="up(attachmentList, index)"
-                            ></i>
-                            <i
-                                class="iconfont icontubiaoweb-23 cursor"
-                                @click="down(attachmentList, index)"
-                            ></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="panel_sidebar_title"><span>添加场景资源</span><i class="iconfont icontubiaoweb-24 cursor" @click="addScene"></i></div>
+        <div class="panel_sidebar_content">
+            <el-row>
+                <el-col :span="24" style="margin: 10px 0px;" v-for="(item, index) in attachmentList" :key="index" :class="{ active: index === currentIndex }" @click="select(index)">
+                    <el-card :body-style="{ padding: '0px'}">
+                        <span class="hot_title" @click="loadpanoscene(item)">{{item.name}}</span>
+                        <span class="hot_item_div" v-show="sceneIndex==item.id">
+                            <el-row >
+                                <el-col :span="12" v-for="(i, cindex) in attachmentList[index].hotspots" >
+                                    <el-popover placement="top" trigger="hover">
+                                        <div>
+                                            <i class="iconfont icontubiaoweb-26 cursor" style="margin: 0px 10px;" @click="updateHotspot(i)" ></i>
+                                            <i class="iconfont icontubiaoweb-28 cursor" style="margin: 0px 10px;" @click="changeHotspotName(i)" ></i>
+                                            <i class="iconfont icontubiaoweb-29 cursor" style="margin: 0px 10px;" @click="editHotspotContent(i)" ></i>
+                                            <i class="iconfont icontubiaoweb-27 cursor" style="margin: 0px 10px;" @click="deleteHotspot(i)" ></i>
+                                        </div>
+                                        <span :class="hotspotIndex==i.id? 'hot_item_active':'hot_item'" @click="backFindHotspot(i)" slot="reference">{{i.title}}</span>
+                                    </el-popover>
+
+                                </el-col>
+                            </el-row>
+                        </span>
+                        <span class="att_bnt_group">
+                            <i class="iconfont icontubiaoweb-24 cursor" @click="addHotspot" v-show="sceneIndex==item.id" ></i>
+                            <i class="iconfont icontubiaoweb-22 cursor" @click="up(attachmentList, index)" ></i>
+                            <i class="iconfont icontubiaoweb-23 cursor" @click="down(attachmentList, index)" ></i>
+                            <i class="iconfont icontubiaoweb-27 cursor" @click="deleteScene(item)"></i>
+                        </span>
+                    </el-card>
+                </el-col>
+            </el-row>
         </div>
-        <div id="triangle-right" @click="closeDrawer"></div>
+
+        <!-- 修改附件弹窗 -->
+        <editAttachmentDialog
+                :visible.sync="isOpenEditHotName"
+                :data="currentItem"
+                :onSuccess="() => getSceneList()"
+        ></editAttachmentDialog>
+
+        <!-- 附件弹窗 -->
+        <AttachmentComponent
+                :visible.sync="isOpenEditHotContent"
+                :hotspotId="currentItem.id"
+                dialogTitle="场景标签内容编辑"
+                v-if="currentItem.id"
+                :orderList="orderList"
+                :engType="engType"
+        ></AttachmentComponent>
     </div>
-    <!-- </el-drawer> -->
 </template>
 
 <script>
+
 import { mapState } from "vuex";
-
-import { hotspot, hotspotDetail, projectDetail } from "@/model/api";
-
+import { hotspot, hotspotDetail, projectDetail, project } from "@/model/api";
 import Bus from "@/components/bus/index.js";
+import editAttachmentDialog from "./editScene";
+import AttachmentComponent from "@/components/Attachment";
 
 export default {
     name: "Attachment",
@@ -81,12 +68,19 @@ export default {
             newArr: [], //
             currentItem: {},
             currentIndex: null,
-            isUpDown: false
+            isUpDown: false,
+            hotspotIndex:null,
+            sceneIndex:null,
+            sceneList:[],
+            isOpenEditHotName: false,
+            isOpenEditHotContent: false,
+            engType: false, // 是否专业英语
+            orderList: [],
         };
     },
     components: {
-        // AttachmentComponent
-        // editSceneDialog
+        editAttachmentDialog,
+        AttachmentComponent
     },
     computed: {
         ...mapState({
@@ -96,56 +90,16 @@ export default {
     watch: {
         drawerHotContent(newVal, oldVal) {
             if (newVal) {
-                this.getAttachmentList().then(res => {
-                    this.attachmentList.length > 0 && this.select(0, this.attachmentList[0]);
+                this.getSceneList().then(res => {
+                    const getScenePara = window.getScenePara && window.getScenePara();
+                    this.sceneIndex=getScenePara[4];
+                    //this.attachmentList.length > 0 && this.select(0, this.attachmentList[0]);
                 });
             }
         }
     },
     methods: {
-        select(index, data) {
-            console.log("111");
-            if (this.isUpDown) {
-                // bug
-                return false;
-            }
-            this.loadpanoscene(data);
-            this.currentIndex = index;
-        },
-        handleClose(done) {
-            done();
-            this.$store.commit("TOGGLE_DRAWER", "drawerHotContent");
-        },
-        delAttach(id) {
-            // 删除附件
-            const projectId = this.$route.params.projectId;
-            projectDetail({ type: "delete" }, `${projectId}/scene/${id}`).then(res => {
-                if (res.suceeded) {
-                    this.getAttachmentList();
-                    this.$message({
-                        type: "success",
-                        message: "删除成功!"
-                    });
-                }
-            });
-        },
-        handleDel(item, index) {
-            this.$confirm(`此操作仅删除${item.name}场景，场景标签将被暂时保留, 是否继续?`, "提示", {
-                confirmButtonText: "确定",
-                cancelButtonText: "取消",
-                type: "warning"
-            })
-                .then(() => {
-                    this.delAttach(item.id);
-                })
-                .catch(() => {
-                    this.$message({
-                        type: "info",
-                        message: "已取消删除"
-                    });
-                });
-        },
-        async getAttachmentList() {
+        async getSceneList() {
             const projectId = this.$route.params.projectId;
             // 通过任务id获取项目的有关信息
             try {
@@ -167,6 +121,181 @@ export default {
                 console.error(error);
             }
         },
+        addScene() {
+            // 新增场景
+            const sceneId = window.getScenePara && window.getScenePara()[4];
+            const isScene = this.attachmentList.find(item => sceneId === item.id);
+            const sceneIds = this.attachmentList.map(item => item.id);
+            sceneIds.push(sceneId);
+            if (!isScene) {
+                const projectId = this.$route.params.projectId;
+                projectDetail(
+                    {
+                        type: "post",
+                        data: {
+                            projectId,
+                            sceneIds: [sceneId]
+                        }
+                    },
+                    `${projectId}/scene`
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.getSceneList();
+                    }
+                });
+            } else {
+                this.$message({
+                    type: "error",
+                    message: "已经在场景列表中了"
+                });
+            }
+        },
+        deleteScene(val) {
+            this.$confirm(`此操作仅删除${val.name}场景，场景标签将被暂时保留, 是否继续?`, "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning"
+            })
+                .then(() => {
+                    const projectId = this.$route.params.projectId;
+                    projectDetail(
+                        { type: "delete" },
+                        `${projectId}/scene/${val.id}`).then(res => {
+                            if (res.suceeded) {
+                            this.getSceneList();
+                            this.$message({
+                                type: "success",
+                                message: "删除成功!"
+                            });
+                        }
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消删除"
+                    });
+                });
+        },
+        loadpanoscene(val) {
+            this.sceneIndex=val.id;
+            this.hotspotIndex=-1;
+            window.loadpanoscene && window.loadpanoscene(val.id, val.code);
+        },
+        backFindHotspot(val) {
+            this.hotspotIndex=val.id
+            const getScenePara = window.getScenePara && window.getScenePara();
+            //window.backFindHotspot && backFindHotspot(getScenePara[0], val.locationX, val.locationY);
+            window.backFindHotspot && backFindHotspot(getScenePara[0], val.locationX, val.locationY);
+        },
+        addHotspot() {
+            const getScenePara = window.getScenePara && window.getScenePara();
+            const projectId = this.$route.params.projectId;
+            const data = {
+                locationFov: getScenePara[1], //场景的视角
+                locationX: getScenePara[2], //获取的热点横坐标
+                locationY: getScenePara[3], //获取的热点垂向坐标
+                projectId, //项目ID
+                sceneId: this.sceneIndex, //场景ID
+                title: "新增热点标签", //热点名称
+                type: "DEFAULT" //热点类型
+            };
+            hotspot({ type: "post", data }).then(res => {
+                if (res.suceeded) {
+                    const id = this.$store.state.toolbarStore.id;
+                    const code = this.$store.state.toolbarStore.code;
+                    console.log(this.$store.state.toolbarStore, "toolbar");
+                    this.getSceneList();
+                    window.loadpanoscene && window.loadpanoscene(res.data.id, res.data.code);
+                    this.$message({
+                        type: "success",
+                        message: "新增成功!"
+                    });
+                }
+            });
+        },
+        deleteHotspot(val) {
+            this.$confirm(`此操作将永久删 ${val.title}, 是否继续?`, "提示", {
+                confirmButtonText: "确定",
+                cancelButtonText: "取消",
+                type: "warning"
+            })
+                .then(() => {
+                    hotspotDetail({ type: "delete" }, val.id).then(res => {
+                        if (res.suceeded) {
+                            this.getSceneList();
+                            this.$message({
+                                type: "success",
+                                message: "删除成功!"
+                            });
+                        }
+                    });
+                })
+                .catch(() => {
+                    this.$message({
+                        type: "info",
+                        message: "已取消删除"
+                    });
+                });
+        },
+        updateHotspot(val) {
+            const id = val.id;
+            const getScenePara = window.getScenePara && window.getScenePara();
+            const parasm = { locationFov:getScenePara[1], locationX: getScenePara[2], locationY: getScenePara[3] };
+            hotspotDetail({ type: "put", data: parasm }, id).then(res => {
+                if (res.suceeded) {
+                    this.getSceneList();
+                    this.$message({
+                        type: "success",
+                        message: "更新成功!"
+                    });
+                }
+            });
+        },
+        changeHotspotName(val) {
+            this.currentItem = val;
+            this.isOpenEditHotName = true;
+        },
+        editHotspotContent(val) {
+            this.currentItem = {};
+            this.currentItem = val;
+            this.id = val.id;
+            const modules = this.$route.params.modules;
+            console.log(val, "data");
+            if (modules && modules === "专业英语") {
+                this.orderList = ["音频", "图片"];
+                this.engType = true;
+                this.isOpenEditHotContent = true;
+            } else {
+                this.orderList = ["文本", "图片", "音频", "视频"];
+                this.engType = false;
+                this.isOpenEditHotContent = true;
+            }
+        },
+        select(index, data) {
+            if (this.isUpDown) {
+                return false;
+            }
+            this.loadpanoscene(data);
+            this.currentIndex = index;
+        },
+        handleClose(done) {
+            done();
+            this.$store.commit("TOGGLE_DRAWER", "drawerHotContent");
+        },
+        delAttach(id) {
+            // 删除附件
+            const projectId = this.$route.params.projectId;
+            project({ type: "delete" }, `${projectId}/scene/${id}`).then(res => {
+                if (res.suceeded) {
+                    this.getSceneList();
+                    this.$message({
+                        type: "success",
+                        message: "删除成功!"
+                    });
+                }
+            });
+        },
         sortAttachment() {
             const projectId = this.$route.params.projectId;
             const sceneIds = this.newArr.map(item => item.id);
@@ -181,7 +310,7 @@ export default {
                 `${projectId}/scene/changeSeq`
             ).then(res => {
                 if (res.suceeded) {
-                    this.getAttachmentList();
+                    this.getSceneList();
                 }
             });
         },
@@ -213,39 +342,6 @@ export default {
         },
         editOpenEditAttachmentName(data) {
             this.$store.commit("SETSCENELIST", { id: data.id, code: data.code });
-        },
-        loadpanoscene(data) {
-            window.loadpanoscene && window.loadpanoscene(data.id, data.code);
-            this.editOpenEditAttachmentName(data);
-        },
-        addScene() {
-            // 新增场景
-            const sceneId = window.getScenePara && window.getScenePara()[4];
-            const isScene = this.attachmentList.find(item => sceneId === item.id);
-            const sceneIds = this.attachmentList.map(item => item.id);
-            sceneIds.push(sceneId);
-            if (!isScene) {
-                const projectId = this.$route.params.projectId;
-                projectDetail(
-                    {
-                        type: "post",
-                        data: {
-                            projectId,
-                            sceneIds: [sceneId]
-                        }
-                    },
-                    `${projectId}/scene`
-                ).then(res => {
-                    if (res.suceeded) {
-                        this.getAttachmentList();
-                    }
-                });
-            } else {
-                this.$message({
-                    type: "error",
-                    message: "已经在场景列表中了"
-                });
-            }
         },
         closeDrawer() {
             this.$store.commit("TOGGLE_DRAWER", "drawerHotContent");
@@ -285,89 +381,77 @@ export default {
 
 <style lang="less">
 .panel_sidebar {
-    position: relative;
-    box-shadow: none;
-    .attachment {
-        .title {
-            height: 88px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            span {
-                font-size: 18px;
-                font-family: MicrosoftYaHei;
-                color: rgba(51, 51, 51, 1);
-                line-height: 24px;
-            }
-            i {
-                font-size: 24px;
-                color: rgba(15, 79, 168, 1);
-            }
-        }
-        .attachment_list {
-            .header {
-                display: flex;
-                justify-content: space-between;
-                height: 32px;
-                align-items: center;
-                background: rgba(248, 248, 248, 1);
-                span {
-                    width: 33%;
-                    font-size: 14px;
-                    font-family: MicrosoftYaHei;
-                    color: rgba(102, 102, 102, 1);
-                    line-height: 19px;
-                    text-align: left;
-                    &:last-child {
-                        text-align: center;
-                    }
-                }
-            }
-            .body {
-                .item {
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    height: 42px;
-                    border-bottom: 1px solid #eee;
-                    & > div {
-                        width: 33%;
-                        text-align: center;
-                        &.link_name {
-                            width: 170px;
-                            text-align: left;
-                            font-size: 14px;
-                            font-family: MicrosoftYaHei;
-                            color: rgba(102, 102, 102, 1);
-                            line-height: 19px;
-                            cursor: pointer;
-                        }
-                        &.operate {
-                            display: flex;
-                            justify-content: space-around;
-                        }
-                        i {
-                            font-size: 16px;
-                            color: rgba(15, 79, 168, 1);
-                        }
-                    }
-                }
-                .active {
-                    background: rgb(255, 165, 0);
-                }
-            }
+    width: 296px;
+    padding: 0px 0px !important;
+    position: absolute;
+    height: 100%;
+    overflow: hidden;
+    .panel_sidebar_title{
+        width: 290px !important;
+        height:44px;
+        position: relative;
+        top:0px;
+        left:4px;
+        text-align: center;
+        border-bottom: thin solid #d9d9d9;
+        span {
+            font-size: 16px;
+            line-height: 44px;
+            margin-right: 20px;
         }
     }
-    #triangle-right {
-        width: 0;
-        height: 0;
-        border-top: 10px solid transparent;
-        border-left: 20px solid #eee;
-        border-bottom: 10px solid transparent;
-        position: absolute;
-        left: 0;
-        top: 50%;
-        transform: translateY(-50);
+    .panel_sidebar_content{
+        width: 296px !important;
+        height: calc(100% - 45px);
+        position: relative;
+        //top:45px;
+        margin-top: 1px;
+        overflow-y: scroll;
+        padding: 0px 15px;
+        &::-webkit-scrollbar {
+            width: 1px;
+        }
+        //text-align: center;
+
+        /*height: 4px;*/
     }
+}
+.hot_title{
+    display: block;
+    text-align:center;
+    font-size: 14px;
+    padding:15px 5px;
+    background: #324155;
+    color: #F7F7F7;
+    cursor:pointer;
+}
+.hot_item_div{
+    display: block;
+    text-align:center;
+    font-size: 14px;
+    padding:15px 5px;
+    background-color: #f0f0f0;
+    color: #333333;
+ }
+.hot_item{
+    display: block;
+    text-align: center;
+    margin:5px 10px;
+    cursor:pointer;
+    border: none;
+}
+.hot_item_active{
+    display: block;
+    text-align: center;
+    color: #ff6900;
+    margin:5px 10px;
+    cursor:pointer;
+    border: none;
+}
+.hot_bnt_group{
+    display: flex;
+    margin: 10px;
+    padding:0px 20px;
+    justify-content: space-between
 }
 </style>

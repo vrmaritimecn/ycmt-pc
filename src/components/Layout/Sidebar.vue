@@ -63,7 +63,7 @@ export default {
                     path: "/news"
                 },
                 {
-                    text: "云船课件",
+                    text: "在线云船",
                     icon: "icontubiaoweb-04",
                     path: "/my/course"
                 },

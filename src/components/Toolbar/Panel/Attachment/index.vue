@@ -1,11 +1,23 @@
 <template>
     <div class="panel_sidebar" v-if="drawerAttachment">
-        <div class="attachment common">
-            <div class="title">
-                <span>添加课件参考</span>
-                <i class="iconfont icontubiaoweb-24 cursor" @click="addAttachment"></i>
-            </div>
-            <div class="attachment_list">
+        <div class="panel_sidebar_title"><span>添加课件参考</span><i class="iconfont icontubiaoweb-24 cursor" @click="addAttachment"></i></div>
+        <div class="panel_sidebar_content">
+            <el-row>
+                <el-col :span="24" style="margin: 10px 0px;" v-for="(item, index) in attachmentList" :key="index" :class="{ active: index === currentIndex }" @click="select(index)">
+                    <el-card :body-style="{ padding: '0px'}">
+                        <span class="att_title">{{item.title}}</span>
+                        <span class="att_bnt_group">
+                            <i class="iconfont icontubiaoweb-28 cursor" @click="editOpenEditAttachmentName(item, index)" ></i>
+                            <i class="iconfont icontubiaoweb-29 cursor" @click="editAttachment(item)"></i>
+                            <i class="iconfont icontubiaoweb-22 cursor" @click="up(attachmentList, index)" ></i>
+                            <i class="iconfont icontubiaoweb-23 cursor" @click="down(attachmentList, index)" ></i>
+                            <i class="iconfont icontubiaoweb-27 cursor" @click="handleDel(item, index)"></i>
+                        </span>
+                    </el-card>
+                </el-col>
+            </el-row>
+
+            <!--div class="attachment_list">
                 <div class="attachment-header">
                     <span style="width:14%">详情</span>
                     <span style="width:170px">课件参考</span>
@@ -54,7 +66,7 @@
                         </div>
                     </div>
                 </div>
-            </div>
+            </div-->
         </div>
 
         <AttachmentComponent
@@ -74,12 +86,10 @@
 </template>
 
 <script>
+
 import { mapState } from "vuex";
-
 import AttachmentComponent from "@/components/Attachment";
-
 import editAttachmentDialog from "./editAttachment";
-
 import { hotspot, hotspotDetail, projectDetail } from "@/model/api";
 import Bus from "@/components/bus/index.js";
 
@@ -335,5 +345,57 @@ export default {
             }
         }
     }
+}
+
+.panel_sidebar {
+    width: 296px;
+    padding: 0px 0px !important;
+    position: absolute;
+    height: 100%;
+    overflow: hidden;
+    .panel_sidebar_title{
+        width: 290px !important;
+        height:44px;
+        position: relative;
+        top:0px;
+        left:4px;
+        text-align: center;
+        border-bottom: thin solid #d9d9d9;
+        span {
+            font-size: 16px;
+            line-height: 44px;
+            margin-right: 20px;
+        }
+    }
+    .panel_sidebar_content{
+        width: 296px !important;
+        height: calc(100% - 45px);
+        position: relative;
+        //top:45px;
+        margin-top: 1px;
+        overflow-y: scroll;
+        padding: 0px 15px;
+        &::-webkit-scrollbar {
+            width: 1px;
+        }
+        //text-align: center;
+
+        /*height: 4px;*/
+    }
+}
+.att_title{
+    display: block;
+    text-align:center;
+    font-size: 14px;
+    padding:15px 5px;
+    background-color: #324155;
+    color: #F7F7F7;
+    cursor:pointer;
+}
+.att_bnt_group{
+    display: flex;
+    margin: 10px;
+    padding:0px 20px;
+    justify-content: space-between;
 }
 </style>

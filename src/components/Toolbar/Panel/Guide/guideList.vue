@@ -147,28 +147,6 @@ export default {
                     });
                 });
         },
-        getAttachmentList() {
-            const projectId = this.$route.params.projectId;
-            // 通过任务id获取项目的有关信息
-            projectDetail(
-                {
-                    type: "GET",
-                    data: {
-                        projectId,
-                        page: "1",
-                        size: "1000"
-                    }
-                },
-                `${projectId}/panoInfo`
-            ).then(res => {
-                if (res.suceeded) {
-                    this.attachmentList = res.data;
-                    this.setCurrent(this.attachmentList);
-                    console.log(res.data, "attach");
-                } else {
-                }
-            });
-        },
         sortAttachment() {
             const projectId = this.$route.params.projectId;
             const sceneIds = this.newArr.map(item => item.id);

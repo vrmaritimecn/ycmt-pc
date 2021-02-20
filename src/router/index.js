@@ -118,7 +118,7 @@ export default new Router({
             name: "panoEditor",
             component: () => import("@/views/my/panoEditor"),
             meta: {
-                title: "全景编辑器"
+                title: "全景内容"
                 // requireLogin: true
             }
         }

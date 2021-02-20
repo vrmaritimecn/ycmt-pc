@@ -144,7 +144,7 @@ export default {
         width: 367px;
         .message_list {
             overflow-y: scroll;
-            height: calc(100% - 55px);
+            height: calc(100% - 45px);
             position: relative;
             padding-right: 4px;
             background-color: #ffffff;

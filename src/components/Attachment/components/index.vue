@@ -19,21 +19,10 @@
         </el-tabs>
         <div class="operate">
             <el-button type="danger" @click="deleteItem" v-if="!isDelAndEdit">删除</el-button>
-            <el-button type="primary" @click="addDialog" v-if="isDelAndEdit" :disabled="disabled"
-                >添加</el-button
-            >
+            <el-button type="primary" @click="addDialog" v-if="isDelAndEdit" :disabled="disabled">添加</el-button>
             <el-button type="primary" @click="editDialog" v-if="!isDelAndEdit">修改</el-button>
         </div>
-        <AddDialog
-            :hotspotId="hotspotId"
-            :id="id"
-            :title="title"
-            :content="content"
-            :extra="extra"
-            :onSuccess="onSuccess"
-            :currentTabOrder="defaultTabName"
-            :engType="engType"
-        />
+        <AddDialog :hotspotId="hotspotId" :id="id" :title="title" :content="content" :extra="extra" :onSuccess="onSuccess" :currentTabOrder="defaultTabName" :engType="engType"/>
     </main>
 </template>
 

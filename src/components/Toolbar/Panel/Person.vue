@@ -8,24 +8,25 @@
         :before-close="handleClose"
     > -->
     <div class="panel_sidebar" v-if="drawerPerson">
-        <div class="person common">
-            <h2>课件制作人员</h2>
-            <div class="course_item_person" v-for="(item, index) in params.userList" :key="index">
-                <div
-                    class="thumb ui-lazyLoad-pic"
-                    v-lazy
-                    :data-src="globalConfig.imagePath + item.avatar"
-                ></div>
-                <div class="info">
-                    <div class="name">{{ item.sgname }}</div>
-                    <div class="role">
-                        <div class="title">角色:</div>
-                        <div class="roles">
-                            <span>{{ item.departmentName }}</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
+        <div class="panel_sidebar_title"><span>课件制作人员</span></div>
+        <div class="panel_sidebar_content">
+            <el-row>
+                <el-col :span="24" style="margin: 10px 0px;" v-for="(item, index) in params.userList" :key="index">
+                    <el-card shadow="always" style="margin-top: 20px;">
+                        <el-row>
+                            <el-col :span="8">
+                                <img class="use_thumb" style="" :src="globalConfig.imagePath + item.avatar" :alt="item.sgname"></img>
+                            </el-col>
+                            <el-col :span="16">
+                                <div class="user_info">
+                                    <span class="name">{{ item.sgname }}</span>
+                                    <span class="department">{{ item.departmentName }}</span>
+                                </div>
+                            </el-col>
+                        </el-row>
+                    </el-card>
+                </el-col>
+            </el-row>
         </div>
     </div>
     <!-- </el-drawer> -->
@@ -82,45 +83,60 @@ export default {
 </script>
 
 <style lang="less">
-.person {
-    & > h2 {
-        margin-bottom: 20px;
-    }
-
-    .course_item_person {
-        background: rgba(248, 248, 248, 1);
-        width: 222px;
-        height: 64px;
-        display: flex;
-        align-items: center;
-        margin: 0 auto;
-        margin-bottom: 24px;
-        &:last-child {
-            margin-bottom: 0px;
-        }
-        .thumb {
-            width: 60px;
-            height: 60px;
-            background: url("./images/role.png");
-            background-size: 100%;
-        }
-        .info {
-            margin-left: 26px;
-            .name {
+    .panel_sidebar {
+        width: 296px;
+        padding: 0px 0px !important;
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        .panel_sidebar_title{
+            width: 290px !important;
+            height:44px;
+            position: relative;
+            top:0px;
+            left:4px;
+            text-align: center;
+            border-bottom: thin solid #d9d9d9;
+            span {
                 font-size: 16px;
-                font-family: MicrosoftYaHei;
-                color: rgba(51, 51, 51, 1);
-                line-height: 21px;
-                margin-bottom: 10px;
-            }
-            .role {
-                font-size: 12px;
-                font-family: MicrosoftYaHei;
-                color: rgba(102, 102, 102, 1);
-                line-height: 16px;
-                display: flex;
+                line-height:44px;
             }
         }
+        .panel_sidebar_content{
+            width: 296px !important;
+            height: calc(100% - 45px);
+            position: relative;
+            //top:45px;
+            margin-top: 1px;
+            overflow-y: scroll;
+            padding: 0px 15px;
+            &::-webkit-scrollbar {
+                width: 1px;
+            }
+            //text-align: center;
+
+            /*height: 4px;*/
+        }
     }
-}
+    .use_thumb{
+        width: 60px;
+        height: 60px;
+        border-radius:2px;
+    }
+    .user_info{
+        text-align: center;
+        .name{
+            font-size: 14px;
+            font-weight: bold;
+            display: block;
+            margin-bottom: 15px;
+        }
+        .department{
+            font-size: 14px;
+            padding:5px 10px;
+            color: #fff;
+            background-color: #324155;
+            border-radius: 2px;
+        }
+    }
 </style>

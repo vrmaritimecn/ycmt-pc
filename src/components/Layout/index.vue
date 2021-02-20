@@ -5,8 +5,7 @@
             <Sidebar class="sidebar"></Sidebar>
             <div
                 class="right"
-                style="width:100%;display: flex;
-    flex-direction: column;"
+                style="width:100%;display: flex; flex-direction: column;"
             >
                 <div
                     class="container-main"

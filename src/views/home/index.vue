@@ -4,7 +4,7 @@
             <Banner :bannerList="bannerList"></Banner>
             <div class="scroll">
                 <div class="home_news">
-                    <Title title="平台资讯" :onClick="toMoreNews"></Title>
+                    <Title title="最新资讯" :onClick="toMoreNews"></Title>
                     <div class="home_news_list" v-loading="loading">
                         <NewsItem
                             v-for="(item, index) in newsList"
@@ -13,6 +13,7 @@
                         ></NewsItem>
                     </div>
                 </div>
+                <!--
                 <div class="home_course">
                     <Title title="最新课件" :onClick="toMoreCourse"></Title>
                     <div class="home_course_list" v-loading="loading">
@@ -23,6 +24,7 @@
                         ></CourseItem>
                     </div>
                 </div>
+                -->
             </div>
         </div>
         <BgNav></BgNav>
@@ -57,7 +59,7 @@ export default {
     },
     computed: {
         newsList: function() {
-            return this.items.slice(0, 2);
+            return this.items.slice(0, 10);
         }
     },
     methods: {

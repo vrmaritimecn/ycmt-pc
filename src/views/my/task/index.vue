@@ -147,11 +147,11 @@ export default {
         width: 367px;
         padding-bottom: 5px;
         .task_list {
-            margin-top: 20px;
             overflow-y: scroll;
-            height: calc(100% - 65px);
+            height: calc(100% - 45px);
             position: relative;
             padding-right: 4px;
+            background-color: #ffffff;
             &::-webkit-scrollbar {
                 width: 4px;
                 /*height: 4px;*/

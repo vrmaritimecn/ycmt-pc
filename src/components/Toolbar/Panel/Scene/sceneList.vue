@@ -1,5 +1,5 @@
 <template>
-    <div class="scene_list" v-if="isOpenScene">
+    <div class="scene_list" v-if="visible">
         <div class="attachment common">
             <div class="title">
                 <span>添加场景标签</span>
@@ -93,7 +93,8 @@ export default {
             id: "",
             engType: false, // 是否专业英语
             orderList: [],
-            currentIndex: 0
+            currentIndex: 0,
+            visible:false
         };
     },
     computed: {

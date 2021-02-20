@@ -27,8 +27,10 @@ export default {
             this.$nextTick(() => {
                 embedpano({
                     id: "kr",
-                    swf: globalConfig.imagePath +"/pano/tour.swf",
-                    xml: globalConfig.imagePath +`/pano/${this.isShowToobar ? "main" : "main_c"}.xml`,
+                    //swf: globalConfig.imagePath +"tour.swf",
+                    //xml: globalConfig.imagePath +`${this.isShowToobar ? "main" : "main_c"}.xml`,
+                    swf: "/pano/tour.swf",
+                    xml: `/pano/${this.isShowToobar ? "main" : "main_c"}.xml`,
                     target: "p_editor",
                     html5: "prefer",
                     mobilescale: 1.0,
@@ -57,7 +59,7 @@ export default {
             return {
                 width: `calc(100% - ${
                     isOpenListValue
-                        ? this.isOpenScene || this.isOpenGuideScene
+                        ? this.isOpenGuideScene //this.isOpenScene || this.isOpenGuideScene
                             ? "600px"
                             : "296px"
                         : "0px"

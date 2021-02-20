@@ -1,12 +1,6 @@
 <template>
     <div id="toolbar">
-        <div
-            class="item-toolbar"
-            v-for="(item, index) in toolbarList"
-            :key="index"
-            @click="toolbarHander(item.type, index)"
-            :class="{ active: index === currentIndex && isCurrentOpen[item.type] }"
-        >
+        <div class="item-toolbar" v-for="(item, index) in toolbarList" :key="index" @click="toolbarHander(item.type, index)" :class="{ active: index === currentIndex && isCurrentOpen[item.type] }">
             <el-tooltip class="item" effect="dark" :content="item.text" placement="left">
                 <i class="iconfont" :class="[item.icon ? item.icon : '']"></i>
             </el-tooltip>
@@ -38,49 +32,29 @@ export default {
             toolbarList: [
                 {
                     text: "简介",
-                    icon: "icontubiaoweb-12",
+                    icon: "iconxiangmu",
                     type: "drawerIntro"
                 },
                 {
                     text: "制作人员",
-                    icon: "icontubiaoweb-13",
+                    icon: "iconjiaoseleixing",
                     type: "drawerPerson"
                 },
                 {
                     text: "附件参考",
-                    icon: "icontubiaoweb-14",
+                    icon: "iconxuexi_nor",
                     type: "drawerAttachment"
                 },
                 {
                     text: "热点内容",
-                    icon: "icontubiaoweb-15",
+                    icon: "icontubiaoweb-26",
                     type: "drawerHotContent"
                 },
                 {
                     text: "引导内容",
-                    icon: "icontubiaoweb-16",
+                    icon: "icontubiaoweb-36",
                     type: "drawerGuideContent"
                 }
-                // {
-                //     text: "课件评论",
-                //     icon: "icontubiaoweb-17",
-                //     type: "drawerComment"
-                // },
-                // {
-                //     text: "启动引导",
-                //     icon: "icontubiaoweb-18",
-                //     type: "drawerPlatGuide"
-                // },
-                // {
-                //     text: "内容摘要",
-                //     icon: "icontubiaoweb-19",
-                //     type: "drawerDigest"
-                // },
-                // {
-                //     text: "快速通道",
-                //     icon: "icontubiaoweb-20",
-                //     type: "drawerTrack"
-                // }
             ],
             currentIndex: null
         };
@@ -123,7 +97,7 @@ export default {
 #toolbar {
     width: 46px;
     height: 100%;
-    background: rgba(50, 65, 65, 1);
+    background: #324155; //rgba(50, 65, 65, 1);
     padding-top: 30px;
     position: absolute;
     right: 0;

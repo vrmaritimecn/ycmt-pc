@@ -21,34 +21,6 @@ const mutations = {
     SET_PLATFORMCLASS_INFO(state, { plylaod }) {
         state.platformClass = plylaod;
     },
-    /*
-    SETBLOCKINDEX(state, index) {
-        state.blockIndex = parseInt(index);
-        state.moduleIndex = 0;
-        state.classIndex = -1;
-
-        state.blockId =  state.userblock["blocks"][state.blockIndex]["id"];
-        state.moduleId = state.userblock["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["id"];
-        state.classId = -1;
-    },
-    SETMODULEINDEX(state, index) {
-        state.moduleIndex = parseInt(index);
-        state.classIndex = -1;
-
-        state.moduleId = state.userblock["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["id"];
-        state.classId = -1;
-    },
-    SETCLASSINDEX(state, index) {
-        state.classIndex = parseInt(index);
-        if(state.classIndex < 0) {
-            state.classId=-1;
-        }
-        else {
-            state.classId = state.userblock["blocks"][state.blockIndex]["moduleList"][state.moduleIndex]["classList"][state.classIndex]["id"];
-        }
-    },
-
-     */
     SETBLOCKID(state, index) {
 
         state.blockId = index

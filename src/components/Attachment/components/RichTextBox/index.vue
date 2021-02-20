@@ -111,15 +111,16 @@ export default {
                 content: getHtml, // 内容
                 title: this.info.title, // 标题
                 type: "HTML", // 类型
-                hotspotId: this.hotspotId
+               // hotspotId: this.hotspotId
             };
             const hotspotContentList = [params];
             hotspotContent(
                 {
                     type: "post",
-                    data: { hotspotContentList }
+                    //data: { hotspotContentList }
+                    data: params
                 },
-                this.id
+                this.info.id
             ).then(res => {
                 if (res.suceeded) {
                     this.$message.success("操作成功");

@@ -1,17 +1,9 @@
 <template>
-    <!-- <el-drawer
-        title="我是标题"
-        :visible="drawerIntro"
-        :with-header="false"
-        :modal="false"
-        :size="296"
-        :before-close="handleClose"
-    > -->
     <div class="panel_sidebar" v-if="drawerIntro">
-        <div class="intro common">
-            <h2>编辑课件简介</h2>
+        <div class="panel_sidebar_title"><span>编辑课件简介</span></div>
+        <div class="panel_sidebar_content">
             <el-form label-position="top" :model="params">
-                <el-form-item :label="uploadTitle">
+                <el-form-item style="margin-top: 10px;">
                     <el-upload
                         class="avatar-uploader"
                         :action="uploadUrl"
@@ -27,53 +19,19 @@
                         <i v-else class="el-icon-plus avatar-uploader-icon"></i>
                     </el-upload>
                 </el-form-item>
-                <el-form-item label="时间">
-                    <!-- <el-date-picker
-                        v-model="params.startDate"
-                        type="date"
-                        placeholder="选择日期"
-                        class="w100"
-                        format="yyyy-MM-dd"
-                        value-format="timestamp"
-                    >
-                    </el-date-picker> -->
-                    <span style="font-weight: bold;"
-                        >{{ formaData(params.startDate) }}---{{
-                            formaData(params.expireDate)
-                        }}</span
-                    >
+                <el-form-item >
+                    <el-input v-model="params.name" class="w100" placeholder="项目标题"></el-input>
                 </el-form-item>
-                <!-- <el-form-item label="发起时间">
-                    <el-date-picker
-                        v-model="params.startDate"
-                        type="date"
-                        placeholder="选择日期"
-                        class="w100"
-                        format="yyyy-MM-dd"
-                        value-format="timestamp"
-                    >
-                    </el-date-picker>
-                    <span></span>
-                </el-form-item> -->
-                <!-- <el-form-item label="结束时间">
-                    <el-date-picker
-                        v-model="params.expireDate"
-                        type="date"
-                        placeholder="选择日期"
-                        class="w100"
-                        format="yyyy-MM-dd"
-                        value-format="timestamp"
-                    >
-                    </el-date-picker>
-                </el-form-item> -->
-                <el-form-item label="课件标题">
-                    <el-input v-model="params.name" class="w100"></el-input>
+                <el-form-item>
+                    <span style="font-weight: bold; display: block; color:#fff; border-radius: 2px; background-color:#324155; text-align: center;">
+                        {{ formaData(params.startDate) }}——{{formaData(params.expireDate)}}
+                    </span>
                 </el-form-item>
-                <el-form-item label="课件简介" class="intro_textarea">
+                <el-form-item class="intro_textarea">
                     <el-input
                         type="textarea"
                         :rows="7"
-                        placeholder="请输入内容"
+                        placeholder="项目简介"
                         v-model="params.detail"
                         class="w100"
                     >
@@ -122,7 +80,7 @@ export default {
         },
         uploadTitle() {
             const { blockName, moduleName, className } = this.params;
-            return `课件路径:${blockName || ""}-${moduleName || ""}-${className || ""}`;
+            return `${blockName || ""}/${moduleName || ""}/${className || ""}`;
         }
     },
     watch: {
@@ -254,6 +212,58 @@ export default {
 </script>
 
 <style lang="less">
+
+    .panel_sidebar {
+
+        width: 296px;
+        padding: 0px 0px !important;
+        /*
+        height: 100%;
+        //background: #fff;
+
+        // transform: translateX(296px);
+        // display: none;
+
+        top: 0;
+        right: 46px;
+        //overflow: hidden;*/
+        position: absolute;
+        height: 100%;
+        overflow: hidden;
+        .panel_sidebar_title{
+            width: 290px !important;
+            height:44px;
+            position: relative;
+            top:0px;
+            left:4px;
+            text-align: center;
+            border-bottom: thin solid #d9d9d9;
+            span {
+                font-size: 16px;
+                line-height:44px;
+            }
+        }
+        .panel_sidebar_content{
+            width: 296px !important;
+            height: calc(100% - 45px);
+            position: relative;
+            //top:45px;
+            margin-top: 1px;
+            overflow-y: scroll;
+            padding: 0px 15px;
+            &::-webkit-scrollbar {
+            width: 1px;
+        }
+            //text-align: center;
+
+            /*height: 4px;*/
+        }
+        /*
+
+
+         */
+
+    }
 .avatar-uploader {
     display: flex;
     justify-content: center;
@@ -261,7 +271,7 @@ export default {
 }
 .avatar-uploader .el-upload {
     border: 1px dashed #d9d9d9;
-    border-radius: 6px;
+    border-radius: 4px;
     cursor: pointer;
     position: relative;
     overflow: hidden;

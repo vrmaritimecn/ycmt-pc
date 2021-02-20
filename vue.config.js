@@ -126,14 +126,13 @@ module.exports = {
         hotOnly: false,
         open: false, // 配置自动启动浏览器
         proxy: {
-            // https://api-pano.vr2shipping.com/home/pageInfo //socket会gg
             "/api": {
                 target: "https://api-tutor.vr2shipping.com",
                 changeOrigin: true,
                 pathRewrite: (path, req) => path.replace("/api", "")
             },
             "/pano": {
-                target: "http://tutor-pc.vr2shipping.com",
+                target: "https://tutor-pc.vr2shipping.com",
                 changeOrigin: true
             }
         }

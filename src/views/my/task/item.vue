@@ -83,6 +83,7 @@ export default {
                 ).then(res => {
                     if (res.suceeded) {
                         const modules = res.data.moduleName;
+                        console.log(res.data.moduleName);
                         params.modules = modules;
                         this.$router.push({
                             name: "panoEditor",
@@ -105,13 +106,14 @@ export default {
 .task-item-content {
     margin: 0 auto;
     width: 96%;
-    background: rgba(255, 255, 255, 1);
+    background: #324155;//rgba(255, 255, 255, 1);
+
     box-shadow: 0px 0.01px 1px 0px rgba(0, 0, 0, 0.5);
     border-radius: 5px;
     filter: blur(px);
     margin-top: 15px;
     margin-bottom: 15px;
-    padding: 16px 8px 16px 8px;
+    padding: 10px 8px 16px 8px;
     cursor: pointer;
     &:last-child {
         margin-bottom: 0;
@@ -121,10 +123,12 @@ export default {
         .text {
             flex: 1;
             margin-right: 4px;
+            color: #ffffff;
             p {
                 font-size: 12px;
                 font-family: MicrosoftYaHei;
-                color: rgba(51, 51, 51, 1);
+                color: #ffffff; //rgba(51, 51, 51, 1);
+                margin-right: 12px;
                 line-height: 20px;
                 -webkit-background-clip: text;
             }
@@ -133,7 +137,7 @@ export default {
             // width: 35px;
             height: 18px;
             background: rgba(255, 157, 59, 1);
-            // border-radius: 1px;
+            border-radius: 1px;
             text-align: center;
             line-height: 18px;
             padding: 0px 4px;
@@ -152,7 +156,7 @@ export default {
         .task-item-thumb {
             width: 105px;
             height: 105px;
-            // background: #f0f0f0;
+            border-radius: 2px;
             margin-right: 15px;
             display: flex;
             justify-content: center;
@@ -180,7 +184,7 @@ export default {
             flex: 1;
             font-size: 12px;
             font-family: MicrosoftYaHei;
-            color: rgba(102, 102, 102, 1);
+            color: #ffffff; //rgba(102, 102, 102, 1);
             line-height: 19px;
             -webkit-background-clip: text;
             .text {
