@@ -22,7 +22,15 @@
             <el-button type="primary" @click="addDialog" v-if="isDelAndEdit" :disabled="disabled">添加</el-button>
             <el-button type="primary" @click="editDialog" v-if="!isDelAndEdit">修改</el-button>
         </div>
-        <AddDialog :hotspotId="hotspotId" :id="id" :title="title" :content="content" :extra="extra" :onSuccess="onSuccess" :currentTabOrder="defaultTabName" :engType="engType"/>
+        <AddDialog
+                :hotspotId="hotspotId"
+                :id="id"
+                :title="title"
+                :content="content"
+                :extra="extra"
+                :onSuccess="onSuccess"
+                :currentTabOrder="defaultTabName"
+                :engType="engType"/>
     </main>
 </template>
 
@@ -80,6 +88,7 @@ export default {
                     }
                 });
             });
+            console.log(tabs);
             return tabs;
         },
         buttonText() {
@@ -120,13 +129,13 @@ export default {
             this.$store.commit("SETATTDIALOG", true);
         },
         editDialog(data) {
+            console.log("defaultTabName:"+ this.defaultTabName);
             let editData = data;
             if (this.defaultTabName === "4") {
                 // 音频修改特殊处理
                 editData = this.$refs.tabChild[0].info;
             }
             if (this.defaultTabName === "5") {
-                // 富文本修改特殊处理
                 return this.$refs.tabChild[0].editRich();
             }
             const { title, content, id, extra } = editData;
@@ -134,7 +143,6 @@ export default {
             this.title = title;
             this.content = content;
             this.extra = extra;
-
             this.$store.commit("SETATTDIALOG", true);
         },
         deleteItem() {

@@ -1,7 +1,7 @@
 <template>
     <el-dialog
         title="修改标签名称"
-        :visible.sync="visible"
+        :visible="visible"
         :close-on-click-modal="false"
         @open="open"
         @close="close"

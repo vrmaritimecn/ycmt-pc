@@ -104,51 +104,67 @@ export default {
         },
         editRich() {
             // 修改文本
-            const RichTextBox = this.$refs.RichTextBox;
-            const getHtml = RichTextBox.getHtml();
-            const params = {
-                // 参数
-                content: getHtml, // 内容
-                title: this.info.title, // 标题
-                type: "HTML", // 类型
-               // hotspotId: this.hotspotId
-            };
-            const hotspotContentList = [params];
-            hotspotContent(
-                {
-                    type: "post",
-                    //data: { hotspotContentList }
-                    data: params
-                },
-                this.info.id
-            ).then(res => {
-                if (res.suceeded) {
-                    this.$message.success("操作成功");
-                    this.getList();
-                }
-            });
+            if(this.info.title!=""){
+                const RichTextBox = this.$refs.RichTextBox;
+                const getHtml = RichTextBox.getHtml();
+                const params = {
+                    // 参数
+                    content: getHtml, // 内容
+                    title: this.info.title, // 标题
+                    type: "HTML", // 类型
+                    // hotspotId: this.hotspotId
+                };
+                const hotspotContentList = [params];
+                hotspotContent(
+                    {
+                        type: "post",
+                        data: params
+                    },
+                    this.info.id
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.$message.success("操作成功");
+                        this.getList();
+                    }
+                });
+            }
+            else {
+                this.$message({
+                    message:"未编辑文章标题",
+                    type:"warning"
+                });
+            }
+
         },
         addRich() {
             // 修改文本
-            const RichTextBox = this.$refs.RichTextBox;
-            const getHtml = RichTextBox.getHtml();
-            const params = {
-                // 参数
-                content: getHtml, // 内容
-                title: this.info.title, // 标题
-                type: "HTML", // 类型
-                hotspotId: this.hotspotId
-            };
-            const hotspotContentList = [params];
-            hotspotContentDetail({
-                type: "post",
-                data: { hotspotContentList }
-            }).then(res => {
-                if (res.suceeded) {
-                    this.$message.success("操作成功");
-                    this.getList();
-                }
-            });
+            if(this.info.title!="") {
+                const RichTextBox = this.$refs.RichTextBox;
+                const getHtml = RichTextBox.getHtml();
+                const params = {
+                    // 参数
+                    content: getHtml, // 内容
+                    title: this.info.title, // 标题
+                    type: "HTML", // 类型
+                    hotspotId: this.hotspotId
+                };
+                const hotspotContentList = [params];
+                hotspotContentDetail({
+                    type: "post",
+                    data: { hotspotContentList }
+                }).then(res => {
+                    if (res.suceeded) {
+                        this.$message.success("操作成功");
+                        this.getList();
+                    }
+                });
+            }
+            else{
+                this.$message({
+                    message:"未编辑文章标题",
+                    type:"warning"
+                });
+            }
         }
     },
     mounted() {

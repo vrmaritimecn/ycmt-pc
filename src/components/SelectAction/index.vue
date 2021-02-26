@@ -5,7 +5,7 @@
         </div>
         <div class="select-body">
             <div class="action_list">
-                <ul>
+                <!--ul>
                     <li
                         v-for="(item, index) in list"
                         :key="index"
@@ -18,9 +18,15 @@
                                 : item.src
                         "
                     >
-                        <!-- <img :src="globalConfig.imagePath + item" alt="" /> -->
                     </li>
-                </ul>
+                </ul-->
+                <el-row style="width:260px;">
+                    <el-col :span="6" v-for="(item, index) in list">
+                        <img :class="currentIndex==index? 'action_pic_active':'action_pic'"
+                             :src="globalConfig.imagePath + item.value"
+                             @click="select(item, index)"/>
+                    </el-col>
+                </el-row>
             </div>
         </div>
     </div>
@@ -61,6 +67,7 @@ export default {
         };
     },
     methods: {
+        /*
         select(url, index, item) {
             console.log(this.currentIndex, "currentIndex");
             this.currentIndex = index;
@@ -69,9 +76,21 @@ export default {
             } else {
                 this.onSelect && this.onSelect(item.desc);
             }
+        },
+
+         */
+        select(item,index) {
+            this.currentIndex = index;
+            console.log(this.currentIndex);
+            if(this.title=="选择图例"){
+                this.onSelect && this.onSelect(item.value);
+            }
+            else{
+                this.onSelect && this.onSelect(item.detail);
+            }
         }
     }
-};
+}
 </script>
 
 <style lang="less">
@@ -81,9 +100,12 @@ export default {
         width: 100%;
         text-align: center;
         height: 20px;
-        margin-bottom: 10px;
+        margin-bottom: 20px;
     }
     .select-body {
+        height:260px;
+        width: 260px;
+        overflow-y: auto;
         .action_list {
             ul {
                 // display: flex;
@@ -110,5 +132,18 @@ export default {
             width: 97%;
         }
     }
+}
+.action_pic_active{
+    margin: 5px;
+    width: 46px;
+    height: 46px;
+    border-radius: 4px;
+    border: 2px solid #ff6900;
+}
+.action_pic{
+    margin: 5px;
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
 }
 </style>

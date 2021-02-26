@@ -144,10 +144,9 @@ export default {
         },
         backFindHotspot(item, index) {
             // 这个做啥的，暂时不知道
-            const { locationX, locationY } = item;
-            const getScenePara = window.getScenePara && window.getScenePara();
-
-            window.backFindHotspot && backFindHotspot(getScenePara[0], locationX, locationY);
+            var k = document.getElementById("kr");
+            k.call("loadscene("+item.code+", view.fov="+item.locationFov+"&view.hlookat="+item.locationX+"&view.vlookat="+item.locationY+", MERGE, BLEND(1));");
+            //window.findSceneLocation && findSceneLocation(item.code, item.locationX, item.locationY);
             this.currentIndex = index;
         },
         updateHotspot(data) {

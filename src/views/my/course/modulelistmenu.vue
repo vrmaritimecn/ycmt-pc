@@ -1,12 +1,7 @@
 <template>
-    <div class="modulelist" v-if="plateformState==0">
-        <div  v-for="(item,index) in mlist" :class="ind==index? 'module-name-card-active' : 'module-name-card'" @click="handclick(index,item.id)">
-            <img class="moduleicon" src="./image/icon-1.png"/><span class="modulename" >{{item.name}}</span>
-        </div>
-    </div>
-    <div class="modulelist" v-else>
-        <div  v-for="(item,index) in pmlist" :class="ind==index? 'module-name-card-active' : 'module-name-card'" @click="firsthandclick(index,item.id)">
-            <img class="moduleicon" src="./image/icon-1.png"/><span class="modulename" >{{item.name}}</span>
+    <div class="modulelist">
+        <div  v-for="(item,index) in mlist" :class="id==item.id? 'module-name-card-active' : 'module-name-card'" @click="selectModule(index,item.id)">
+            <img class="moduleicon" :src="setModueIcon(item.name)"/><span class="modulename" >{{item.name}}</span>
         </div>
     </div>
 </template>
@@ -18,55 +13,47 @@
       name: "modulelist",
       data() {
         return {
-          ind: 0
+          id: ""
         };
       },
       computed:{
-        mlist(){
-          return this.$store.getters.getUserModuleResource
-        },
-          pmlist(){
-              return this.$store.getters.getPlatformResource
+          mlist(){
+              return this.$store.getters.getModuleList
           },
-          plateformState(){
-              return this.$store.getters.getPlatformState
+          moduleConst(){
+              return this.$store.getters.getModuleConst
           },
-        ...mapGetters([
-          'getBlockId',
-           'getModuleId',
-        ])
+          ...mapGetters([
+              "getModuleId"
+          ])
       },
-      methods:{
-        handclick(index,id){
-          this.$store.commit('SETMODULEID', id);
-          this.ind = index;
+        watch:{
+            getModuleId:function() {
+                this.id=this.$store.getters.getModuleId;
+            }
         },
-          firsthandclick(index,id)
-          {
-              this.ind = index;
-              this.$store.commit("SETMODULEID",id);
-              this.$nextTick(() => {
-                  projectClass({
-                      type:"GET",
-                      data:{
-                          blockId: 5,
-                          moduleId: id
-                      }
-                  }).then(res => {
-                      if (res.suceeded) {
-                          this.$store.commit({
-                              type: "SET_PLATFORMCLASS_INFO",
-                              plylaod: res.data.content
-                          });
-                      }
-                  });
-              });
+      methods:{
+          selectModule(index,id){
+              this.$store.commit('SETMODULEID', id);
+              this.id = id;
+              for (var i=0; i<this.mlist.length;i++){
+                  if(this.mlist[i]["id"]==id){
+                      this.$store.commit("SETCLASSLIST", this.mlist[i]["classList"]);
+                      this.$store.commit("SETCLASSID", -1);
+                  }
+              }
+          },
+          setModueIcon(val){
+              for(var i=0; i<this.moduleConst.length;i++)
+              {
+                  if(this.moduleConst[i]["title"]==val){
+                      return globalConfig.imagePath + this.moduleConst[i]["iconUrl"];
+                  }
+              }
           }
       },
-      watch:{
-        getBlockId: function(){
-            this.ind = 0;
-        }
+      mounted() {
+          this.id=this.$store.getters.getModuleId
       }
     };
 </script>

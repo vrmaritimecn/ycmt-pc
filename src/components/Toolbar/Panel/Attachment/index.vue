@@ -5,7 +5,7 @@
             <el-row>
                 <el-col :span="24" style="margin: 10px 0px;" v-for="(item, index) in attachmentList" :key="index" :class="{ active: index === currentIndex }" @click="select(index)">
                     <el-card :body-style="{ padding: '0px'}">
-                        <span class="att_title">{{item.title}}</span>
+                        <span :class="attachmentIndex==item.id?'att_title_active':'att_title'" @click="attachmentIndex=item.id">{{item.title}}</span>
                         <span class="att_bnt_group">
                             <i class="iconfont icontubiaoweb-28 cursor" @click="editOpenEditAttachmentName(item, index)" ></i>
                             <i class="iconfont icontubiaoweb-29 cursor" @click="editAttachment(item)"></i>
@@ -16,57 +16,6 @@
                     </el-card>
                 </el-col>
             </el-row>
-
-            <!--div class="attachment_list">
-                <div class="attachment-header">
-                    <span style="width:14%">详情</span>
-                    <span style="width:170px">课件参考</span>
-                    <span>操作</span>
-                </div>
-                <div class="attachment-body">
-                    <div
-                        class="item"
-                        v-for="(item, index) in attachmentList"
-                        :key="index"
-                        :class="{ active: index === currentIndex }"
-                        @click="select(index)"
-                    >
-                        <div class="link" @click="editAttachment(item)" style="width:13%">
-                            <i class="iconfont icontubiaoweb-29 cursor"></i>
-                        </div>
-                        <div class="link_name ellipsis cursor">
-                            <el-tooltip
-                                class="item"
-                                effect="light"
-                                :content="item.title"
-                                placement="left"
-                                offset="30"
-                                :enterable="false"
-                            >
-                                <span>{{ item.title }}</span>
-                            </el-tooltip>
-                        </div>
-                        <div class="operate">
-                            <i
-                                class="iconfont icontubiaoweb-21 cursor"
-                                @click="handleDel(item, index)"
-                            ></i>
-                            <i
-                                class="iconfont icontubiaoweb-22 cursor"
-                                @click="up(attachmentList, index)"
-                            ></i>
-                            <i
-                                class="iconfont icontubiaoweb-23 cursor"
-                                @click="down(attachmentList, index)"
-                            ></i>
-                            <i
-                                class="iconfont icontubiaoweb-28 cursor"
-                                @click="editOpenEditAttachmentName(item, index)"
-                            ></i>
-                        </div>
-                    </div>
-                </div>
-            </div-->
         </div>
 
         <AttachmentComponent
@@ -75,6 +24,7 @@
             v-if="currentItem.id"
             :orderList="['文章', '音频', '视频']"
         ></AttachmentComponent>
+
 
         <!-- 修改附件弹窗 -->
         <editAttachmentDialog
@@ -101,11 +51,30 @@ export default {
                 isOpenAttachment: false, // 附件弹窗
                 isOpenEditAttachment: false // 修改附件弹窗
             },
+            attachmentIndex:"",
             attachmentList: [], // 获取附件列表
             newArr: [], //
             currentItem: {},
             isUpDown: false,
-            currentIndex: null // 当前选择行
+            currentIndex: null, // 当前选择行
+            orderList:[
+                {
+                    name:"文章",
+                    status:true
+                },{
+                    name:"音频",
+                    status:true
+                },{
+                    name:"视频",
+                    status:true
+                },{
+                    name:"文本",
+                    status:false
+                },{
+                    name:"图片",
+                    status:false
+                }
+            ]
         };
     },
     components: {
@@ -150,6 +119,7 @@ export default {
             });
         },
         handleDel(item, index) {
+            this.attachmentIndex=item.id;
             this.$confirm(`此操作将永久删 ${item.title}, 是否继续?`, "提示", {
                 confirmButtonText: "确定",
                 cancelButtonText: "取消",
@@ -157,6 +127,7 @@ export default {
             })
                 .then(() => {
                     this.delAttach(item.id);
+                    this.attachmentIndex="";
                 })
                 .catch(() => {
                     this.$message({
@@ -226,6 +197,7 @@ export default {
             });
         },
         up(arr, index) {
+            this.attachmentIndex=arr[index].id
             if (arr.length > 1 && index !== 0) {
                 this.newArr = this.swapItems(arr, index, index - 1);
                 this.isUpDown = true;
@@ -237,6 +209,7 @@ export default {
             }
         },
         down(arr, index) {
+            this.attachmentIndex=arr[index].id
             if (arr.length > 1 && index !== arr.length - 1) {
                 this.newArr = this.swapItems(arr, index, index + 1);
                 this.currentIndex = index + 1;
@@ -253,6 +226,7 @@ export default {
         },
         editOpenEditAttachmentName(data, index) {
             // 修改附件名称弹窗
+            this.attachmentIndex=data.id
             this.currentIndex = index;
             this.currentItem = {};
             this.currentItem = data;
@@ -260,6 +234,7 @@ export default {
             console.log(data);
         },
         editAttachment(data) {
+            this.attachmentIndex=data.id
             this.currentItem = data;
             this.shows.isOpenAttachment = true;
         }
@@ -382,6 +357,16 @@ export default {
 
         /*height: 4px;*/
     }
+}
+.att_title_active{
+    display: block;
+    text-align:center;
+    font-size: 14px;
+    padding:15px 5px;
+    background-color: #324155;
+    border-bottom: thin solid #e6a23c;
+    color: #e6a23c;
+    cursor:pointer;
 }
 .att_title{
     display: block;

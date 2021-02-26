@@ -33,27 +33,38 @@ export default {
                 {
                     text: "简介",
                     icon: "iconxiangmu",
-                    type: "drawerIntro"
+                    type: "drawerIntro",
+                    call:""
                 },
                 {
                     text: "制作人员",
                     icon: "iconjiaoseleixing",
-                    type: "drawerPerson"
+                    type: "drawerPerson",
+                    call:""
                 },
                 {
                     text: "附件参考",
                     icon: "iconxuexi_nor",
-                    type: "drawerAttachment"
+                    type: "drawerAttachment",
+                    call:""
                 },
                 {
                     text: "热点内容",
                     icon: "icontubiaoweb-26",
-                    type: "drawerHotContent"
+                    type: "drawerHotContent",
+                    call:""
                 },
                 {
                     text: "引导内容",
                     icon: "icontubiaoweb-36",
-                    type: "drawerGuideContent"
+                    type: "drawerGuideContent",
+                    call:""
+                },
+                {
+                    text: "在线交流",
+                    icon: "icontubiaoweb-39",
+                    type: "",
+                    call:"SETISOPENMESSAGE"
                 }
             ],
             currentIndex: null
@@ -75,7 +86,14 @@ export default {
     methods: {
         toolbarHander(type, index) {
             this.currentIndex = index;
-            this.$store.commit("SETTOGGLETOOLBR", type);
+            if(type){
+                this.$store.commit("SETTOGGLETOOLBR", type);
+            }
+            else if(this.toolbarList[index]["call"]){
+                const call=this.toolbarList[index]["call"];
+                this.$store.commit(call);
+            }
+
         },
         initBus() {
             Bus.$on("toolbar-hander", data => {

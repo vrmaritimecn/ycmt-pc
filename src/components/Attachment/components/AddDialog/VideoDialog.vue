@@ -139,8 +139,6 @@ export default {
         setOpen() {
             if (!this.id) {
                 this.$nextTick(() => {
-                    this.$refs["form"].resetFields();
-                    this.clear();
                 });
             } else {
                 this.setContent();
@@ -161,6 +159,8 @@ export default {
         },
         close() {
             this.$store.commit("SETATTDIALOG", false);
+            this.$refs["form"].resetFields();
+            this.clear();
         },
         save() {
             this.$refs["form"].validate(valid => {

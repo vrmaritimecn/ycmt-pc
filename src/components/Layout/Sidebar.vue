@@ -136,6 +136,7 @@ export default {
                         "personal"
                     ).then(res => {
                         if (res.suceeded) {
+
                             if (res.data.userType === 1) {
                                 this.menu.push({
                                     text: "远程核查",
@@ -144,10 +145,14 @@ export default {
                                 });
                             }
                             store.set("userId", res.data.id, "local");
-
+                            this.$store.commit("SET_USERID", res.data.id);
                             this.$store.commit({
                                 type: "SET_USERBLOCK_INFO",
                                 plylaod: res.data
+                            });
+                            this.$store.commit({
+                                type: "SET_USERBLOCKLIST_INFO",
+                                plylaod: res.data["blocks"]
                             });
 
                             this.$store.commit({
@@ -170,7 +175,6 @@ export default {
     },
     mounted() {
         this.getUserDetail();
-        //this.getPlatformDetail();
     }
 };
 </script>

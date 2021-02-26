@@ -1,7 +1,7 @@
 <template>
     <el-dialog
-        title="修改附件名称"
-        :visible.sync="visible"
+        title="修改引导脚本概要"
+        :visible="visible"
         :close-on-click-modal="false"
         @open="open"
         @close="close"
@@ -10,7 +10,7 @@
     >
         <div>
             <el-form ref="form" :model="form" label-width="80px">
-                <el-form-item label="附件名称">
+                <el-form-item label="引导概要">
                     <el-input v-model="form.title"></el-input>
                 </el-form-item>
             </el-form>

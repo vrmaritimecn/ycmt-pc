@@ -23,7 +23,7 @@ import Nav from "@/components/common/Nav";
 import Title from "@/components/common/Title";
 import Submenu from "../../course/Submenu";
 import CourseItem from "@/components/course";
-import { project , projectModule} from "@/model/api";
+import { user, appConst, block, project , projectModule} from "@/model/api";
 import store from "@/widget/store";
 import blocklistmenu from "./blocklistmenu";
 import modulelistmenu from "./modulelistmenu";
@@ -61,6 +61,7 @@ export default {
     },
 
     methods: {
+        /*
         getPlatformModule() {
             this.$nextTick(() => {
                 projectModule({
@@ -80,12 +81,90 @@ export default {
                     }
                 });
             });
-        }
+        },
+
+         */
+        getUserDetail() {
+            this.$nextTick(() => {
+                user(
+                    {
+                        type: "get"
+                    },
+                    "/personal"
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.$store.commit({
+                            type: "SET_USERBLOCKLIST_INFO",
+                            plylaod: res.data.blocks
+                        });
+                        this.$store.commit("SET_USERBLOCK_INFO", res.data);
+                        this.$store.commit({
+                            type: "SET_USER_INFO",
+                            plylaod: res.data
+                        });
+                        this.$store.commit("SET_USERID", res.data.id);
+                        this.user = res.data;
+                    }
+                });
+            });
+        },
+        getPlatformEnterprise(){
+            this.$nextTick(() => {
+                appConst({
+                    type: "get",
+                    data: {
+                        name: "APP_PLATFORM_ENTERPRISE"
+                    }
+                }).then(res => {
+                    if (res.suceeded) {
+                        console.log(res);
+                        this.getPlatformBlockList(res.data[0].value);
+                    }
+                });
+            })
+        },
+        getPlatformBlockList(val){
+            let plateformBlockList=[];
+            block({
+                type: "get",
+                data: {
+                    enterpriseId: val
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    this.getPlatformBlockModuleList(res.data.content[0]["id"])
+                    this.$store.commit('SETPLATFORMSTATUS');
+                    this.$store.commit('SETBLOCKID',res.data.content[0]["id"]);
+                    this.$store.commit('SET_PLATFORMBLOCKLIST_INFO',res.data.content);
+                }
+                else{
+                    this.$store.commit('SET_PLATFORMBLOCKLIST_INFO',plateformBlockList);
+                }
+            });
+        },
+        getPlatformBlockModuleList(val){
+            projectModule({
+                type: "get",
+                data: {
+                    blockId: val
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    console.log("moduleList");
+                    console.log(res);
+                    this.$store.commit("SETMODULELIST", res.data);
+                    this.$store.commit("SETMODULEID", res.data[0]["id"]);
+                    this.$store.commit("SETCLASSLIST", res.data[0]["classList"]);
+                    this.$store.commit("SETCLASSID", -1);
+                }
+            });
+        },
     },
     watch: {
     },
     mounted() {
-        this.getPlatformModule();
+        this.getPlatformEnterprise();
+        this.getUserDetail();
     }
 };
 </script>

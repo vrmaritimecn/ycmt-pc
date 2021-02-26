@@ -137,7 +137,7 @@ export default {
                 path: "/course",
                 query
             });
-        }
+        },
     },
     mounted() {
         this.getHome();

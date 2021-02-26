@@ -54,7 +54,7 @@
 </template>
 
 <script>
-import { user, messageDetail, projectModule } from "@/model/api";
+import { appConst, user, messageDetail, block, projectModule } from "@/model/api";
 import validate from "@/widget/validate";
 import store from "@/widget/store";
 import { mapState } from "vuex";
@@ -115,8 +115,6 @@ export default {
                             this.$store.commit("TOGGLE_LOGIN");
                             this.$message.success("登录成功");
                             this.getUserDetail();
-                            this.getMessageDetail();
-                            this.getPlatformModule();
                             window.location.href = "/";
                         } else {
                             res.message && this.$message.error(res.message);
@@ -135,6 +133,12 @@ export default {
                     "/personal"
                 ).then(res => {
                     if (res.suceeded) {
+                        this.$store.commit("SET_USERID", res.data.id);
+                        this.$store.commit({
+                            type: "SET_USERBLOCKLIST_INFO",
+                            plylaod: res.data["blocks"]
+                        });
+
                         this.$store.commit({
                             type: "SET_USERBLOCK_INFO",
                             plylaod: res.data
@@ -145,25 +149,91 @@ export default {
                             plylaod: res.data
                         });
                         this.user = res.data;
+                        this.getMessageDetail();
+                        this.getPlatformEnterprise();
+                        if(res.data.userType==0 || res.data.userType==1)
+                        {
+                            this.getEnterpriseConst(res.data.enterprises[0]["id"]);
+                        }else if(res.data.userType==2){
+                            this.getEnterpriseConst(-1);
+                        }else{
+                         this.$message({
+                             message:"登陆出错，请刷新网页重新登录",
+                             type:"error"
+                         })
+                        }
                     }
                 });
             });
         },
-        getPlatformModule() {
-            this.$nextTick(() => {
-                projectModule({
-                    type:"GET",
-                    data:{
-                        blockId: 5
+        getEnterpriseConst(val){
+            appConst({
+                type: "get",
+                data: {
+                    name: "APP_DEFAULT_ENTERPRISE_DETAIL"
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    var str = [];
+                    var eId = null;
+                    for (var i = 0; i < res.data.length; i++) {
+                        str.push(JSON.parse(res.data[i].value));
                     }
-                }).then(res => {
-                    if (res.suceeded) {
-                        this.$store.commit({
-                            type: "SET_PLATFORMBLOCK_INFO",
-                            plylaod: res.data
-                        });
+                    if(val!=-1) {
+                        for (var i = 0; i < str.data.length; i++){
+                            if(str[i]["id"]==val){
+                                this.$store.commit("SETENTERPRISEID",str[i]["id"]);
+                                this.$store.commit("SETDEPARTMENTID",str[i]["departmentId"]);
+                            }
+                        }
+                    }else{
+                        this.$store.commit("SETENTERPRISEID",str[0]["id"]);
+                        this.$store.commit("SETDEPARTMENTID",str[0]["departmentId"]);
                     }
-                });
+                }
+            });
+        },
+        getPlatformEnterprise(){
+            appConst({
+                type: "get",
+                data: {
+                    name: "APP_PLATFORM_ENTERPRISE"
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    this.getPlatformBlockList(res.data[0]["value"]);
+                }
+            });
+        },
+        getPlatformBlockList(val){
+            block({
+                type: "get",
+                data: {
+                    enterpriseId: val
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    this.getPlatformBlockModuleList(res.data.content[0]["id"]);
+                    this.$store.commit("SETBLOCKID",res.data.content[0]["id"]);
+                    this.$store.commit('SET_PLATFORMBLOCKLIST_INFO',res.data.content);
+                }
+                else{
+                    this.$message({
+                        message:"未获取到平台信息"
+                    });
+                }
+            });
+        },
+        getPlatformBlockModuleList(val){
+            projectModule({
+                type: "get",
+                data: {
+                    blockId: val
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    this.$store.commit("SETMODULEID",res.data[0]["id"]);
+                }
             });
         },
         getMessageDetail() {

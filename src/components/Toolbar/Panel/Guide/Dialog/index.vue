@@ -1,7 +1,7 @@
 <template>
     <el-dialog
         title="添加解说内容"
-        :visible.sync="visible"
+        :visible="visible"
         :close-on-click-modal="false"
         @open="open"
         @close="close"
@@ -17,22 +17,14 @@
                         <div
                             class="action "
                             @click="openAction"
-                            :class="{ 'ui-lazyLoad-pic': !selectData.img1 }"
+                            :class="{ 'ui-lazyLoad-pic': !selectData.pic }"
                         >
                             <img
-                                :src="globalConfig.imagePath + selectData.img1"
+                                :src="globalConfig.imagePath + selectData.pic"
                                 alt=""
-                                v-if="selectData.img1"
+                                v-if="selectData.pic"
                             />
                         </div>
-                        <!-- <div class="digest">
-                            <div class="title">
-                                <span>简介</span>
-                            </div>
-                            <div class="text">
-                                <p>{{ data.title }}</p>
-                            </div>
-                        </div> -->
                     </div>
                     <div class="content">
                         <el-input
@@ -84,7 +76,6 @@
             :editData="editData"
         ></SelectAction>
         <div slot="footer">
-            <!-- <el-button @click="close">关闭</el-button> -->
             <el-button type="primary" @click="save">保存</el-button>
         </div>
         <AudioDialog
@@ -138,7 +129,7 @@ export default {
             },
             isOpenAction: false,
             selectData: {
-                img1: ""
+                pic: ""
             },
             IMAGE: {},
             AUDIO: {},
@@ -159,7 +150,6 @@ export default {
             this.editAudio();
         },
         editAudio() {
-            // 修改
             const saveParams = this.AUDIO;
             if (this.textSrc) {
                 saveParams.extra = this.textSrc;
@@ -258,7 +248,7 @@ export default {
                     }
                     if (type === "IMAGE" && res.data && res.data[0]) {
                         this.IMAGE = res.data[0];
-                        this.selectData.img1 = this.IMAGE.extra;
+                        this.selectData.pic = this.IMAGE.extra;
                     }
                 }
             });

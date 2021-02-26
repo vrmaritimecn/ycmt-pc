@@ -1,3 +1,4 @@
+<script src="../../../../../../../../船福管理/海事局/海宝安检/开发文件/dev文件夹/js/panotour.js"></script>
 <template>
     <div class="panel_sidebar" v-if="drawerHotContent">
         <div class="panel_sidebar_title"><span>添加场景资源</span><i class="iconfont icontubiaoweb-24 cursor" @click="addScene"></i></div>
@@ -5,7 +6,7 @@
             <el-row>
                 <el-col :span="24" style="margin: 10px 0px;" v-for="(item, index) in attachmentList" :key="index" :class="{ active: index === currentIndex }" @click="select(index)">
                     <el-card :body-style="{ padding: '0px'}">
-                        <span class="hot_title" @click="loadpanoscene(item)">{{item.name}}</span>
+                        <span :class="sceneIndex==item.id? 'hot_title_active':'hot_title'" @click="loadpanoscene(item)">{{item.name}}</span>
                         <span class="hot_item_div" v-show="sceneIndex==item.id">
                             <el-row >
                                 <el-col :span="12" v-for="(i, cindex) in attachmentList[index].hotspots" >
@@ -55,6 +56,7 @@
 <script>
 
 import { mapState } from "vuex";
+import { mapGetters } from "vuex";
 import { hotspot, hotspotDetail, projectDetail, project } from "@/model/api";
 import Bus from "@/components/bus/index.js";
 import editAttachmentDialog from "./editScene";
@@ -85,7 +87,10 @@ export default {
     computed: {
         ...mapState({
             drawerHotContent: state => state.toolbarStore.drawerHotContent
-        })
+        }),
+        ...mapGetters([
+            "getSceneId"
+        ])
     },
     watch: {
         drawerHotContent(newVal, oldVal) {
@@ -96,6 +101,9 @@ export default {
                     //this.attachmentList.length > 0 && this.select(0, this.attachmentList[0]);
                 });
             }
+        },
+        getSceneId:function() {
+            this.sceneIndex=this.$store.getters.getSceneId
         }
     },
     methods: {
@@ -108,6 +116,7 @@ export default {
                         type: "GET",
                         data: {
                             projectId,
+                            type: "DEFAULT",
                             page: "1",
                             size: "1000"
                         }
@@ -171,16 +180,20 @@ export default {
                     });
                 })
                 .catch(() => {
+                    this.sceneIndex=val.id;
+                    this.hotspotIndex=-1;
                     this.$message({
                         type: "info",
                         message: "已取消删除"
                     });
                 });
         },
-        loadpanoscene(val) {
-            this.sceneIndex=val.id;
+        loadpanoscene(item) {
+            this.sceneIndex=item.id;
             this.hotspotIndex=-1;
-            window.loadpanoscene && window.loadpanoscene(val.id, val.code);
+            //window.loadpanoscene && window.loadpanoscene(val.id, val.code);
+            var k = document.getElementById("kr");
+            k.call("loadscene(scene_"+item.code+",null, MERGE, BLEND(1));");
         },
         backFindHotspot(val) {
             this.hotspotIndex=val.id
@@ -315,6 +328,8 @@ export default {
             });
         },
         up(arr, index) {
+            this.sceneIndex=arr[index].id;
+            this.hotspotIndex=-1;
             if (arr.length > 1 && index !== 0) {
                 this.newArr = this.swapItems(arr, index, index - 1);
                 this.isUpDown = true;
@@ -326,6 +341,7 @@ export default {
             }
         },
         down(arr, index) {
+            this.sceneIndex=arr[index].id;
             if (arr.length > 1 && index !== arr.length - 1) {
                 this.newArr = this.swapItems(arr, index, index + 1);
                 this.currentIndex = index + 1;
@@ -415,6 +431,16 @@ export default {
 
         /*height: 4px;*/
     }
+}
+.hot_title_active{
+    display: block;
+    text-align:center;
+    font-size: 14px;
+    padding:15px 5px;
+    background: #324155;
+    border-bottom: thin solid #e6a23c;
+    color: #e6a23c;
+    cursor:pointer;
 }
 .hot_title{
     display: block;

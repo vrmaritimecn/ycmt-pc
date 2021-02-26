@@ -31,6 +31,7 @@
 
 <script>
 import { mapState } from "vuex";
+import { appConst, user, messageDetail, block, projectModule } from "@/model/api";
 import Header from "./Header";
 import Footer from "./Footer";
 import Sidebar from "./Sidebar";
@@ -58,8 +59,77 @@ export default {
             isOpenFesetPassword: state => state.loginStore.isOpenFesetPassword,
             mobile: state => state.loginStore.mobile
         })
+    },
+    methods: {
+        getModuleConst() {
+            appConst({
+                type: "get",
+                data: {
+                    name: "APP_DEFAULT_MODULE"
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    var str = [];
+                    for (var i = 0; i < res.data.length; i++) {
+                        str.push(JSON.parse(res.data[i].value));
+                    }
+                    this.$store.commit("SET_MODULECONST", str);
+                }
+            });
+        },
+        getPlatformEnterprise(){
+            appConst({
+                type: "get",
+                data: {
+                    name: "APP_PLATFORM_ENTERPRISE"
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    this.getPlatformBlockList(res.data[0]["value"]);
+                }
+            });
+        },
+        getPlatformBlockList(val){
+            block({
+                type: "get",
+                data: {
+                    enterpriseId: val
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    this.getPlatformBlockModuleList(res.data.content[0]["id"]);
+                    this.$store.commit('SETPLATFORMSTATUS');
+                    this.$store.commit('SET_PLATFORMBLOCKLIST_INFO',res.data.content);
+                    this.$store.commit("SETBLOCKID", res.data.content[0]["id"]);
+                }
+                else{
+                    this.$message({
+                        message:"未获取到平台信息"
+                    });
+                }
+            });
+        },
+        getPlatformBlockModuleList(val){
+            projectModule({
+                type: "get",
+                data: {
+                    blockId: val
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    this.$store.commit("SETMODULELIST", res.data);
+                    this.$store.commit("SETMODULEID", res.data[0]["id"]);
+                    this.$store.commit("SETCLASSLIST", res.data[0]["classList"]);
+                    this.$store.commit("SETCLASSID", -1);
+                }
+            });
+        }
+    },
+    mounted() {
+        this.getModuleConst();
+        this.getPlatformEnterprise();
     }
-};
+}
 </script>
 
 <style lang="less">

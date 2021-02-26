@@ -134,6 +134,11 @@ module.exports = {
             "/pano": {
                 target: "https://tutor-pc.vr2shipping.com",
                 changeOrigin: true
+            },
+            "/wss":{
+                target: "http://47.102.199.232:8089/panopipe",
+                changeOrigin: true,
+                pathRewrite: (path, req) => path.replace("/wss", "")
             }
         }
     }

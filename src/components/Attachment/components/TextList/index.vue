@@ -111,6 +111,7 @@ export default {
                 });
         },
         edit(data) {
+            console.log(data);
             Bus.$emit("update-item", data);
         },
         sort() {

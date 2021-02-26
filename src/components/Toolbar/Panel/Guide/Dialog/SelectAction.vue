@@ -1,7 +1,7 @@
 <template>
     <el-dialog
         title="添加动作"
-        :visible.sync="visible"
+        :visible="visible"
         :close-on-click-modal="false"
         @open="open"
         @close="close"
@@ -11,16 +11,16 @@
         <main class="SelectAction" v-loading="loading">
             <SelectActionComp
                 placeholder="图片描述"
-                title="人物或动画形象选择"
+                title="选择图例"
                 :list="guideHotspotImage"
-                :onSelect="url => onSelect('img1', url, item)"
+                :onSelect="url => onSelect('pic', url)"
                 :activeIndex="actionImg1Index"
             ></SelectActionComp>
             <SelectActionComp
                 placeholder="动作描述"
-                title="动作"
+                title="选择动作"
                 :list="actionList"
-                :onSelect="url => onSelect('img2', url)"
+                :onSelect="url => onSelect('act', url)"
                 :activeIndex="actionImg2Index"
             ></SelectActionComp>
         </main>
@@ -72,10 +72,11 @@ export default {
     },
     computed: {
         actionImg1Index: function() {
-            return this.guideHotspotImage.findIndex(item => item.src === this.params.extra);
+            //return this.guideHotspotImage.findIndex(item => item.src === this.params.extra);
+            //return this.guideHotspotImage.findIndex(item => item.src === this.params.extra);
         },
         actionImg2Index: function() {
-            return this.actionList.findIndex(item => item.desc === this.params.content);
+            //return this.actionList.findIndex(item => item.desc === this.params.content);
         }
     },
     data() {
@@ -84,18 +85,18 @@ export default {
             loading: false,
             checkedData: {},
             actionList: [
-                { src: none, desc: "none" },
-                { src: upaction, desc: "upaction" },
-                { src: downaction, desc: "downaction" },
-                { src: leftaction, desc: "leftaction" },
-                { src: rightaction, desc: "rightaction" },
-                { src: narrowaction, desc: "narrowaction" },
-                { src: enlargeaction, desc: "enlargeaction" },
-                { src: jumpaction, desc: "jumpaction" },
-                { src: rotateaction, desc: "rotateaction" },
-                { src: swingaction, desc: "swingaction" },
-                { src: flashaction, desc: "flashaction" },
-                { src: yrotateaction, desc: "yrotateaction" }
+                { value: "/static/app/gudiance/01_none.png", detail: "none" },
+                { value: "/static/app/gudiance/02_upaction.png", detail: "upaction" },
+                { value: "/static/app/gudiance/03_downaction.png", detail: "downaction" },
+                { value: "/static/app/gudiance/04_leftaction.png", detail: "leftaction" },
+                { value: "/static/app/gudiance/05_rightaction.png", detail: "rightaction" },
+                { value: "/static/app/gudiance/06_narrowaction.png", detail: "narrowaction" },
+                { value: "/static/app/gudiance/07_enlargeaction.png", detail: "enlargeaction" },
+                { value: "/static/app/gudiance/08_jumpaction.png", detail: "jumpaction" },
+                { value: "/static/app/gudiance/09_rotateaction.png", detail: "rotateaction" },
+                { value: "/static/app/gudiance/10_swingaction.png", detail: "swingaction" },
+                { value: "/static/app/gudiance/11_flashaction.png", detail: "flashaction" },
+                { value: "/static/app/gudiance/12_yrotateaction.png", detail: "yrotateaction" }
             ],
             params: {
                 // 参数
@@ -132,7 +133,7 @@ export default {
             this.editImages();
         },
         getActionList() {
-            const modules = this.$route.params.modules === "技术解读";
+            const modules = this.$route.params.modules === "专业英语";
             if (modules) {
                 this.getActionListZYYY();
             } else {
@@ -141,6 +142,25 @@ export default {
         },
         // 获取技术截图图片list
         getActionListJSJD() {
+            console.log("技术解读");
+            this.loading = true;
+            this.guideHotspotImage = [];
+            appConst({
+                type: "get",
+                data: {
+                    name: "PROJECT_GUIDE_HOTSPOT_IMAGE"
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    console.log(res);
+                    this.loading = false;
+                    this.guideHotspotImage = (res.data || []);
+                }
+            });
+        },
+        // 获取专业英语图片list
+        getActionListZYYY() {
+            console.log("专业英语");
             this.loading = true;
             this.guideHotspotImage = [];
             appConst({
@@ -151,29 +171,14 @@ export default {
             }).then(res => {
                 if (res.suceeded) {
                     this.loading = false;
+                    this.guideHotspotImage = (res.data || []);
+                    /*
                     this.guideHotspotImage = (res.data || []).map(item => ({
                         src: item.value,
                         desc: ""
                     }));
-                }
-            });
-        },
-        // 获取专业英语图片list
-        getActionListZYYY() {
-            this.loading = true;
-            this.guideHotspotImage = [];
-            appConst({
-                type: "get",
-                data: {
-                    name: "PROJECT_GUIDE_HOTSPOT_IMAGE"
-                }
-            }).then(res => {
-                if (res.suceeded) {
-                    this.loading = false;
-                    this.guideHotspotImage = (res.data || []).map(item => ({
-                        src: item.value,
-                        desc: ""
-                    }));
+
+                     */
                 }
             });
         },
@@ -183,8 +188,8 @@ export default {
         },
         editImages() {
             // 修改文本
-            this.params.extra = this.checkedData.img1;
-            this.params.content = this.checkedData.img2;
+            this.params.extra = this.checkedData.pic;
+            this.params.content = this.checkedData.act;
             hotspotContent(
                 {
                     type: "post",

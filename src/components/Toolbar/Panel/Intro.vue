@@ -20,7 +20,9 @@
                     </el-upload>
                 </el-form-item>
                 <el-form-item >
-                    <el-input v-model="params.name" class="w100" placeholder="项目标题"></el-input>
+                    <el-input v-model="params.name" class="w100" placeholder="项目标题">
+                        <i slot="suffix" class="el-input__icon el-icon-info"></i>
+                    </el-input>
                 </el-form-item>
                 <el-form-item>
                     <span style="font-weight: bold; display: block; color:#fff; border-radius: 2px; background-color:#324155; text-align: center;">
@@ -53,6 +55,7 @@
 import { mapState } from "vuex";
 import { taskDetail, projectDetail } from "@/model/api";
 import utils from "@/widget/utils";
+
 export default {
     name: "Intro",
     data() {

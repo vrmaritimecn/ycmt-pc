@@ -1,49 +1,71 @@
 <template>
-    <div class="classlist" v-if="plateformState == 0">
-        <span class="span-all" @click="handclick(-1)">全部</span>
-        <span v-for="(item,index) in clist" :class="ind==index? 'span-active' : 'span'"  @click="handclick(index,item.id)">{{item.name}}</span>
-    </div>
-    <div class="classlist" v-else>
-        <span class="span-all" @click="handclick(-1)">全部</span>
-        <span v-for="(item,index) in pClasslist" :class="ind==index? 'span-active' : 'span'"  @click="handclick(index,item.id)">{{item.name}}</span>
+    <div class="classlist">
+        <span class="span-all" @click="selectClass(-1)">全部</span>
+        <span v-for="(item,index) in clist" :class="id==item.id? 'span-active' : 'span'"  @click="selectClass(item.id)">{{item.name}}</span>
     </div>
 </template>
 
 <script>
 
   import {mapGetters} from 'vuex'
+  import { project } from "@/model/api";
 
     export default {
       name: "classlist",
       data() {
         return {
-          ind: -1
+            id: -1
         };
       },
       computed:{
-        clist(){
-          return this.$store.getters.getUserClassResource
-        },
-          plateformState(){
-              return this.$store.getters.getPlatformState
+          clist(){
+              return this.$store.getters.getClassList
           },
-          pClasslist(){
-              return this.$store.getters.getPlatformClassList
+          bId(){
+              return this.$store.getters.getBlockId
+          },
+          mId(){
+              return this.$store.getters.getModuleId
           },
         ...mapGetters([
-            'getModuleId'
+            'getModuleId',
+            'getUserStatus'
           ])
       },
       methods:{
-        handclick(index,id){
-          console.log(index)
-          this.$store.commit('SETCLASSID', id);
-          this.ind = index;
-        }
+          selectClass(id){
+              this.$store.commit('SETCLASSID', id);
+              this.id = id;
+              this.getCourseList(id);
+              },
+          getCourseList(val) {
+              this.loading = true;
+              let list = [];
+              project({
+                  type: "GET",
+                  data: {
+                      page: 1,
+                      size: 100000,
+                      moduleId: this.mId,
+                      classId: val<0? "" : val,
+                      blockId: this.bId,
+                      publishFlg: 1,
+                      publicFlg: this.$store.getters.getUserStatus? "" : 1
+                  }
+              }).then(res => {
+                  if (res.suceeded) {
+                      this.loading = false;
+                      const { content, total } = res.data;
+                      list = list.concat(content || {});
+                      this.$store.commit("SETPROJECTLIST",list);
+                      console.log(list);
+                  }
+              });
+          },
       },
       watch:{
           getModuleId: function(){
-              this.ind = -1;
+              this.id = -1;
             }
       }
     };

@@ -1,20 +1,11 @@
 <template>
-    <!-- <el-drawer
-        title="我是标题"
-        :visible.sync="drawerGuideContent"
-        :with-header="false"
-        :size="296"
-        :before-close="handleClose"
-        :modal="false"
-        :wrapperClosable="false"
-    > -->
     <div class="panel_sidebar" v-if="drawerGuideContent">
         <div class="panel_sidebar_title"><span>编辑对话或独白</span><i class="iconfont icontubiaoweb-24 cursor" @click="addGuide"></i></div>
         <div class="panel_sidebar_content">
             <el-row>
                 <el-col :span="24" style="margin: 10px 0px;" v-for="(item, index) in attachmentList" :key="index" :class="{ active: index === currentIndex }" @click="select(index)">
                     <el-card :body-style="{ padding: '0px'}">
-                        <span class="guide_title" @click="selectGuideIndex(item.id)">{{item.title}}</span>
+                        <span class="guide_title" @click="selectGuide(item)">{{item.title}}</span>
                         <span class="guide_item_div" v-show="guideIndex==item.id">
                             <el-row >
                                 <el-col :span="12" v-for="item in sceneList">
@@ -33,64 +24,6 @@
                     </el-card>
                 </el-col>
             </el-row>
-        <!--div class="attachment common">
-            <div class="title">
-                <span>编辑对话或独白</span>
-                <i class="iconfont icontubiaoweb-24 cursor" @click="addGuide"></i>
-            </div-->
-            <!--div class="attachment_list">
-                <div class="header">
-                    <span style="width:14%">内容</span>
-                    <span style="width:170px">概要</span>
-                    <span>操作</span>
-                </div>
-                <div class="body">
-                    <div
-                        class="item"
-                        v-for="(item, index) in attachmentList"
-                        :key="index"
-                        @click="select(index)"
-                        :class="{ active: index === currentIndex }"
-                    >
-                        <div class="link" style="width:13%">
-                            <i
-                                class="iconfont icontubiaoweb-29 cursor"
-                                @click="openHotspotConent(item)"
-                            ></i>
-                        </div>
-                        <div
-                            class="link_name ellipsis cursor"
-                            @click="editOpenEditAttachmentName(item)"
-                        >
-                            <el-tooltip
-                                class="item"
-                                effect="light"
-                                :content="item.title"
-                                placement="left"
-                                offset="30"
-                                :enterable="false"
-                            >
-                                <span>{{ item.title }}</span>
-                            </el-tooltip>
-                        </div>
-                        <div class="operate">
-                            <i
-                                class="iconfont icontubiaoweb-21"
-                                @click="handleDel(item, index)"
-                            ></i>
-                            <i
-                                class="iconfont icontubiaoweb-22"
-                                @click="up(attachmentList, index)"
-                            ></i>
-                            <i
-                                class="iconfont icontubiaoweb-23"
-                                @click="down(attachmentList, index)"
-                            ></i>
-                            <i class="iconfont icontubiaoweb-28" @click="edit(item, index)"></i>
-                        </div>
-                    </div>
-                </div>
-            </div-->
         </div>
 
         <div id="triangle-right" @click="closeDrawer"></div>
@@ -108,17 +41,15 @@
             :onSuccess="getGuideList"
         ></editSceneDialog>
     </div>
-    <!-- </el-drawer> -->
 </template>
 
 <script>
-import { mapState } from "vuex";
 
-// 批量新增弹窗
-import HotspotConent from "./Dialog";
-import editSceneDialog from "./editGuide";
-import { hotspot, hotspotDetail, projectDetail, hotspotContentDetail } from "@/model/api";
-import Bus from "@/components/bus/index.js";
+    import { mapGetters, mapState } from "vuex";
+    import HotspotConent from "./Dialog";
+    import editSceneDialog from "./editGuide";
+    import { hotspot, hotspotDetail, projectDetail, hotspotContentDetail } from "@/model/api";
+    import Bus from "@/components/bus/index.js";
 
 export default {
     name: "Attachment",
@@ -146,7 +77,10 @@ export default {
     computed: {
         ...mapState({
             drawerGuideContent: state => state.toolbarStore.drawerGuideContent
-        })
+        }),
+        ...mapGetters([
+            "getSceneId"
+        ])
     },
     watch: {
         drawerGuideContent(newVal, oldVal) {
@@ -154,6 +88,16 @@ export default {
                 this.getGuideList().then(res => {
                     this.attachmentList.length > 0 && this.select(0);
                 });
+            }
+        },
+        getSceneId:function() {
+            var sId=this.$store.getters.getSceneId;
+            this.sceneIndex=-1;
+            for (var i=0; i<this.sceneList.length; i++) {
+                if(sId==this.sceneList[i]["id"]){
+                    this.sceneIndex=sId;
+                    return;
+                }
             }
         }
     },
@@ -204,6 +148,28 @@ export default {
                 }
             });
         },
+        selectGuide(val){
+            this.guideIndex=val.id;
+            if(val.sceneId){
+                for(var i=0; i<this.sceneList.length; i++){
+                    if(val.sceneId==this.sceneList[i]["id"]) {
+                        this.sceneIndex=val.sceneId;
+                        const guideLocation={
+                                id: val.sceneId,
+                                code: "scene_"+this.sceneList[i]["code"],
+                                locationX: val.locationX,
+                                locationY: val.locationY,
+                                fov: val.locationFov
+                            };
+                        //window.loadpanoscene && window.loadpanoscene(this.sceneList[i]["id"], this.sceneList[i]["code"]);
+                        window.gotoSceneLocation && window.gotoSceneLocation(guideLocation);
+                    }
+                }
+            }
+            else{
+                this.sceneIndex=-1;
+            }
+        },
         addGuide() {
             const projectId = this.$route.params.projectId;
             // 通过任务id获取项目的有关信息
@@ -228,7 +194,7 @@ export default {
                     }
                 }).then(res => {
                     if (res.suceeded) {
-                        this.defualtAddContent(res.data.id);
+                        this.defualtAddGuideContent(res.data.id);
                     }
                 });
             }
@@ -239,11 +205,11 @@ export default {
                 });
             }
         },
-        defualtAddContent(val) {
+        defualtAddGuideContent(val) {
             // 默认添加
             const image = {
                 // 参数
-                content: "upaction", // 内容
+                content: "none", // 内容
                 extra: "static/app/gudiance/up.png", // 附件url
                 hotspotId:val, //
                 title: "引导标识", // 标题
@@ -320,10 +286,6 @@ export default {
         openHotspotConent(val) {
             this.currentItem = val;
             this.shows.isOpenHotspotConent = true;
-        },
-        selectGuideIndex(val){
-            this.guideIndex=val;
-            this.sceneIndex=-1;
         },
         select(index) {
             console.log("111");
@@ -425,10 +387,13 @@ export default {
     mounted() {
         this.initBus();
         window._hban_addGuide = () => {
+            console.log(100);
+            /*
             if (!this.drawerGuideContent) {
                 Bus.$emit("toolbar-hander", { type: "drawerGuideContent", index: 4 });
             }
             this.addGuide();
+            */
         };
         this.getSceneList();
     }

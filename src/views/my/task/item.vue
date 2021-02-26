@@ -8,7 +8,7 @@
 <template>
     <div
         class="task-item-content"
-        @click="goToPedit(item.id, item.project.id, item.name, item.status)"
+        @click="goToPedit(item.id, item.project.id, item.name, item.status,item.blockId)"
     >
         <div class="task-item-title">
             <div class="text">
@@ -53,7 +53,7 @@
 
 <script>
 import "@/widget/lazyLoad";
-import { projectDetail } from "@/model/api";
+import { projectDetail, sceneType, scene } from "@/model/api";
 
 export default {
     props: {
@@ -63,7 +63,7 @@ export default {
         }
     },
     methods: {
-        goToPedit(taskId, projectId, name, status) {
+        goToPedit(taskId, projectId, name, status,blockId) {
             if (status === 2) {
                 return this.$message.error("任务已完成,修改请联系管理员");
             }
@@ -73,7 +73,7 @@ export default {
                 from: "1",
                 name
             };
-            const getDetail = () => {
+            const getProjectDetail = () => {
                 // 通过任务id获取项目的有关信息
                 projectDetail(
                     {
@@ -82,8 +82,8 @@ export default {
                     projectId
                 ).then(res => {
                     if (res.suceeded) {
+                        this.$store.commit("SET_PROJECT_DATA",res.data);
                         const modules = res.data.moduleName;
-                        console.log(res.data.moduleName);
                         params.modules = modules;
                         this.$router.push({
                             name: "panoEditor",
@@ -96,7 +96,64 @@ export default {
                     }
                 });
             };
-            getDetail();
+            /*
+            const getSceneTypeList = () => {
+                // 通过任务id获取项目的有关信息
+                sceneType(
+                    {
+                        type: "GET",
+                        data:{
+                            blockId,
+                            page:1,
+                            size:1000
+                        }
+                    },
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.$store.commit("SET_SCENETYPELIST",res.data.content);
+                        getProjectDetail();
+                    }
+                });
+            };
+             */
+            const getSceneAllList = () => {
+                // 通过任务id获取项目的有关信息
+                scene(
+                    {
+                        type: "GET",
+                        data:{
+                            blockId,
+                            page:1,
+                            size:1000
+                        }
+                    },
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.$store.commit("SET_SCENEALLLIST",res.data.content);
+                        getProjectDetail();
+                    }
+                });
+            };
+            const getSceneList = () => {
+                // 通过任务id获取项目的有关信息
+                scene(
+                    {
+                        type: "GET",
+                        data:{
+                            blockId,
+                            projectId,
+                            page:1,
+                            size:1000
+                        }
+                    },
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.$store.commit("SET_SCENELIST",res.data.content);
+                        getSceneAllList();
+                    }
+                });
+            };
+            getSceneList();
         }
     }
 };

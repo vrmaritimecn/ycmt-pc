@@ -5,6 +5,7 @@ import toolbarStore from "./toolbar";
 import histroyStore from "./histroy";
 import attachmentStore from "./attachment";
 import blockStore from "./block";
+import messageStore from "./message";
 
 Vue.use(Vuex);
 
@@ -14,6 +15,7 @@ export default new Vuex.Store({
         toolbarStore,
         histroyStore,
         attachmentStore,
-        blockStore
+        blockStore,
+        messageStore
     }
 });

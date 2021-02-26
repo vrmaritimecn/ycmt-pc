@@ -1,4 +1,4 @@
-<template>
+r<template>
     <component
         :is="defaultTabName"
         ref="tab-child"

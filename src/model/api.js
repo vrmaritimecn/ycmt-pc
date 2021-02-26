@@ -33,6 +33,8 @@ export const addComment = data => request(`${baseUrl}/comment`, data);
 
 export const sceneType = data => request(`${baseUrl}/sceneType`, data);
 
+export const scene = data => request(`${baseUrl}/scene`, data);
+
 export const taskDetail = (data, url) => request(`${baseUrl}/task/${url}`, data);
 
 export const projectDetail = (data, url) => request(`${baseUrl}/project/${url}`, data);
@@ -51,6 +53,6 @@ export const youdao = (data, url) => request(`${baseUrl}/youdao/tts/${url}`, dat
 
 export const appConst = data => request(`${baseUrl}/appConst/all`, data);
 
-
+export const block = data => request(`${baseUrl}/block`, data);
 
 

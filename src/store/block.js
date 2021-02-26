@@ -1,44 +1,56 @@
 const state = {
+    enterpriseId:0,
+    departmentId:0,
     blockIndex: 0,
     moduleIndex: 0,
     classIndex: -1,
+    classList:[],
     blockId: 0,
     moduleId: 0,
+    moduleList:[],
     classId: -1,
-    userblock: {},
+    userId:-1,
+    userblock: [],
+    userState:false,
+    userBlockList: {},
     platformblock: {},
+    platformBlockList: {},
     platformState: 1,
-    platformClass: []
+    platformClass: [],
+    moduleConst:[],
+    projectList:[],
+    sceneId:-1,
 };
 
 const mutations = {
-    SET_USERBLOCK_INFO(state, { plylaod }) {
+    SETENTERPRISEID(state, index) {
+        state.enterpriseId = index
+    },
+    SETDEPARTMENTID(state, index) {
+        state.departmentId = index
+    },
+    SET_USERBLOCKLIST_INFO(state, {plylaod}) {
+        console.log("用户block", plylaod);
+        state.userBlockList = plylaod;
+    },
+    SET_USERBLOCK_INFO(state, plylaod) {
         state.userblock = plylaod;
     },
-    SET_PLATFORMBLOCK_INFO(state, { plylaod }) {
+    SET_PLATFORMBLOCK_INFO(state, plylaod) {
         state.platformblock = plylaod;
     },
-    SET_PLATFORMCLASS_INFO(state, { plylaod }) {
+    SET_PLATFORMBLOCKLIST_INFO(state, plylaod) {
+        state.platformBlockList = plylaod;
+    },
+    SET_PLATFORMCLASS_INFO(state, plylaod) {
         state.platformClass = plylaod;
     },
     SETBLOCKID(state, index) {
-
         state.blockId = index
-        if(state.platformState == 0)
-        {
-            console.log("aa");
-            for(var i=0; i<state.userblock["blocks"].length; i++) {
-                if (state.userblock["blocks"][i]["id"] == state.blockId) {
-                    state.moduleId=state.userblock["blocks"][i]["moduleList"][0]["id"];
-                }
-            }
-        }
-        else
-        {
-            console.log(111);
-            console.log(state.platformblock[0]["id"])
-            state.moduleId = state.platformblock[0]["id"];
-        }
+        state.classId = -1;
+    },
+    SETMODULELIST(state, plylaod) {
+        state.moduleList = plylaod;
         state.classId = -1;
     },
     SETMODULEID(state, index) {
@@ -48,50 +60,46 @@ const mutations = {
     SETCLASSID(state, index) {
         state.classId = index;
     },
-    SETUSERSTATE(state){
-        state.platformState=0;
+    SETCLASSLIST(state, plylaod) {
+        state.classList = plylaod;
     },
-    SETPLATFORMSTATE(state){
-        state.platformState=1;
+    SET_USERID(state,index){
+        state.userId=index
+    },
+    SETPLATFORMSTATUS(state){
+        state.userState=false;
+    },
+    SET_MODULECONST(state, plylaod){
+        state.moduleConst=plylaod
+    },
+    SETPROJECTLIST(state, plylaod){
+        state.projectList=plylaod
+    },
+    SETSCENEID(state,index){
+        state.sceneId=index
     }
-
 };
 
 const getters ={
-    getUserBlockResource(state)
-    {
-        return state.userblock["blocks"]
+    getEnterpriseId(state){
+        return state.enterpriseId
     },
-    getUserModuleResource(state)
-    {
-        for(var i=0; i<state.userblock["blocks"].length; i++) {
-            if (state.userblock["blocks"][i]["id"] == state.blockId) {
-                return state.userblock["blocks"][i]["moduleList"]
-            }
-        }
+    getDepartmentId(state){
+        return state.departmentId
     },
-    getUserClassResource(state)
-    {
-        for(var i=0; i<state.userblock["blocks"].length; i++) {
-            if (state.userblock["blocks"][i]["id"] == state.blockId) {
-                for(var j=0; j<state.userblock["blocks"][i]["moduleList"].length; j++)
-                {
-                    if(state.userblock["blocks"][i]["moduleList"][j]["id"] == state.moduleId)
-                    {
-                        return state.userblock["blocks"][i]["moduleList"][j]["classList"]
-                        console.log(state.userblock["blocks"][i]["moduleList"][j]["classList"]);
-                    }
-                }
-            }
-        }
+    getUserBlockList(state){
+        return state.userBlockList
     },
-    getPlatformResource(state)
-    {
-        return state.platformblock
+    getPlatformBlockList(state){
+        return state.platformBlockList
     },
     getBlockId(state)
     {
         return state.blockId
+    },
+    getModuleList(state)
+    {
+        return state.moduleList
     },
     getModuleId(state)
     {
@@ -101,15 +109,29 @@ const getters ={
     {
         return state.classId
     },
-    getPlatformState(state)
+    getClassList(state)
     {
-        return state.platformState
+        return state.classList
+    },
+    getUserId(state){
+        return state.userId
+    },
+    getUserStatus(state)
+    {
+        return state.userState
     },
     getPlatformClassList(state)
     {
-        console.log("platformClass");
-        console.log(state.platformClass);
         return state.platformClass
+    },
+    getModuleConst(state) {
+        return state.moduleConst
+    },
+    getProjectList(state) {
+        return state.projectList
+    },
+    getSceneId(state) {
+        return state.sceneId
     }
 };
 

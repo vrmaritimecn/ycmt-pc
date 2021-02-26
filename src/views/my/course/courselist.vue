@@ -40,32 +40,27 @@
         methods:{
             getCourseList() {
                 this.loading = true;
-                this.projectlist = []; // 清空
-                let cid= this.$store.getters.getClassId;
-                if(cid<0)
-                {
-                    cid="";
-                }
+                let list = [];
                 project({
                     type: "GET",
                     data: {
                         page: 1,
                         size: 100000,
-                        moduleId: this.$store.getters.getModuleId,
-                        classId: cid,
-                        blockId: this.$store.getters.getBlockId,
-                        publishFlg: 1
+                        moduleId: this.mId,
+                        classId: this.cId<0? "" : this.cId,
+                        blockId: this.bId,
+                        publishFlg: 1,
+                        publicFlg: this.$store.getters.getUserStatus? "" : 1
                     }
                 }).then(res => {
                     if (res.suceeded) {
                         this.loading = false;
                         const { content, total } = res.data;
-                        this.projectlist = this.projectlist.concat(content || {});
-                        //console.log(this.projectlist);
+                        list = list.concat(content || {});
+                        this.$store.commit("SETPROJECTLIST",list);
                     }
                 });
             },
-
             goDetail({ id, name }) {
                 if (!window.localStorage.getItem("authorization")) {
                     return this.$store.commit("TOGGLE_LOGIN");
@@ -86,35 +81,29 @@
                 });
             }
         },
-
-        watch: {
-/*
-            $route: function() {
-                this.getCourseList();
-            }
-*/
-            'getModuleId': function() {
-                this.getCourseList();
-            },
-            'getClassId': function() {
-                if(this.$store.state.classId !=-1)
-                {
-                    this.getCourseList();
-                    console.log('getClassId');
-                }
-            }
-
-        },
         computed:{
+            bId(){
+                return this.$store.getters.getBlockId
+            },
+            mId(){
+                return this.$store.getters.getModuleId
+            },
+            cId(){
+                return this.$store.getters.getClassId
+            },
             ...mapGetters([
-                'getModuleId',
-                'getClassId'
+                "getClassList",
+                "getProjectList"
             ])
         },
-        mounted() {
-            this.getCourseList();
+        watch:{
+            getClassList:function() {
+                this.getCourseList();
+            },
+            getProjectList: function() {
+                this.projectlist=this.$store.getters.getProjectList
+            }
         }
-
     };
 </script>
 
@@ -152,10 +141,14 @@
         overflow: hidden;
         vertical-align:middle;
         position:relative;
-    }
-    .image {
-        width: 100%;
-        display: block;
+        .image {
+            position: absolute;
+            width: 100%;
+            display: block;
+            left:50%;
+            top:50%;
+            transform: translate(-50%,-50%);
+        }
     }
 
     .tip-span-0{
@@ -175,6 +168,8 @@
         display: block;
         height: 30px;
         vertical-align:middle;
+        font-size: 14px;
+        font-weight: bold;
     }
     .clearfix:before,
     .clearfix:after {
