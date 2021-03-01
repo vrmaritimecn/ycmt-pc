@@ -267,8 +267,10 @@ export default {
                     const id = this.$store.state.toolbarStore.id;
                     const code = this.$store.state.toolbarStore.code;
                     console.log(this.$store.state.toolbarStore, "toolbar");
+                    var k = document.getElementById("kr");
+                    k.call("loadscene("+ k.get("xml.scene") +",null, MERGE|KEEPVIEW, BLEND(1));");
                     this.getSceneList();
-                    window.loadpanoscene && window.loadpanoscene(res.data.id, res.data.code);
+                    //window.loadpanoscene && window.loadpanoscene(res.data.id, res.data.code);
                     this.$message({
                         type: "success",
                         message: "新增成功!"
@@ -285,6 +287,8 @@ export default {
                 .then(() => {
                     hotspotDetail({ type: "delete" }, val.id).then(res => {
                         if (res.suceeded) {
+                            var k = document.getElementById("kr");
+                            k.call("loadscene("+ k.get("xml.scene") +",null, MERGE|KEEPVIEW, BLEND(1));");
                             this.getSceneList();
                             this.$message({
                                 type: "success",

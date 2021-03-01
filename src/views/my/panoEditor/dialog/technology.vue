@@ -6,8 +6,6 @@
             <img src="../images/icon_en.png"/>
             <img src="../images/icon_pro.png"/>
             <img src="../images/icon_ser.png"/>
-            <img src="../images/icon_link.png"/>
-            <img src="../images/icon_contact.png"/>
             <img src="../images/icon_pano.png" @click="close"/>
         </div>
         <div class="content">

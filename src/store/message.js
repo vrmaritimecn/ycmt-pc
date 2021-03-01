@@ -52,7 +52,9 @@ const mutations = {
     },
     TOGGLESCENETHUMB(state){
         state.isOpenSceneThumb=!state.isOpenSceneThumb
-        console.log("isOpenSceneThumb");
+    },
+    RESETSCENETHUMB(state){
+        state.isOpenSceneThumb=false
     }
 };
 

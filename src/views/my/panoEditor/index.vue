@@ -74,7 +74,8 @@
         -->
         <!-- 右侧工具条 -->
 
-        <Toolbar v-if="isShowToobar"></Toolbar>
+        <!--Toolbar v-if="isShowToobar"></Toolbar-->
+        <Toolbar></Toolbar>
     </div>
 </template>
 
@@ -198,7 +199,6 @@ export default {
             "getIsOpenMessage",
             "getProjectData",
             "getMessageList",
-            "getSceneId",
             "getIsOpenOrg"
         ])
     },
@@ -225,31 +225,6 @@ export default {
                 container.scrollTop = container.scrollHeight;
             })
         },
-        /*
-        getSceneId:function() {
-            var sId=this.$store.getters.getSceneId
-            const projectId = this.$route.params.projectId;
-            this.loading = true;
-            hotspot({
-                type: "get",
-                data: {
-                    projectId,
-                    sceneId: sId,
-                    type: "DEFAULT",
-                    page: 1,
-                    size: 1000
-                }
-            }).then(res => {
-                if (res.suceeded) {
-                    this.loading = false;
-                    const list = res.data.content || [];
-                    this.$store.commit("SET_HOTSPOTLIST", list);
-                    this.renderHotspot(list);
-                }
-            });
-        },
-
-         */
         getIsOpenOrg:function() {
             console.log("getIsOpenOrg已经改变")
             this.mainSite.isOpenOrganization=this.$store.getters.getIsOpenOrg
@@ -438,6 +413,7 @@ export default {
             console.log("loadpanoscene('%FIRSTXML%/xmls/block_id_"+ pData.blockPanoPath +"/panos.xml',scene_"+ data.code +");");
         },
         getSceneId(){
+            /*
             var k = document.getElementById("kr");
             var code=k.get("xml.scene")
             for(var i=0; i<this.sceneAllList.length; i++){
@@ -445,6 +421,18 @@ export default {
                     this.reLoadScene();
                     this.$store.commit("SETSCENEID",this.sceneAllList[i]["id"])
                     return this.sceneAllList[i]["id"];
+                }
+            }
+             */
+            var k = document.getElementById("kr");
+            var code=k.get("xml.scene")
+            for(var i=0; i<this.sceneAllList.length; i++){
+                var tCode="scene_"+this.sceneAllList[i]["code"];
+                if(tCode==code) {
+                    console.log(code);
+                    this.reLoadScene(this.sceneAllList[i]["id"]);
+                    this.$store.commit("SETSCENEID",this.sceneAllList[i]["id"])
+                    return;
                 }
             }
         },
@@ -481,53 +469,24 @@ export default {
                 var h0H ="hotspot" + hotspotList[i]["code"];
                 var h0B ="hLayer" + hotspotList[i]["code"] + "0B";
                 var h0T ="hLayer" + hotspotList[i]["code"] + "0T";
-                var h01 ="hLayer" + hotspotList[i]["code"] + "01";
-                var h02 ="hLayer" + hotspotList[i]["code"] + "02";
-                var h03 ="hLayer" + hotspotList[i]["code"] + "03";
-                var h04 ="hLayer" + hotspotList[i]["code"] + "04";
-                var h0C ="hLayer" + hotspotList[i]["code"] + "0C";
                 var hH = hotspotList[i]["locationX"];
                 var hV = hotspotList[i]["locationY"];
 
                 kstr=kstr + "addhotspot("+ h0H +");";
-                kstr=kstr + "hotspot["+ h0H +"].loadstyle(hotspotAni);";
+                kstr=kstr + "hotspot["+ h0H +"].loadstyle(hotspotTarget);";
                 kstr=kstr + "set(hotspot["+ h0H +"].ath,"+ hH +");";
                 kstr=kstr + "set(hotspot["+ h0H +"].atv,"+ hV +");";
                 kstr=kstr + "set(hotspot["+ h0H +"].onclick, 'switch(layer["+ h0B +"].visible);');";
 
                 kstr=kstr + "addlayer("+ h0B +");";
                 kstr=kstr + "set(layer["+ h0B +"].parent,hotspot["+ h0H +"]);";
-                kstr=kstr + "layer["+ h0B +"].loadstyle(hIconBg);";
+                kstr=kstr + "layer["+ h0B +"].loadstyle(hotspotLine);";
 
                 kstr=kstr + "addlayer("+ h0T +");";
                 kstr=kstr + "set(layer["+ h0T +"].html,'"+ hotspotList[i]["title"] +"');";
                 kstr=kstr + "set(layer["+ h0T +"].parent,layer["+ h0B +"]);";
-                kstr=kstr + "layer["+ h0T +"].loadstyle(hText);";
+                kstr=kstr + "layer["+ h0T +"].loadstyle(hotspotText);";
                 kstr=kstr + "set(layer["+ h0T +"].onclick,js(_show_content("+ hotspotList[i]["id"]+")));";
-
-                kstr=kstr + "addlayer("+ h01 +");";
-                kstr=kstr + "set(layer["+ h01 +"].parent,layer["+ h0B +"]);";
-                kstr=kstr + "layer["+ h01 +"].loadstyle(hIcon01);";
-
-                kstr=kstr + "addlayer("+ h02 +");";
-                kstr=kstr + "set(layer["+ h02 +"].parent,layer["+ h0B +"]);";
-                kstr=kstr + "layer["+ h02 +"].loadstyle(hIcon02);";
-                kstr=kstr + "set(layer["+ h02 +"].onclick, js(alert('1')););";
-
-                kstr=kstr + "addlayer("+ h03 +");";
-                kstr=kstr + "set(layer["+ h03 +"].parent,layer["+ h0B +"]);";
-                kstr=kstr + "layer["+ h03 +"].loadstyle(hIcon03);";
-                kstr=kstr + "set(layer["+ h03 +"].onclick, js(alert('1')););";
-
-                kstr=kstr + "addlayer("+ h04 +");";
-                kstr=kstr + "set(layer["+ h04 +"].parent,layer["+ h0B +"]);";
-                kstr=kstr + "layer["+ h04 +"].loadstyle(hIcon04);";
-                kstr=kstr + "set(layer["+ h04 +"].onclick, js(alert('1')););";
-
-                kstr=kstr + "addlayer("+ h0C +");";
-                kstr=kstr + "set(layer["+ h0C +"].parent,layer["+ h0B +"]);";
-                kstr=kstr + "set(layer["+ h0C +"].onclick, js(alert('1')););";
-                kstr=kstr + "layer["+ h0C +"].loadstyle(hIconBgClose);";
             }
             k.call(kstr);
         },
@@ -564,14 +523,12 @@ export default {
         clearInterval(this.timer);
     },
     mounted() {
-        //var pData=this.$store.getters.getProjectData;
-        //var sList=this.$store.getters.getSceneList;
-        //this.projectName=pData.name;
-        //this.projectId=pData.id;
-        //this.initPano(pData,sList);
+        this.$store.commit("RESETSCENETHUMB");
         this.initSceneAllList();
         this.initWebSocket();
         window._ycmt_setSceneId = () => {
+            this.getSceneId();
+            /*
             var k = document.getElementById("kr");
             var code=k.get("xml.scene")
             for(var i=0; i<this.sceneAllList.length; i++){
@@ -583,8 +540,7 @@ export default {
                     return;
                 }
             }
-            //const getScenePara = window.getScenePara && window.getScenePara();
-            //this.$store.commit("SETSCENEID",getScenePara[4])
+             */
         };
 
         window._ycmt_mainContent = () => {

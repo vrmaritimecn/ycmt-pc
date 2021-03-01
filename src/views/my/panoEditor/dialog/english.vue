@@ -2,11 +2,6 @@
     <div class="english_div">
         <div class="title">
             <span>云船码头专业英语训练卡</span>
-            <!--img src="../images/icon_en.png"/>
-            <img src="../images/icon_pro.png"/>
-            <img src="../images/icon_ser.png"/>
-            <img src="../images/icon_link.png"/>
-            <img src="../images/icon_contact.png"/-->
             <img src="../images/icon_pano.png" @click="close"/>
         </div>
         <div class="content">

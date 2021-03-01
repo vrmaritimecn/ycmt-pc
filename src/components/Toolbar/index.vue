@@ -104,6 +104,7 @@ export default {
             else if(this.toolbarList[index]["call"]){
                 const call=this.toolbarList[index]["call"];
                 this.$store.commit(call);
+                this.$store.commit("SETTOGGLETOOLBR", "none");
             }
 
         },
