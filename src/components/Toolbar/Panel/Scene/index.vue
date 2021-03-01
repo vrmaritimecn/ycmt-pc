@@ -57,7 +57,7 @@
 
 import { mapState } from "vuex";
 import { mapGetters } from "vuex";
-import { hotspot, hotspotDetail, projectDetail, project } from "@/model/api";
+import { hotspot, hotspotDetail, projectDetail, project, scene } from "@/model/api";
 import Bus from "@/components/bus/index.js";
 import editAttachmentDialog from "./editScene";
 import AttachmentComponent from "@/components/Attachment";
@@ -78,6 +78,7 @@ export default {
             isOpenEditHotContent: false,
             engType: false, // 是否专业英语
             orderList: [],
+            sceneAllList:[]
         };
     },
     components: {
@@ -132,7 +133,23 @@ export default {
         },
         addScene() {
             // 新增场景
-            const sceneId = window.getScenePara && window.getScenePara()[4];
+            const getScenePara=[]
+            var k = document.getElementById("kr");
+            var code=k.get("xml.scene")
+            getScenePara[0]=k.get("xml.scene");
+            getScenePara[1]=k.get("view.fov");
+            getScenePara[2]=k.get("view.hlookat");
+            getScenePara[3]=k.get("view.vlookat");
+            for(var i=0; i<this.sceneAllList.length; i++){
+                var tempC="scene_"+this.sceneAllList[i]["code"];
+                if(tempC==code) {
+                    //this.reLoadScene();
+                    //this.$store.commit("SETSCENEID",sceneAllList[i]["id"])
+                    getScenePara[4]=this.sceneAllList[i]["id"];
+                }
+            }
+            //const sceneId = window.getScenePara && window.getScenePara()[4];
+            const sceneId=getScenePara[4]
             const isScene = this.attachmentList.find(item => sceneId === item.id);
             const sceneIds = this.attachmentList.map(item => item.id);
             sceneIds.push(sceneId);
@@ -142,7 +159,9 @@ export default {
                     {
                         type: "post",
                         data: {
-                            projectId,
+
+                            sceneId: getScenePara[4],
+                            //projectId,
                             sceneIds: [sceneId]
                         }
                     },
@@ -158,6 +177,23 @@ export default {
                     message: "已经在场景列表中了"
                 });
             }
+        },
+        getSceneAllList(){
+            var pData=this.$store.getters.getProjectData;
+            scene({
+                    type: "GET",
+                    data:{
+                        blockId: pData.blockId,
+                        page:1,
+                        size:1000
+                    }
+                },
+            ).then(res => {
+                if (res.suceeded) {
+                    this.sceneAllList=res.data.content;
+                    this.$store.commit("SET_SCENEALLLIST",res.data.content);
+                }
+            });
         },
         deleteScene(val) {
             this.$confirm(`此操作仅删除${val.name}场景，场景标签将被暂时保留, 是否继续?`, "提示", {
@@ -202,7 +238,20 @@ export default {
             window.backFindHotspot && backFindHotspot(getScenePara[0], val.locationX, val.locationY);
         },
         addHotspot() {
-            const getScenePara = window.getScenePara && window.getScenePara();
+            //const getScenePara = window.getScenePara && window.getScenePara();
+            const getScenePara=[]
+            var k = document.getElementById("kr");
+            var code=k.get("xml.scene")
+            getScenePara[0]=k.get("xml.scene");
+            getScenePara[1]=k.get("view.fov");
+            getScenePara[2]=k.get("view.hlookat");
+            getScenePara[3]=k.get("view.vlookat");
+            for(var i=0; i<this.sceneAllList.length; i++){
+                var tempC="scene_"+this.sceneAllList[i]["code"];
+                if(tempC==code) {
+                    getScenePara[4]=this.sceneAllList[i]["id"];
+                }
+            }
             const projectId = this.$route.params.projectId;
             const data = {
                 locationFov: getScenePara[1], //场景的视角
@@ -275,7 +324,7 @@ export default {
             this.id = val.id;
             const modules = this.$route.params.modules;
             console.log(val, "data");
-            if (modules && modules === "专业英语") {
+            if (modules && modules === "航运英语") {
                 this.orderList = ["音频", "图片"];
                 this.engType = true;
                 this.isOpenEditHotContent = true;
@@ -382,6 +431,7 @@ export default {
         }
     },
     mounted() {
+        this.getSceneAllList();
         window._hban_addScene = () => {
             if (!this.drawerHotContent) {
                 Bus.$emit("toolbar-hander", { type: "drawerHotContent", index: 3 });

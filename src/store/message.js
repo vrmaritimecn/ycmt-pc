@@ -1,12 +1,14 @@
 const state = {
     isOpenMessage:false,
+    isOpenSceneThumb:false,
     messageList:[],
     projectId:-1,
     projectData:[],
     sceneList:[],
     hotspotList:[],
     sceneTypeList:[],
-    sceneAllList:[]
+    sceneAllList:[],
+    isOpenOrg:false
 };
 
 const mutations = {
@@ -41,9 +43,23 @@ const mutations = {
     SET_SCENEALLLIST(state, plylaod) {
         state.sceneAllList=plylaod
     },
+    ISOPENORG(state) {
+        state.isOpenOrg=true;
+    },
+    ISCLOSEORG(state) {
+        state.isOpenOrg=false;
+        console.log(state.isOpenOrg)
+    },
+    TOGGLESCENETHUMB(state){
+        state.isOpenSceneThumb=!state.isOpenSceneThumb
+        console.log("isOpenSceneThumb");
+    }
 };
 
 const getters ={
+    getIsOpenSceneThumb(state){
+        return state.isOpenSceneThumb
+    },
     getMessageList(state){
         return state.messageList
     },
@@ -67,6 +83,9 @@ const getters ={
     },
     getSceneAllList(){
         return state.sceneAllList
+    },
+    getIsOpenOrg(){
+        return state.isOpenOrg
     }
 };
 

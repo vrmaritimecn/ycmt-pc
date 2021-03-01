@@ -65,6 +65,18 @@ export default {
                     icon: "icontubiaoweb-39",
                     type: "",
                     call:"SETISOPENMESSAGE"
+                },
+                {
+                    text: "用户点评",
+                    icon: "icontubiaoweb-13",
+                    type: "",
+                    call:"SETISOPENMESSAGE"
+                },
+                {
+                    text: "场景地图",
+                    icon: "icontubiaoweb-41",
+                    type: "",
+                    call:"TOGGLESCENETHUMB"
                 }
             ],
             currentIndex: null

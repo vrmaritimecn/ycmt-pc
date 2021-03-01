@@ -1,6 +1,49 @@
 <template>
     <div class="p_editor_container" :style="{ paddingRight: isShowToobar ? '46px' : '0px' }">
-        <div id="p_editor" :style="{ width: isOpenedWidth.width }" ></div>
+
+        <div :style="{ width: isOpenedWidth.width }">
+            <div id="p_editor" >
+                <div id="p_content" v-if="isShowContent" >
+                    <company v-if="mainSite.isOpenCompany" :attachmentContent="attachmentContent" @close_content="close_content"></company>
+                    <organization v-if="mainSite.isOpenOrganization" :attachmentContent="attachmentContent" @close_content="close_content"></organization>
+                    <technology v-if="mainSite.isOpenTechnology" :hotspotContent="hotspotContent" @close_content="close_content"></technology>
+                    <english v-if="mainSite.isOpenEnglish" :hotspotContent="hotspotContent" @close_content="close_content"></english>
+                    <archives v-if="mainSite.isOpenArchives" :hotspotContent="hotspotContent" @close_content="close_content"></archives>
+                    <inspection v-if="mainSite.isOpenInspection" :hotspotContent="hotspotContent" @close_content="close_content"></inspection>
+                </div>
+                <div class="chat_outer_div" v-show="isOpenMessage">
+                    <div class="chat_inner_div">
+                        <div class="chat_header" @click="closeMessage">您正在对“{{projectName}}”开展讨论</div>
+                        <div class="chat_main" id="_message_container">
+                            <div :class="item.userId==userId && item.projectId==messageItem.projectId? 'chat_div_right':'chat_div_left'" v-for="item in messageList">
+                                <img class="chat_div_icon" :src="globalConfig.imagePath + item.userAvatar" width="100%" height="100%"/>
+                                <span class="chat_div_info" @click="findMessageLocation(item)">
+                            <img :src="globalConfig.imagePath + item.imageUrl" v-if="item.imageUrl"/>
+                            <p>{{item.message}}</p>
+                        </span>
+
+                            </div>
+                        </div>
+                        <div class="chat_footer">
+                            <input  v-model="messageItem.message"></input>
+                            <img src="./images/icon_sent.png" @click="sendMessage"/>
+                            <el-upload
+                                    class="upload-demo"
+                                    :action="uploadUrl"
+                                    :show-file-list="false"
+                                    :on-success="handleAvatarSuccess"
+                                    :before-upload="beforeAvatarUpload">
+                                <img src="./images/icon_pic.png"/>
+                            </el-upload>
+                            <img src="./images/icon_mic.png" @click="cleanMessage"/>
+                        </div>
+                    </div>
+                </div>
+                <div class="scene_content" v-show="isOpenSceneThumb">
+                    <span v-for="item in sceneAllList" @click="gotoScene(item)">{{item.name}}</span>
+                </div>
+            </div>
+        </div>
         <!--
         <div style="z-index:100; width:100%; position: absolute; top:5px; text-align: center;" visible="false"><el-button size="mini" type="warning">警告按钮</el-button></div>
         <div style="z-index:100; width:120px; position: absolute; bottom:5px; left:5px; text-align: center;" visible="false">
@@ -31,59 +74,38 @@
         -->
         <!-- 右侧工具条 -->
 
-        <div class="chat_outer_div" v-show="isOpenMessage">
-            <div class="chat_inner_div">
-                <div class="chat_header" @click="closeMessage">您正在对“{{projectName}}”开展讨论</div>
-                <div class="chat_main" id="_message_container">
-                    <div :class="item.userId==userId && item.projectId==messageItem.projectId? 'chat_div_right':'chat_div_left'" v-for="item in messageList">
-                        <img class="chat_div_icon" :src="globalConfig.imagePath + item.userAvatar" width="100%" height="100%"/>
-                        <span class="chat_div_info" @click="findMessageLocation(item)">
-                            <img :src="globalConfig.imagePath + item.imageUrl" v-if="item.imageUrl"/>
-                            <p>{{item.message}}</p>
-                        </span>
-
-                    </div>
-                </div>
-                <div class="chat_footer">
-                    <input  v-model="messageItem.message"></input>
-                    <img src="./images/icon_sent.png" @click="sendMessage"/>
-                    <el-upload
-                            class="upload-demo"
-                            :action="uploadUrl"
-                            :show-file-list="false"
-                            :on-success="handleAvatarSuccess"
-                            :before-upload="beforeAvatarUpload">
-                        <img src="./images/icon_pic.png"/>
-                    </el-upload>
-                    <img src="./images/icon_mic.png" @click="cleanMessage"/>
-                </div>
-            </div>
-        </div>
-
         <Toolbar v-if="isShowToobar"></Toolbar>
     </div>
 </template>
 
 <script>
 import Toolbar from "@/components/Toolbar";
-import SceneList from "@/components/Toolbar/Panel/Scene/sceneList";
-import GuideList from "@/components/Toolbar/Panel/Guide/guideList.vue";
+import company from "./dialog/company.vue";
+import organization from "./dialog/organization.vue";
+import technology from "./dialog/technology.vue";
+import archives from "./dialog/archives.vue";
+import english from "./dialog/english.vue";
+import inspection from "./dialog/inspection.vue";
+//import SceneList from "@/components/Toolbar/Panel/Scene/sceneList";
+//import GuideList from "@/components/Toolbar/Panel/Guide/guideList.vue";
 import { mapGetters } from "vuex";
 import SockJS from  'sockjs-client';
 import Stomp from 'stompjs';
-import { hotspot } from "@/model/api";
+import { hotspot, hotspotContent, scene } from "@/model/api";
 import utils from "@/widget/utils";
 
 export default {
     data() {
         return {
             isOpenMessage : false,
+            //isOpenSceneThumb: false,
             stompClient:'',
             timer:'',
             text:"",
             isSend:false,
             projectId:"",
             projectName:"",
+            projectModuleName:"",
             sceneId:"",
             messageItem:{
                 userId:"",
@@ -97,31 +119,189 @@ export default {
                 locationFov:"",
                 ImageUrl:""
             },
-            messageDetail:{}
+            messageDetail:{},
+            isShowContent:false,
+            mainSite:{
+                isOpenCompany:false,
+                isOpenOrganization:false,
+                isOpenTechnology:false,
+                isOpenEnglish:false,
+                isOpenArchives:false,
+                isOpenInspection:false
+            },
+            hotspotContent:[],
+            attachmentContent:[],
+            sceneAllList:[]
         };
     },
 
     components: {
         Toolbar,
-        SceneList,
-        GuideList
+        //SceneList,
+        //GuideList,
+        company,
+        organization,
+        technology,
+        english,
+        archives,
+        inspection
+    },
+    computed: {
+        isOpenOrg:function(){
+          return  this.$store.getters.getIsOpenOrg;
+        },
+        isOpenedWidth: function() {
+            const data = this.$store.state.toolbarStore;
+            const toolbarList = [
+                "drawerAttachment",
+                "drawerIntro",
+                "drawerPerson",
+                "drawerHotContent",
+                "drawerGuideContent"
+            ];
+            const isOpenListValue = toolbarList.map(item => data[item]).some(item => item);
+
+            return {
+                width: `calc(100% - ${
+                    isOpenListValue
+                        ? this.isOpenGuideScene
+                        ? "600px"
+                        : "296px"
+                        : "0px"
+                })`
+            };
+        },
+        isOpenScene: function() {
+            return this.$store.state.toolbarStore.openScene;
+        },
+        uploadUrl() {
+            const url = `/api/file/upload?fileName=default&relatedId=${this.$route.params.projectId}&fileType=PROJECT_IMAGE`;
+            return url;
+        },
+        isOpenGuideScene: function() {
+            return this.$store.state.toolbarStore.openGuideScene;
+        },
+        isOpenSceneThumb:function(){
+            return this.$store.getters.getIsOpenSceneThumb
+        },
+        isShowToobar: function() {
+            // 1 我的任务过 2课件过来
+            return this.$route.params.from === "1";
+        },
+        userId(){
+            return this.$store.getters.getUserId
+        },
+        messageList(){
+            return this.$store.getters.getMessageList
+        },
+        ...mapGetters([
+            "getIsOpenMessage",
+            "getProjectData",
+            "getMessageList",
+            "getSceneId",
+            "getIsOpenOrg"
+        ])
+    },
+    watch:{
+        getIsOpenMessage:function(){
+            this.isOpenMessage=this.$store.getters.getIsOpenMessage
+            console.log(this.isOpenMessage)
+            if(this.isOpenMessage){
+            }
+            else{
+                //this.disconnect();
+            }
+        },
+        getProjectData:function() {
+            var pData=this.$store.getters.getProjectData;
+            console.log(pData);
+            this.projectName=pData.name;
+            this.projectId=pData.id;
+        },
+        getMessageList:function() {
+            this.$nextTick(() => {
+                var container = this.$el.querySelector("#_message_container");
+                console.log(container);
+                container.scrollTop = container.scrollHeight;
+            })
+        },
+        /*
+        getSceneId:function() {
+            var sId=this.$store.getters.getSceneId
+            const projectId = this.$route.params.projectId;
+            this.loading = true;
+            hotspot({
+                type: "get",
+                data: {
+                    projectId,
+                    sceneId: sId,
+                    type: "DEFAULT",
+                    page: 1,
+                    size: 1000
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    this.loading = false;
+                    const list = res.data.content || [];
+                    this.$store.commit("SET_HOTSPOTLIST", list);
+                    this.renderHotspot(list);
+                }
+            });
+        },
+
+         */
+        getIsOpenOrg:function() {
+            console.log("getIsOpenOrg已经改变")
+            this.mainSite.isOpenOrganization=this.$store.getters.getIsOpenOrg
+        }
     },
     methods: {
-        initPano(a1,a2) {
+        initModule(pm){
+            if(pm=="船商在线"){
+                var pData=this.$store.getters.getProjectData;
+                this.attachmentContent=pData.attachments;
+                console.log(this.attachmentContent);
+                this.mainSite.isOpenCompany=true
+                this.isShowContent=true
+            }
+            if(pm=="机构直通车"){
+                var pData=this.$store.getters.getProjectData;
+                this.attachmentContent=pData.attachments;
+                console.log(this.attachmentContent);
+                this.mainSite.isOpenOrganization=true
+                this.isShowContent=true
+            }
+            if(pm=="技术热点"){
+                this.mainSite.isOpenTechnology=true
+            }
+            if(pm=="航运英语"){
+                this.mainSite.isOpenEnglish=true
+            }
+            if(pm=="船东宝"){
+                this.mainSite.isOpenArchives=true
+            }
+            if(pm=="远程检查"){
+                this.mainSite.isOpenInspection=true
+            }
+        },
+        initPano(a1,a2,a3) {
             const projectId = this.$route.params.projectId;
             this.$store.commit("SETPROJECTID",projectId);
             this.$nextTick(() => {
                 embedpano({
                     id: "kr",
                     swf: "/pano/tour.swf",
-                    xml: `/pano/${this.isShowToobar ? "enter" : "main_c"}.xml`,
+                    xml: `/pano/${this.isShowToobar ? "enter" : "enter"}.xml`,
                     target: "p_editor",
                     html5: "prefer",
                     mobilescale: 1.0,
                     passQueryParameters: true,
-                    onready: buildProject(a1,a2)
+                    onready: buildProject(a1,a2,a3)
                 });
             });
+        },
+        close_content(){
+          this.isShowContent=false;
         },
         initWebSocket(){
             this.connection();
@@ -189,6 +369,9 @@ export default {
         closeMessage(){
             this.$store.commit("RESETISOPENMESSAGE");
         },
+        toggleSceneThumb(){
+            this.isOpenSceneThumb=!this.isOpenSceneThumb;
+        },
         findMessageLocation(item){
             console.log(item);
             var k = document.getElementById("kr");
@@ -222,6 +405,72 @@ export default {
             }
             return isJPG && isLt2M;
         },
+        initSceneAllList(){
+            console.log("___scene")
+            console.log("___scene")
+            var pData=this.$store.getters.getProjectData;
+            var sList=this.$store.getters.getSceneList;
+            this.projectName=pData.name;
+            this.projectId=pData.id;
+            scene(
+                {
+                    type: "GET",
+                    data:{
+                        blockId: pData.blockId,
+                        page:1,
+                        size:1000
+                    }
+                },
+            ).then(res => {
+                if (res.suceeded) {
+                    this.sceneAllList=res.data.content;
+                    this.$store.commit("SET_SCENEALLLIST",res.data.content);
+                    this.initPano(pData,sList,this.sceneAllList);
+                    this.initModule(pData.moduleName);
+                }
+            });
+        },
+        gotoScene(data){
+            console.log(data);
+            var k = document.getElementById("kr");
+            var pData=this.$store.getters.getProjectData;
+            k.call("loadpanoscene('%FIRSTXML%/xmls/block_id_"+ pData.blockPanoPath +"/panos.xml',scene_"+ data.code +");");
+            console.log("loadpanoscene('%FIRSTXML%/xmls/block_id_"+ pData.blockPanoPath +"/panos.xml',scene_"+ data.code +");");
+        },
+        getSceneId(){
+            var k = document.getElementById("kr");
+            var code=k.get("xml.scene")
+            for(var i=0; i<this.sceneAllList.length; i++){
+                if(this.sceneAllList[i]["code"]==code) {
+                    this.reLoadScene();
+                    this.$store.commit("SETSCENEID",this.sceneAllList[i]["id"])
+                    return this.sceneAllList[i]["id"];
+                }
+            }
+        },
+        reLoadScene(val) {
+            const getScenePara = window.getScenePara && window.getScenePara();
+            var sId=val;
+            const projectId = this.$route.params.projectId;
+            this.loading = true;
+            hotspot({
+                type: "get",
+                data: {
+                    projectId,
+                    sceneId: sId,
+                    type: "DEFAULT",
+                    page: 1,
+                    size: 1000
+                }
+            }).then(res => {
+                if (res.suceeded) {
+                    this.loading = false;
+                    const list = res.data.content || [];
+                    this.$store.commit("SET_HOTSPOTLIST", list);
+                    this.renderHotspot(list);
+                }
+            });
+        },
         renderHotspot(val){
             console.log("renderHotspot");
             var k = document.getElementById("kr");
@@ -254,6 +503,7 @@ export default {
                 kstr=kstr + "set(layer["+ h0T +"].html,'"+ hotspotList[i]["title"] +"');";
                 kstr=kstr + "set(layer["+ h0T +"].parent,layer["+ h0B +"]);";
                 kstr=kstr + "layer["+ h0T +"].loadstyle(hText);";
+                kstr=kstr + "set(layer["+ h0T +"].onclick,js(_show_content("+ hotspotList[i]["id"]+")));";
 
                 kstr=kstr + "addlayer("+ h01 +");";
                 kstr=kstr + "set(layer["+ h01 +"].parent,layer["+ h0B +"]);";
@@ -280,99 +530,28 @@ export default {
                 kstr=kstr + "layer["+ h0C +"].loadstyle(hIconBgClose);";
             }
             k.call(kstr);
-        }
-    },
-    computed: {
-        isOpenedWidth: function() {
-            const data = this.$store.state.toolbarStore;
-            const toolbarList = [
-                "drawerAttachment",
-                "drawerIntro",
-                "drawerPerson",
-                "drawerHotContent",
-                "drawerGuideContent"
-            ];
-            const isOpenListValue = toolbarList.map(item => data[item]).some(item => item);
-
-            return {
-                width: `calc(100% - ${
-                    isOpenListValue
-                        ? this.isOpenGuideScene //this.isOpenScene || this.isOpenGuideScene
-                            ? "600px"
-                            : "296px"
-                        : "0px"
-                })`
-            };
         },
-        isOpenScene: function() {
-            return this.$store.state.toolbarStore.openScene;
-        },
-        uploadUrl() {
-            const url = `/api/file/upload?fileName=default&relatedId=${this.$route.params.projectId}&fileType=PROJECT_IMAGE`;
-            return url;
-        },
-        isOpenGuideScene: function() {
-            return this.$store.state.toolbarStore.openGuideScene;
-        },
-        isShowToobar: function() {
-            // 1 我的任务过 2课件过来
-            return this.$route.params.from === "1";
-        },
-        userId(){
-            return this.$store.getters.getUserId
-        },
-        messageList(){
-          return this.$store.getters.getMessageList
-        },
-        ...mapGetters([
-            "getIsOpenMessage",
-            "getProjectData",
-            "getMessageList",
-            "getSceneId"
-        ])
-    },
-    watch:{
-        getIsOpenMessage:function(){
-            this.isOpenMessage=this.$store.getters.getIsOpenMessage
-            console.log(this.isOpenMessage)
-            if(this.isOpenMessage){
-            }
-            else{
-                //this.disconnect();
-            }
-        },
-        getProjectData:function() {
-            var pData=this.$store.getters.getProjectData;
-            console.log(pData);
-            this.projectName=pData.name;
-            this.projectId=pData.id;
-        },
-        getMessageList:function() {
-            this.$nextTick(() => {
-                var container = this.$el.querySelector("#_message_container");
-                console.log(container);
-                container.scrollTop = container.scrollHeight;
-            })
-        },
-        getSceneId:function() {
-            var sId=this.$store.getters.getSceneId
+        getHotContent(val){
             const projectId = this.$route.params.projectId;
             this.loading = true;
-            hotspot({
-                type: "get",
-                data: {
-                    projectId,
-                    sceneId: sId,
-                    type: "DEFAULT",
-                    page: 1,
-                    size: 1000
-                }
-            }).then(res => {
+            hotspotContent(
+                {
+                    type: "get",
+                    data: {
+                        hotspotId: val,
+                        size: 1000,
+                        page: 1
+                    }
+                },
+                "all"
+            ).then(res => {
                 if (res.suceeded) {
+                    this.hotspotContent = res.data || [];
+                    this.isShowContent = true;
+                    console.log(this.hotspotContent);
                     this.loading = false;
-                    const list = res.data.content || [];
-                    this.$store.commit("SET_HOTSPOTLIST", list);
-                    this.renderHotspot(list);
+                } else {
+                    this.loading = false;
                 }
             });
         }
@@ -385,17 +564,36 @@ export default {
         clearInterval(this.timer);
     },
     mounted() {
-        var pData=this.$store.getters.getProjectData;
-        var sList=this.$store.getters.getSceneList;
-        this.projectName=pData.name;
-        this.projectId=pData.id;
-        this.initPano(pData,sList);
+        //var pData=this.$store.getters.getProjectData;
+        //var sList=this.$store.getters.getSceneList;
+        //this.projectName=pData.name;
+        //this.projectId=pData.id;
+        //this.initPano(pData,sList);
+        this.initSceneAllList();
         this.initWebSocket();
         window._ycmt_setSceneId = () => {
-            console.log("_ycmt_setSceneId");
-            const getScenePara = window.getScenePara && window.getScenePara();
-            this.$store.commit("SETSCENEID",getScenePara[4])
+            var k = document.getElementById("kr");
+            var code=k.get("xml.scene")
+            for(var i=0; i<this.sceneAllList.length; i++){
+                var tCode="scene_"+this.sceneAllList[i]["code"];
+                if(tCode==code) {
+                    console.log(code);
+                    this.reLoadScene(this.sceneAllList[i]["id"]);
+                    this.$store.commit("SETSCENEID",this.sceneAllList[i]["id"])
+                    return;
+                }
+            }
+            //const getScenePara = window.getScenePara && window.getScenePara();
+            //this.$store.commit("SETSCENEID",getScenePara[4])
         };
+
+        window._ycmt_mainContent = () => {
+
+        };
+        window._show_content=(hotspotId)=>{
+            this.getHotContent(hotspotId);
+        };
+        this.$store.commit("ISOPENORG");
     }
 }
 </script>
@@ -407,38 +605,56 @@ export default {
     position: relative;
     padding-right: 46px;
     #p_editor {
-        // flex: 1;
-        z-index:10;
-        margin-right: 6px;
+        width: 100%;
+        height: 100%;
+        margin-right: 8px;
         transition: width 300ms;
         position: relative;
+    }
+    #p_content {
+        width: 100%;
+        height:100%;
+        left:0px;
+        top:0px;
+        z-index:11;
+        transition: width 300ms;
+        position: absolute;
+        pointer-events: none;
+    }
+    .scene_content{
+        width: 100%;
+        height:100px;
+        bottom:0px;
+        z-index:12;
+        background-color: #ffffff;
+        //margin-right: 6px;
+        position: absolute;
+        padding: 10px;
+        overflow-y: scroll;
+        span{
+            display: inline-block;
+            height: 24px;
+            line-height: 24px;
+            //width: 80px;
+            padding: 5px 8px;
+            border-radius: 2px;
+            background-color: #324155;
+            margin: 5px 10px;
+            color: #FFFFFF;
+        }
     }
     .panel_sidebar {
         width: 296px;
         height: 100%;
         background: #fff;
         padding: 0 24px;
-        // transform: translateX(296px);
-        // display: none;
         position: absolute;
         top: 0;
         right: 46px;
-        // overflow: hidden;
         overflow-y: scroll;
         &::-webkit-scrollbar {
             width: 4px;
-            /*height: 4px;*/
-        }
-        // &::-webkit-scrollbar-thumb {
-        //     border-radius: 10px;
-        //     -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-        //     background: rgba(0, 0, 0, 0.2);
-        // }
-        // &::-webkit-scrollbar-track {
-        //     -webkit-box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
-        //     border-radius: 0;
-        //     background: rgba(0, 0, 0, 0.1);
-        // }
+         }
         .common {
             h2 {
                 font-size: 18px;
@@ -466,8 +682,9 @@ export default {
     width:360px;
     position: absolute;
     bottom:15px;
-    right:65px;
+    right:15px;
     text-align: center;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
 //    background-color: #ff6900;
     border-radius: 5px;
     overflow: hidden;
@@ -583,7 +800,7 @@ export default {
             bottom:0px;
             width:100%;
             height:40px;
-            background-color: #f0f0f0;
+            background-color: #e9e9e9;
             padding: 8px 8px;
             display: flex;
             justify-content: space-between;
@@ -608,6 +825,7 @@ export default {
     }
 
 }
+/*
 .el-header, .el-footer {
     background-color: #B3C0D1;
     color: #333;
@@ -626,7 +844,7 @@ export default {
     background-color: #E9EEF3;
     color: #333;
     text-align: center;
-    height: 500px;
+    height: 100%;
 }
 
 body > .el-container {
@@ -641,4 +859,5 @@ body > .el-container {
 .el-container:nth-child(7) .el-aside {
     line-height: 320px;
 }
+ */
 </style>

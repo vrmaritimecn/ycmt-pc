@@ -104,6 +104,9 @@ export default {
         },
         isDrawerHotContent() {
             return this.$store.state.toolbarStore.drawerHotContent;
+        },
+        sceneAllList(){
+            return this.$store.getters.getSceneAllList();
         }
     },
     components: {
@@ -198,7 +201,22 @@ export default {
             this.isOpenEditAttachment = true;
         },
         addHotScene() {
-            const getScenePara = window.getScenePara && window.getScenePara();
+            //const getScenePara = window.getScenePara && window.getScenePara();
+            const getScenePara=[]
+            var k = document.getElementById("kr");
+            var code=k.get("xml.scene")
+            getScenePara[0]=k.get("xml.scene");
+            getScenePara[1]=k.get("view.fov");
+            getScenePara[2]=k.get("view.hlookat");
+            getScenePara[3]=k.get("view.vlookat");
+            for(var i=0; i<this.sceneAllList.length; i++){
+                if(this.sceneAllList[i]["code"]==code) {
+                    this.reLoadScene();
+                    this.$store.commit("SETSCENEID",this.sceneAllList[i]["id"])
+                    getScenePara[4]=this.sceneAllList[i]["id"];
+                }
+            }
+
             const projectId = this.$route.params.projectId;
             const data = {
                 locationFov: getScenePara[1], //场景的视角
@@ -223,6 +241,17 @@ export default {
                     });
                 }
             });
+        },
+        getSceneId(){
+            var k = document.getElementById("kr");
+            var code=k.get("xml.scene")
+            for(var i=0; i<this.sceneAllList.length; i++){
+                if(this.sceneAllList[i]["code"]==code) {
+                    this.reLoadScene();
+                    this.$store.commit("SETSCENEID",this.sceneAllList[i]["id"])
+                    return this.sceneAllList[i]["id"];
+                }
+            }
         },
         editAttachment(data) {
             this.currentItem = {};

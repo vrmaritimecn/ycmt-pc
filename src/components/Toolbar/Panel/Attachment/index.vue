@@ -22,7 +22,7 @@
             :visible.sync="shows.isOpenAttachment"
             :hotspotId="currentItem.id"
             v-if="currentItem.id"
-            :orderList="['文章', '音频', '视频']"
+            :orderList="['文本','图片','文章', '音频', '视频']"
         ></AttachmentComponent>
 
 
@@ -69,10 +69,10 @@ export default {
                     status:true
                 },{
                     name:"文本",
-                    status:false
+                    status:true
                 },{
                     name:"图片",
-                    status:false
+                    status:true
                 }
             ]
         };

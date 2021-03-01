@@ -6,7 +6,6 @@
                 <div style="padding: 14px;">
                     <span class="name-span">{{item.name}}</span>
                     <div class="bottom clearfix">
-                        <!--span class="time">发布时间：{{ item.publishDate }}</span-->
                         <span :class="item.publicFlg==1? 'tip-span-0' : 'tip-span-1'" class="tip-span">{{ item.publicFlg | formPublicFlg }}</span>
                         <el-popover
                                 placement="bottom"
@@ -25,7 +24,7 @@
 
 <script>
     import { mapGetters } from 'vuex';
-    import { project } from "@/model/api";
+    import { project,projectDetail } from "@/model/api";
 
     export default {
         name: "courselist",
@@ -65,6 +64,7 @@
                 if (!window.localStorage.getItem("authorization")) {
                     return this.$store.commit("TOGGLE_LOGIN");
                 }
+                this.getProjectDetail(id);
                 const params = {
                     taskId: "0",
                     projectId: id,
@@ -78,6 +78,19 @@
                 this.$store.commit("SETHISTROY", {
                     path: `0/${id}/1`,
                     params
+                });
+            },
+            getProjectDetail(projectId){
+
+                projectDetail(
+                    {
+                        type: "GET"
+                    },
+                    projectId
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.$store.commit("SET_PROJECT_DATA",res.data);
+                    }
                 });
             }
         },
