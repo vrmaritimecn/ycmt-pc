@@ -1,13 +1,13 @@
 <template>
     <div class="technology_div">
 
-        <div class="title">
+        <!--div class="title">
             <span>云船码头技术解读卡</span>
             <img src="../images/icon_en.png"/>
             <img src="../images/icon_pro.png"/>
             <img src="../images/icon_ser.png"/>
             <img src="../images/icon_pano.png" @click="close"/>
-        </div>
+        </div-->
         <div class="content">
             <div class="item_div" v-for="item in hotspotContent.filter(item => item.type ==='TEXT')">
                 <p class="item_title">{{item.title}}</p>
@@ -48,7 +48,7 @@
 
 <style lang="less">
     .technology_div {
-        width: 460px;
+        width: 100%;
         height: 100%;
         margin-left: 0px;
         margin-top: 0px;
@@ -56,12 +56,8 @@
         overflow-y: scroll;
         pointer-events:auto;
         .content{
-            padding: 10px 30px;
-            margin-top: 50px;
-            width: 450px;
-            //height:100%;
-            //max-width: 800px;
-            //margin: auto;
+            padding: 15px 15px;
+            width: 100%;
             background-color: rgba(245,245,245,1);
         }
         .title{
@@ -90,9 +86,10 @@
             font-size: 16px; font-weight: bold; padding: 0px 0px; margin-top: 60px;
         }
         .item_div{
-            margin: 15px 0px;
+            margin-top: 5px;
+            padding-bottom: 10px;
             border-bottom: 1px solid #eee;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             .item_title{
                 font-size: 14px; font-weight: bold; line-height: 28px;
             }

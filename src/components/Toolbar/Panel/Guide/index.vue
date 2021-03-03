@@ -66,7 +66,7 @@ export default {
             currentIndex: null,
             isUpDown: false,
             guideIndex:-1,
-            sceneList:[],
+            sceneList:this.$store.state.sceneList,
             sceneIndex:-1
         };
     },
@@ -79,7 +79,7 @@ export default {
             drawerGuideContent: state => state.toolbarStore.drawerGuideContent
         }),
         ...mapGetters([
-            "getSceneId"
+            "getSceneId",
         ])
     },
     watch: {
@@ -129,6 +129,7 @@ export default {
                 console.error(error);
             }
         },
+        /*
         getSceneList() {
             const projectId = this.$route.params.projectId;
             // 通过任务id获取项目的有关信息
@@ -148,8 +149,12 @@ export default {
                 }
             });
         },
+         */
         selectGuide(val){
             this.guideIndex=val.id;
+            this.sceneList=this.$store.state.messageStore.sceneList;
+
+            console.log(this.sceneList);
             if(val.sceneId){
                 for(var i=0; i<this.sceneList.length; i++){
                     if(val.sceneId==this.sceneList[i]["id"]) {
@@ -386,16 +391,7 @@ export default {
     },
     mounted() {
         this.initBus();
-        window._hban_addGuide = () => {
-            console.log(100);
-            /*
-            if (!this.drawerGuideContent) {
-                Bus.$emit("toolbar-hander", { type: "drawerGuideContent", index: 4 });
-            }
-            this.addGuide();
-            */
-        };
-        this.getSceneList();
+        //this.getSceneList();
     }
 };
 </script>

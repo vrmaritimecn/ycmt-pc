@@ -1,9 +1,9 @@
 <template>
     <div class="english_div">
-        <div class="title">
+        <!--div class="title">
             <span>云船码头专业英语训练卡</span>
             <img src="../images/icon_pano.png" @click="close"/>
-        </div>
+        </div-->
         <div class="content">
             <div class="card" v-for="item in hotspotContent.filter(item => item.type ==='AUDIO')">
                 <span>{{item.title}}</span>
@@ -64,18 +64,17 @@
 <style lang="less">
     .carousel-image{width: 100%; position:absolute; left:50%; top:50%; transform: translate(-50%,-50%);}
     .english_div {
-        width: 460px;
+        width: 100%;
         height: 100%;
         margin-left: 0px;
         margin-top: 0px;
-        background: rgba(245,245,245,1);
+        background: rgba(255,255,255,1);
         overflow-y: scroll;
         pointer-events:auto;
         .content{
-            padding: 10px 30px;
-            width: 450px;
-            margin-top: 50px;
-            background-color: rgba(245,245,245,1);
+            padding: 15px 15px;
+            width: 100%;
+            background-color: rgba(255,255,255,1);
         }
         .title{
             position: absolute;
@@ -100,10 +99,10 @@
             }
         }
         .card{
-            background-color: #ffffff;
-            border: 2px;
+            background-color: #f4f4f4;
+            border: 4px;
             padding:10px;
-            margin: 10px 0px;
+            margin: 15px 0px;
             span{
                 font-size: 16px;
                 padding:10px 10px;

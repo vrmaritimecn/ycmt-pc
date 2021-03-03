@@ -1,7 +1,7 @@
 <template>
     <div class="inspection_div">
 
-        <div class="title">
+        <!--div class="title">
             <span>云船码头设备远程检查卡</span>
             <img src="../images/icon_en.png"/>
             <img src="../images/icon_pro.png"/>
@@ -9,7 +9,7 @@
             <img src="../images/icon_link.png"/>
             <img src="../images/icon_contact.png"/>
             <img src="../images/icon_pano.png" @click="close"/>
-        </div>
+        </div-->
         <div class="content">
             <div class="item_div" v-for="item in hotspotContent.filter(item => item.type ==='TEXT')">
                 <p class="item_title">{{item.title}}</p>
@@ -50,21 +50,20 @@
 
 <style lang="less">
     .inspection_div {
-        width: 610px;
+        width: 100%;
         height: 100%;
         margin-left: 0px;
         margin-top: 0px;
-        background: rgba(245,245,245,1);
+        background: rgba(255,255,255,1);
         overflow-y: scroll;
         pointer-events:auto;
         .content{
-            padding: 10px 30px;
-            margin-top: 50px;
-            width: 600px;
+            padding: 15px 15px;
+            width: 100%;
             //height:100%;
             //max-width: 800px;
             //margin: auto;
-            background-color: rgba(245,245,245,1);
+            background-color: rgba(255,255,255,1);
         }
         .title{
             position: absolute;
@@ -92,9 +91,10 @@
             font-size: 16px; font-weight: bold; padding: 0px 0px; margin-top: 60px;
         }
         .item_div{
-            margin: 15px 0px;
+            margin-top: 5px;
+            padding-bottom: 10px;
             border-bottom: 1px solid #eee;
-            margin-bottom: 10px;
+            margin-bottom: 20px;
             .item_title{
                 font-size: 14px; font-weight: bold; line-height: 28px;
             }

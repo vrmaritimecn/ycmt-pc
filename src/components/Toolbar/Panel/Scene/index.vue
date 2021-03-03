@@ -97,8 +97,15 @@ export default {
         drawerHotContent(newVal, oldVal) {
             if (newVal) {
                 this.getSceneList().then(res => {
-                    const getScenePara = window.getScenePara && window.getScenePara();
-                    this.sceneIndex=getScenePara[4];
+                    var k = document.getElementById("kr");
+                    var code=k.get("xml.scene")
+                    for(var i=0; i<this.sceneAllList.length; i++){
+                        var tCode="scene_"+this.sceneAllList[i]["code"];
+                        if(tCode==code) {
+                            this.sceneIndex=this.sceneAllList[i]["id"];
+                            return;
+                        }
+                    }
                     //this.attachmentList.length > 0 && this.select(0, this.attachmentList[0]);
                 });
             }
@@ -126,6 +133,9 @@ export default {
                 );
                 if (suceeded) {
                     this.attachmentList = data;
+                    this.$store.commit("SET_SCENELIST",data)
+                    var k = document.getElementById("kr");
+                    k.call("loadscene("+ k.get("xml.scene") +",null, MERGE|KEEPVIEW, BLEND(1));");
                 }
             } catch (error) {
                 console.error(error);
@@ -133,23 +143,28 @@ export default {
         },
         addScene() {
             // 新增场景
+            console.log("新增场景");
+            console.log(this.sceneAllList);
             const getScenePara=[]
             var k = document.getElementById("kr");
             var code=k.get("xml.scene")
+            var id=""
             getScenePara[0]=k.get("xml.scene");
             getScenePara[1]=k.get("view.fov");
             getScenePara[2]=k.get("view.hlookat");
             getScenePara[3]=k.get("view.vlookat");
+            console.log(code);
             for(var i=0; i<this.sceneAllList.length; i++){
                 var tempC="scene_"+this.sceneAllList[i]["code"];
                 if(tempC==code) {
                     //this.reLoadScene();
                     //this.$store.commit("SETSCENEID",sceneAllList[i]["id"])
-                    getScenePara[4]=this.sceneAllList[i]["id"];
+                    id=this.sceneAllList[i]["id"];
                 }
             }
+            console.log(getScenePara);
             //const sceneId = window.getScenePara && window.getScenePara()[4];
-            const sceneId=getScenePara[4]
+            const sceneId=id
             const isScene = this.attachmentList.find(item => sceneId === item.id);
             const sceneIds = this.attachmentList.map(item => item.id);
             sceneIds.push(sceneId);

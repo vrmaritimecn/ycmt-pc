@@ -1,9 +1,16 @@
 <template>
-    <div class="p_editor_container" :style="{ paddingRight: isShowToobar ? '46px' : '0px' }">
-
-        <div :style="{ width: isOpenedWidth.width }">
-            <div id="p_editor" >
-                <div id="p_content" v-if="isShowContent" >
+    <div class="message_container">
+        <div class="message_info"  v-if="isShowContent" :style="{ width: contentLock ? '500px' : '367px' }">
+            <div class="title-box">
+                <div class="title">
+                    <span>{{contentTitle}}</span>
+                </div>
+                <div>
+                    <img v-if="!contentLock" src="./images/icon_close.png" @click="close_content"/>
+                </div>
+            </div>
+            <div class="task_list scroll-view-wrapper">
+                <div id="p_content">
                     <company v-if="mainSite.isOpenCompany" :attachmentContent="attachmentContent" @close_content="close_content"></company>
                     <organization v-if="mainSite.isOpenOrganization" :attachmentContent="attachmentContent" @close_content="close_content"></organization>
                     <technology v-if="mainSite.isOpenTechnology" :hotspotContent="hotspotContent" @close_content="close_content"></technology>
@@ -11,72 +18,79 @@
                     <archives v-if="mainSite.isOpenArchives" :hotspotContent="hotspotContent" @close_content="close_content"></archives>
                     <inspection v-if="mainSite.isOpenInspection" :hotspotContent="hotspotContent" @close_content="close_content"></inspection>
                 </div>
-                <div class="chat_outer_div" v-show="isOpenMessage">
-                    <div class="chat_inner_div">
-                        <div class="chat_header" @click="closeMessage">您正在对“{{projectName}}”开展讨论</div>
-                        <div class="chat_main" id="_message_container">
-                            <div :class="item.userId==userId && item.projectId==messageItem.projectId? 'chat_div_right':'chat_div_left'" v-for="item in messageList">
-                                <img class="chat_div_icon" :src="globalConfig.imagePath + item.userAvatar" width="100%" height="100%"/>
-                                <span class="chat_div_info" @click="findMessageLocation(item)">
-                            <img :src="globalConfig.imagePath + item.imageUrl" v-if="item.imageUrl"/>
-                            <p>{{item.message}}</p>
-                        </span>
-
-                            </div>
-                        </div>
-                        <div class="chat_footer">
-                            <input  v-model="messageItem.message"></input>
-                            <img src="./images/icon_sent.png" @click="sendMessage"/>
-                            <el-upload
-                                    class="upload-demo"
-                                    :action="uploadUrl"
-                                    :show-file-list="false"
-                                    :on-success="handleAvatarSuccess"
-                                    :before-upload="beforeAvatarUpload">
-                                <img src="./images/icon_pic.png"/>
-                            </el-upload>
-                            <img src="./images/icon_mic.png" @click="cleanMessage"/>
-                        </div>
-                    </div>
-                </div>
-                <div class="scene_content" v-show="isOpenSceneThumb">
-                    <span v-for="item in sceneAllList" @click="gotoScene(item)">{{item.name}}</span>
-                </div>
             </div>
         </div>
-        <!--
-        <div style="z-index:100; width:100%; position: absolute; top:5px; text-align: center;" visible="false"><el-button size="mini" type="warning">警告按钮</el-button></div>
-        <div style="z-index:100; width:120px; position: absolute; bottom:5px; left:5px; text-align: center;" visible="false">
-            <el-button style="margin:10px" size="mini" type="primary" icon="el-icon-edit" circle></el-button>
-            <el-button style="margin:10px" size="mini" type="success" icon="el-icon-check" circle></el-button>
-        </div>
-        <div style="z-index:100; width:50px; height: 300px; position: absolute; bottom:5px; right:50px; text-align: center;" visible="false">
-            <el-button style="margin:10px" size="mini" type="primary" icon="el-icon-edit" circle></el-button>
-            <el-button style="margin:10px" size="mini" type="success" icon="el-icon-check" circle></el-button>
-            <el-button style="margin:10px" size="mini" type="info" icon="el-icon-message" circle></el-button>
-            <el-button style="margin:10px" size="mini" type="warning" icon="el-icon-star-off" circle></el-button>
-            <el-button style="margin:10px" size="mini" type="danger" icon="el-icon-delete" circle></el-button>
-            <SceneList ref="SceneList" v-if="isShowToobar"></SceneList>
-            <GuideList v-if="isShowToobar"></GuideList>
-        </div>
-        <div style="z-index:100; position: absolute; top:5px; right:50px; text-align: center;" visible="false">
-            <el-card style="margin: 10px;" shadow="always">
-                总是显示
-            </el-card>
-        </div>
-        <el-drawer  title="场景列表区" :visible.sync="drawer" :direction="direction" :before-close="handleClose">
-            <div>水平场景</div>
-            <div>水平场景分类</div>
-        </el-drawer>
-        <el-drawer  title="地图列表区" :visible.sync="drawer" :direction="direction" :before-close="handleClose">
-            <div>地图列表</div>
-        </el-drawer>
-        -->
-        <!-- 右侧工具条 -->
+        <!--div class="p_editor_container" :style="{ paddingRight: isShowToobar ? '46px' : '0px' }"-->
+        <div class="p_editor_container">
+            <!--div :style="{ width: isOpenedWidth.width }"-->
+                <div id="p_editor" >
+                    <div class="chat_outer_div" v-show="isOpenMessage">
+                        <div class="chat_inner_div">
+                            <div class="chat_header" @click="closeMessage">您正在对“{{projectName}}”开展讨论</div>
+                            <div class="chat_main" id="_message_container">
+                                <div :class="item.userId==userId && item.projectId==messageItem.projectId? 'chat_div_right':'chat_div_left'" v-for="item in messageList">
+                                    <img class="chat_div_icon" :src="globalConfig.imagePath + item.userAvatar" width="100%" height="100%"/>
+                                    <span class="chat_div_info" @click="findMessageLocation(item)">
+                                <img :src="globalConfig.imagePath + item.imageUrl" v-if="item.imageUrl"/>
+                                <p>{{item.message}}</p>
+                            </span>
 
-        <!--Toolbar v-if="isShowToobar"></Toolbar-->
-        <Toolbar></Toolbar>
+                                </div>
+                            </div>
+                            <div class="chat_footer">
+                                <input  v-model="messageItem.message"></input>
+                                <img src="./images/icon_sent.png" @click="sendMessage"/>
+                                <el-upload
+                                        class="upload-demo"
+                                        :action="uploadUrl"
+                                        :show-file-list="false"
+                                        :on-success="handleAvatarSuccess"
+                                        :before-upload="beforeAvatarUpload">
+                                    <img src="./images/icon_pic.png"/>
+                                </el-upload>
+                                <img src="./images/icon_mic.png" @click="cleanMessage"/>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="scene_content" v-show="isOpenSceneThumb">
+                        <span v-for="item in sceneAllList" @click="gotoScene(item)">{{item.name}}</span>
+                    </div>
+                </div>
+            <!--/div-->
+            <!--
+            <div style="z-index:100; width:100%; position: absolute; top:5px; text-align: center;" visible="false"><el-button size="mini" type="warning">警告按钮</el-button></div>
+            <div style="z-index:100; width:120px; position: absolute; bottom:5px; left:5px; text-align: center;" visible="false">
+                <el-button style="margin:10px" size="mini" type="primary" icon="el-icon-edit" circle></el-button>
+                <el-button style="margin:10px" size="mini" type="success" icon="el-icon-check" circle></el-button>
+            </div>
+            <div style="z-index:100; width:50px; height: 300px; position: absolute; bottom:5px; right:50px; text-align: center;" visible="false">
+                <el-button style="margin:10px" size="mini" type="primary" icon="el-icon-edit" circle></el-button>
+                <el-button style="margin:10px" size="mini" type="success" icon="el-icon-check" circle></el-button>
+                <el-button style="margin:10px" size="mini" type="info" icon="el-icon-message" circle></el-button>
+                <el-button style="margin:10px" size="mini" type="warning" icon="el-icon-star-off" circle></el-button>
+                <el-button style="margin:10px" size="mini" type="danger" icon="el-icon-delete" circle></el-button>
+                <SceneList ref="SceneList" v-if="isShowToobar"></SceneList>
+                <GuideList v-if="isShowToobar"></GuideList>
+            </div>
+            <div style="z-index:100; position: absolute; top:5px; right:50px; text-align: center;" visible="false">
+                <el-card style="margin: 10px;" shadow="always">
+                    总是显示
+                </el-card>
+            </div>
+            <el-drawer  title="场景列表区" :visible.sync="drawer" :direction="direction" :before-close="handleClose">
+                <div>水平场景</div>
+                <div>水平场景分类</div>
+            </el-drawer>
+            <el-drawer  title="地图列表区" :visible.sync="drawer" :direction="direction" :before-close="handleClose">
+                <div>地图列表</div>
+            </el-drawer>
+            -->
+            <!-- 右侧工具条 -->
+            <!--Toolbar v-if="isShowToobar"></Toolbar-->
+        </div>
+        <Toolbar v-if="ToolbarStatus"></Toolbar>
     </div>
+
 </template>
 
 <script>
@@ -87,6 +101,7 @@ import technology from "./dialog/technology.vue";
 import archives from "./dialog/archives.vue";
 import english from "./dialog/english.vue";
 import inspection from "./dialog/inspection.vue";
+import Title from "@/components/common/Title";
 //import SceneList from "@/components/Toolbar/Panel/Scene/sceneList";
 //import GuideList from "@/components/Toolbar/Panel/Guide/guideList.vue";
 import { mapGetters } from "vuex";
@@ -107,6 +122,9 @@ export default {
             projectId:"",
             projectName:"",
             projectModuleName:"",
+            ToolbarStatus:false,
+            contentTitle:"",
+            contentLock:false,
             sceneId:"",
             messageItem:{
                 userId:"",
@@ -137,6 +155,7 @@ export default {
     },
 
     components: {
+        Title,
         Toolbar,
         //SceneList,
         //GuideList,
@@ -213,10 +232,11 @@ export default {
             }
         },
         getProjectData:function() {
-            var pData=this.$store.getters.getProjectData;
+            var pData=this.$store.state.messageStore.projectData;
             console.log(pData);
             this.projectName=pData.name;
             this.projectId=pData.id;
+            this.attachmentContent=pData.attachments;
         },
         getMessageList:function() {
             this.$nextTick(() => {
@@ -231,32 +251,92 @@ export default {
         }
     },
     methods: {
-        initModule(pm){
-            if(pm=="船商在线"){
+        initModule(data){
+            if(data.moduleName=="船商在线"){
+                this.contentTitle="云船码头企业微官网"
                 var pData=this.$store.getters.getProjectData;
-                this.attachmentContent=pData.attachments;
-                console.log(this.attachmentContent);
+                this.attachmentContent=[];
+                this.attachmentContent=data.attachments;
+                this.isShowContent=true
                 this.mainSite.isOpenCompany=true
-                this.isShowContent=true
+                this.mainSite.isOpenOrganization=false
+                this.mainSite.isOpenTechnology=false
+                this.mainSite.isOpenEnglish=false
+                this.mainSite.isOpenArchives=false
+                this.mainSite.isOpenInspection=false
+                var pData=this.$store.state.messageStore.projectData
+                if(pData.status<3){
+                    this.ToolbarStatus=true
+                }
+                else{
+                    this.ToolbarStatus=false
+                }
+                this.contentLock=true
             }
-            if(pm=="机构直通车"){
+            if(data.moduleName=="机构直通车"){
+                this.contentTitle="云船码头海事机构直通车"
                 var pData=this.$store.getters.getProjectData;
-                this.attachmentContent=pData.attachments;
-                console.log(this.attachmentContent);
-                this.mainSite.isOpenOrganization=true
+                this.attachmentContent=[];
+                this.attachmentContent=data.attachments;
                 this.isShowContent=true
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=true
+                this.mainSite.isOpenTechnology=false
+                this.mainSite.isOpenEnglish=false
+                this.mainSite.isOpenArchives=false
+                this.mainSite.isOpenInspection=false
+                if(pData.status<3){
+                    this.ToolbarStatus=true
+                }
+                else{
+                    this.ToolbarStatus=false
+                }
+                this.contentLock=true
+
             }
-            if(pm=="技术热点"){
+            if(data.moduleName=="技术热点"){
+                this.contentTitle="云船码头技术热点解读"
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=false
                 this.mainSite.isOpenTechnology=true
+                this.mainSite.isOpenEnglish=false
+                this.mainSite.isOpenArchives=false
+                this.mainSite.isOpenInspection=false
+                this.ToolbarStatus=true
+                this.contentLock=false
             }
-            if(pm=="航运英语"){
+            if(data.moduleName=="航运英语"){
+                this.contentTitle="云船码头航运英语大家学"
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=false
+                this.mainSite.isOpenTechnology=false
                 this.mainSite.isOpenEnglish=true
+                this.mainSite.isOpenArchives=false
+                this.mainSite.isOpenInspection=false
+                this.ToolbarStatus=true
+                this.contentLock=false
             }
-            if(pm=="船东宝"){
+            if(data.moduleName=="船东宝"){
+                this.contentTitle="云船码头船舶档案卡"
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=false
+                this.mainSite.isOpenTechnology=false
+                this.mainSite.isOpenEnglish=false
                 this.mainSite.isOpenArchives=true
+                this.mainSite.isOpenInspection=false
+                this.ToolbarStatus=true
+                this.contentLock=false
             }
-            if(pm=="远程检查"){
+            if(data.moduleName=="远程检查"){
+                this.contentTitle="云船码头项目检验卡"
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=false
+                this.mainSite.isOpenTechnology=false
+                this.mainSite.isOpenEnglish=false
+                this.mainSite.isOpenArchives=false
                 this.mainSite.isOpenInspection=true
+                this.ToolbarStatus=true
+                this.contentLock=false
             }
         },
         initPano(a1,a2,a3) {
@@ -385,6 +465,8 @@ export default {
             console.log("___scene")
             var pData=this.$store.getters.getProjectData;
             var sList=this.$store.getters.getSceneList;
+            console.log(pData);
+            console.log(sList);
             this.projectName=pData.name;
             this.projectId=pData.id;
             scene(
@@ -401,7 +483,7 @@ export default {
                     this.sceneAllList=res.data.content;
                     this.$store.commit("SET_SCENEALLLIST",res.data.content);
                     this.initPano(pData,sList,this.sceneAllList);
-                    this.initModule(pData.moduleName);
+                    this.initModule(pData);
                 }
             });
         },
@@ -413,17 +495,6 @@ export default {
             console.log("loadpanoscene('%FIRSTXML%/xmls/block_id_"+ pData.blockPanoPath +"/panos.xml',scene_"+ data.code +");");
         },
         getSceneId(){
-            /*
-            var k = document.getElementById("kr");
-            var code=k.get("xml.scene")
-            for(var i=0; i<this.sceneAllList.length; i++){
-                if(this.sceneAllList[i]["code"]==code) {
-                    this.reLoadScene();
-                    this.$store.commit("SETSCENEID",this.sceneAllList[i]["id"])
-                    return this.sceneAllList[i]["id"];
-                }
-            }
-             */
             var k = document.getElementById("kr");
             var code=k.get("xml.scene")
             for(var i=0; i<this.sceneAllList.length; i++){
@@ -436,9 +507,9 @@ export default {
                 }
             }
         },
-        reLoadScene(val) {
-            const getScenePara = window.getScenePara && window.getScenePara();
-            var sId=val;
+        reLoadScene(id) {
+            //const getScenePara = window.getScenePara && window.getScenePara();
+            var sId=id;
             const projectId = this.$route.params.projectId;
             this.loading = true;
             hotspot({
@@ -528,21 +599,7 @@ export default {
         this.initWebSocket();
         window._ycmt_setSceneId = () => {
             this.getSceneId();
-            /*
-            var k = document.getElementById("kr");
-            var code=k.get("xml.scene")
-            for(var i=0; i<this.sceneAllList.length; i++){
-                var tCode="scene_"+this.sceneAllList[i]["code"];
-                if(tCode==code) {
-                    console.log(code);
-                    this.reLoadScene(this.sceneAllList[i]["id"]);
-                    this.$store.commit("SETSCENEID",this.sceneAllList[i]["id"])
-                    return;
-                }
-            }
-             */
         };
-
         window._ycmt_mainContent = () => {
 
         };
@@ -555,265 +612,292 @@ export default {
 </script>
 
 <style lang="less">
-.p_editor_container {
-    height: 100%;
-    display: flex;
-    position: relative;
-    padding-right: 46px;
-    #p_editor {
-        width: 100%;
+    .message_container {
+        display: flex;
         height: 100%;
-        margin-right: 8px;
-        transition: width 300ms;
-        position: relative;
-    }
-    #p_content {
-        width: 100%;
-        height:100%;
-        left:0px;
-        top:0px;
-        z-index:11;
-        transition: width 300ms;
-        position: absolute;
-        pointer-events: none;
-    }
-    .scene_content{
-        width: 100%;
-        height:100px;
-        bottom:0px;
-        z-index:12;
-        background-color: #ffffff;
-        //margin-right: 6px;
-        position: absolute;
-        padding: 10px;
-        overflow-y: scroll;
-        span{
-            display: inline-block;
-            height: 24px;
-            line-height: 24px;
-            //width: 80px;
-            padding: 5px 8px;
-            border-radius: 2px;
-            background-color: #324155;
-            margin: 5px 10px;
-            color: #FFFFFF;
-        }
-    }
-    .panel_sidebar {
-        width: 296px;
-        height: 100%;
-        background: #fff;
-        padding: 0 24px;
-        position: absolute;
-        top: 0;
-        right: 46px;
-        overflow-y: scroll;
-        &::-webkit-scrollbar {
-            width: 4px;
-         }
-        .common {
-            h2 {
-                font-size: 18px;
-                font-family: MicrosoftYaHei;
-                color: rgba(51, 51, 51, 1);
-                line-height: 24px;
-                padding: 10px 0;
-            }
-            .el-form-item {
-                .el-form-item__label {
-                    font-size: 16px;
-                    font-family: MicrosoftYaHei;
-                    color: rgba(51, 51, 51, 1);
-                    line-height: 21px;
-                }
-            }
-        }
-    }
-}
-.chat_outer_div{
-    z-index:100;
-    height: 90%;
-    min-height: 400px;
-    max-height: 600px;
-    width:360px;
-    position: absolute;
-    bottom:15px;
-    right:15px;
-    text-align: center;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
-//    background-color: #ff6900;
-    border-radius: 5px;
-    overflow: hidden;
-    .chat_inner_div{
-        position:relative; width: 100%; height:100%;
-        .chat_header{
-            position:absolute;
-            top:0px;
-            width:100%;
-            height:40px;
-            background-color: #324155;
-            color:#F7F7F7;
-            line-height: 40px;
-        }
-        .chat_main{
-            position:absolute;
-            top:40px;
-            width:100%;
-            height:calc(100% - 80px);
-            background-color: #ffffff;
-            overflow-y: auto;
-            padding: 20px 0px;
-            .chat_div_right {
+        overflow: hidden;
+        .message_info {
+            width: 367px;
+            padding-bottom: 5px;
+            background-color: #fff;
+            .task_list {
+                overflow-y: scroll;
+                height: calc(100% - 45px);
                 position: relative;
-                width: 260px;
-                margin-top: 15px;
-                margin-bottom: 15px;
-                margin-left: 85px;
-                margin-right: 15px;
-                overflow: hidden;
+                padding-right: 4px;
+                background-color: #ffffff;
 
-                .chat_div_icon {
-                    position: absolute;
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 5px;
-                    right: 0px;
-                    //margin-right: 10px;
-                }
-
-                .chat_div_info {
-                    //position: absolute;
-                    width: 180px;
-                    min-width: 10px;
-                    margin-right: 40px;
-                    border-radius: 2px 2px 2px 2px;
-                    background-color: #324155;
-                    text-align: left;
-                    padding: 8px;
-                    color: #F7F7F7;
-                    font-family: "PingFang SC";
-                    font-size: 12px;
-                    letter-spacing: 1px;
-                    line-height: 20px;
-                    align-content: start;
-                    display: inline-block;
-                    img{
-                        display: block;
-                        width: 94%;
-                        margin:auto;
-                        margin-top: 5px;
-                        margin-bottom: 5px;
-                    }
+                &::-webkit-scrollbar {
+                    width: 4px;
+                    padding-bottom: 10px;
                 }
             }
-            .chat_div_left{
-                position: relative;
-                width: 260px;
-                margin-top: 15px;
-                margin-bottom: 15px;
+
+            #p_content {
+                width: 100%;
+                height:100%;
+                left:0px;
+                top:0px;
+                z-index:11;
+                transition: width 300ms;
+                position: absolute;
+                pointer-events: none;
+            }
+
+            .message_right {
+                flex: 1;
+                background: #fff;
                 margin-left: 15px;
-                margin-right: 85px;
-                overflow:hidden;
-                .chat_div_icon{
-                    position: absolute;
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 5px;
-                    left:0px;
-                    //margin-right: 10px;
-                }
-                .chat_div_info{
-                    //position: absolute;
-                    width: 180px;
-                    min-width: 10px;
-                    margin-left: 40px;
-                    border-radius: 2px 2px 2px 2px;
-                    background-color: #324155;
-                    text-align: left;
-                    padding: 8px;
-                    color: #F7F7F7;
-                    font-family: "PingFang SC";
-                    font-size: 12px;
-                    letter-spacing: 1px;
-                    line-height: 20px;
-                    align-content: start;
-                    display: inline-block;
-                    span{
+            }
+        }
+        .p_editor_container {
+            /*
+            height: 100%;
+            display: flex;
+            position: relative;
+            padding-right: 46px;
 
+             */
+            flex: 1;
+            height: 100%;
+            background-size: 100%;
+            margin-left: 8px;
+            cursor: move;
+            position: relative;
+            #p_editor {
+
+                width: 100%;
+                height: 100%;
+                margin-right: 8px;
+                transition: width 300ms;
+                position: relative;
+            }
+            .scene_content{
+                width: 100%;
+                height:100px;
+                bottom:0px;
+                z-index:12;
+                background-color: #ffffff;
+                //margin-right: 6px;
+                position: absolute;
+                padding: 10px;
+                overflow-y: scroll;
+                span{
+                    display: inline-block;
+                    height: 24px;
+                    line-height: 24px;
+                    //width: 80px;
+                    padding: 5px 8px;
+                    border-radius: 2px;
+                    background-color: #324155;
+                    margin: 5px 10px;
+                    color: #FFFFFF;
+                }
+            }
+            .panel_sidebar {
+                width: 296px;
+                height: 100%;
+                background: #fff;
+                padding: 0 24px;
+                position: absolute;
+                top: 0;
+                right: 46px;
+                overflow-y: scroll;
+                &::-webkit-scrollbar {
+                    width: 4px;
+                }
+                .common {
+                    h2 {
+                        font-size: 18px;
+                        font-family: MicrosoftYaHei;
+                        color: rgba(51, 51, 51, 1);
+                        line-height: 24px;
+                        padding: 10px 0;
                     }
-                    img{
-                        display: block;
-                        width: 94%;
-                        margin:auto;
-                        margin-top: 5px;
-                        margin-bottom: 5px;
+                    .el-form-item {
+                        .el-form-item__label {
+                            font-size: 16px;
+                            font-family: MicrosoftYaHei;
+                            color: rgba(51, 51, 51, 1);
+                            line-height: 21px;
+                        }
                     }
                 }
             }
         }
-        .chat_footer{
-            position:absolute;
-            bottom:0px;
-            width:100%;
-            height:40px;
-            background-color: #e9e9e9;
-            padding: 8px 8px;
+        .chat_outer_div{
+            z-index:100;
+            height: 90%;
+            min-height: 400px;
+            max-height: 600px;
+            width:360px;
+            position: absolute;
+            bottom:15px;
+            right:15px;
+            text-align: center;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+            //    background-color: #ff6900;
+            border-radius: 5px;
+            overflow: hidden;
+            .chat_inner_div{
+                position:relative; width: 100%; height:100%;
+                .chat_header{
+                    position:absolute;
+                    top:0px;
+                    width:100%;
+                    height:40px;
+                    background-color: #324155;
+                    color:#F7F7F7;
+                    line-height: 40px;
+                }
+                .chat_main{
+                    position:absolute;
+                    top:40px;
+                    width:100%;
+                    height:calc(100% - 80px);
+                    background-color: #ffffff;
+                    overflow-y: auto;
+                    padding: 20px 0px;
+                    .chat_div_right {
+                        position: relative;
+                        width: 260px;
+                        margin-top: 15px;
+                        margin-bottom: 15px;
+                        margin-left: 85px;
+                        margin-right: 15px;
+                        overflow: hidden;
+
+                        .chat_div_icon {
+                            position: absolute;
+                            width: 30px;
+                            height: 30px;
+                            border-radius: 5px;
+                            right: 0px;
+                            //margin-right: 10px;
+                        }
+
+                        .chat_div_info {
+                            //position: absolute;
+                            width: 180px;
+                            min-width: 10px;
+                            margin-right: 40px;
+                            border-radius: 2px 2px 2px 2px;
+                            background-color: #324155;
+                            text-align: left;
+                            padding: 8px;
+                            color: #F7F7F7;
+                            font-family: "PingFang SC";
+                            font-size: 12px;
+                            letter-spacing: 1px;
+                            line-height: 20px;
+                            align-content: start;
+                            display: inline-block;
+                            img{
+                                display: block;
+                                width: 94%;
+                                margin:auto;
+                                margin-top: 5px;
+                                margin-bottom: 5px;
+                            }
+                        }
+                    }
+                    .chat_div_left{
+                        position: relative;
+                        width: 260px;
+                        margin-top: 15px;
+                        margin-bottom: 15px;
+                        margin-left: 15px;
+                        margin-right: 85px;
+                        overflow:hidden;
+                        .chat_div_icon{
+                            position: absolute;
+                            width: 30px;
+                            height: 30px;
+                            border-radius: 5px;
+                            left:0px;
+                            //margin-right: 10px;
+                        }
+                        .chat_div_info{
+                            //position: absolute;
+                            width: 180px;
+                            min-width: 10px;
+                            margin-left: 40px;
+                            border-radius: 2px 2px 2px 2px;
+                            background-color: #324155;
+                            text-align: left;
+                            padding: 8px;
+                            color: #F7F7F7;
+                            font-family: "PingFang SC";
+                            font-size: 12px;
+                            letter-spacing: 1px;
+                            line-height: 20px;
+                            align-content: start;
+                            display: inline-block;
+                            span{
+
+                            }
+                            img{
+                                display: block;
+                                width: 94%;
+                                margin:auto;
+                                margin-top: 5px;
+                                margin-bottom: 5px;
+                            }
+                        }
+                    }
+                }
+                .chat_footer{
+                    position:absolute;
+                    bottom:0px;
+                    width:100%;
+                    height:40px;
+                    background-color: #e9e9e9;
+                    padding: 8px 8px;
+                    display: flex;
+                    justify-content: space-between;
+                    vertical-align: center;
+                    input{
+                        background-color: #ffffff;
+                        outline-style: none ;
+                        border: 1px solid #ccc;
+                        border-radius: 4px;
+                        width: 260px;
+                        padding: 0px 5px;
+                        //margin-top: 8px;
+                        height: 24px;
+                    }
+                    img{
+                        width: 16px;
+                        height: 16px;
+                        margin-top: 4px;
+                        cursor: pointer;
+                    }
+                }
+            }
+        }
+        .title-box {
+            height: 55px;
+            background: #fff;
+            border-bottom: 1px solid rgba(245, 245, 245, 1);
             display: flex;
             justify-content: space-between;
-            vertical-align: center;
-            input{
-                background-color: #ffffff;
-                outline-style: none ;
-                border: 1px solid #ccc;
-                border-radius: 4px;
-                width: 260px;
-                padding: 0px 5px;
-                //margin-top: 8px;
-                height: 24px;
+            align-items: center;
+            padding: 0 16px;
+            .title {
+                span {
+                    font-size: 16px;
+                    font-family: MicrosoftYaHei;
+                    color: rgba(0, 0, 0, 1);
+                    line-height: 24px;
+                    -webkit-background-clip: text;
+                }
             }
             img{
-                width: 16px;
-                height: 16px;
-                margin-top: 4px;
-                cursor: pointer;
+                width:18px;
+                height:18px;
             }
         }
     }
 
-}
-/*
-.el-header, .el-footer {
-    background-color: #B3C0D1;
-    color: #333;
-    text-align: center;
-    line-height: 60px;
-}
 
-.el-aside {
-    background-color: #D3DCE6;
-    color: #333;
-    text-align: center;
-    line-height: 200px;
-}
-
-.el-main {
-    background-color: #E9EEF3;
-    color: #333;
-    text-align: center;
-    height: 100%;
-}
-
-body > .el-container {
-    margin-bottom: 40px;
-}
-
-.el-container:nth-child(5) .el-aside,
-.el-container:nth-child(6) .el-aside {
-    line-height: 260px;
-}
-
-.el-container:nth-child(7) .el-aside {
-    line-height: 320px;
-}
- */
 </style>

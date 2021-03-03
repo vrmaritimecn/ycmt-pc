@@ -230,9 +230,12 @@ export default {
         top: 0;
         right: 46px;
         //overflow: hidden;*/
+        top: 0px;
+        right: 46px;
         position: absolute;
         height: 100%;
         overflow: hidden;
+        background-color: #ffffff;
         .panel_sidebar_title{
             width: 290px !important;
             height:44px;

@@ -1,8 +1,8 @@
 <template>
     <div id="toolbar">
-        <div class="item-toolbar" v-for="(item, index) in toolbarList" :key="index" @click="toolbarHander(item.type, index)" :class="{ active: index === currentIndex && isCurrentOpen[item.type] }">
+        <div class="item-toolbar" v-if="proStatus==item.status ||item.status==100" v-for="(item, index) in toolbarList" :key="index" @click="toolbarHander(item.type, index)" :class="{ active: index === currentIndex && isCurrentOpen[item.type] }">
             <el-tooltip class="item" effect="dark" :content="item.text" placement="left">
-                <i class="iconfont" :class="[item.icon ? item.icon : '']"></i>
+                <i class="iconfont"  :class="[item.icon ? item.icon : '']"></i>
             </el-tooltip>
         </div>
         <!-- 简介面板 -->
@@ -34,52 +34,61 @@ export default {
                     text: "简介",
                     icon: "iconxiangmu",
                     type: "drawerIntro",
-                    call:""
+                    call:"",
+                    status:"1"
                 },
                 {
                     text: "制作人员",
                     icon: "iconjiaoseleixing",
                     type: "drawerPerson",
-                    call:""
+                    call:"",
+                    status:"1"
                 },
                 {
                     text: "附件参考",
                     icon: "iconxuexi_nor",
                     type: "drawerAttachment",
-                    call:""
+                    call:"",
+                    status:"100"
                 },
                 {
                     text: "热点内容",
                     icon: "icontubiaoweb-26",
                     type: "drawerHotContent",
-                    call:""
+                    call:"",
+                    status:"100"
                 },
                 {
                     text: "引导内容",
                     icon: "icontubiaoweb-36",
                     type: "drawerGuideContent",
-                    call:""
+                    call:"",
+                    status:"100"
                 },
                 {
                     text: "在线交流",
                     icon: "icontubiaoweb-39",
                     type: "",
-                    call:"SETISOPENMESSAGE"
+                    call:"SETISOPENMESSAGE",
+                    status:"100"
                 },
                 {
                     text: "用户点评",
                     icon: "icontubiaoweb-13",
                     type: "",
-                    call:"SETISOPENMESSAGE"
+                    call:"SETISOPENMESSAGE",
+                    status:"100"
                 },
                 {
                     text: "场景地图",
                     icon: "icontubiaoweb-41",
                     type: "",
-                    call:"TOGGLESCENETHUMB"
+                    call:"TOGGLESCENETHUMB",
+                    status:"100"
                 }
             ],
-            currentIndex: null
+            currentIndex: null,
+            proStatus: this.$store.state.messageStore.projectData.status
         };
     },
     components: {
@@ -117,6 +126,8 @@ export default {
     },
     mounted() {
         this.initBus();
+        this.$store.commit("SETTOGGLETOOLBR", "none");
+        console.log(this.$store.state.messageStore.projectData.status);
         window._hban_openToolbarType = type => {
             return this.isCurrentOpen[type];
         };
@@ -130,7 +141,7 @@ export default {
     height: 100%;
     background: #324155; //rgba(50, 65, 65, 1);
     padding-top: 30px;
-    position: absolute;
+    position: relative;
     right: 0;
     // display: flex;
     // flex-wrap: wrap;

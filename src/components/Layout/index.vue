@@ -7,10 +7,11 @@
                 class="right"
                 style="width:100%;display: flex; flex-direction: column;"
             >
-                <div
+                <!--div
                     class="container-main"
                     :style="{ paddingRight: $route.name === 'panoEditor' ? '0px' : '' }"
-                >
+                -->
+                <div class="container-main" >
                     <router-view></router-view>
                 </div>
                 <Footer class="footer"></Footer>

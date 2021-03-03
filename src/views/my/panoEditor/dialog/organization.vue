@@ -1,22 +1,22 @@
 <template>
     <div class="organization_div">
         <div class="content">
-            <div class="title">
+            <!--div class="title">
                 <span>云船码头机构网络通道链接</span>
                 <img src="../images/icon_en.png"/>
                 <img src="../images/icon_pro.png"/>
                 <img src="../images/icon_ser.png"/>
-                <img src="../images/icon_link.png"/>
-                <img src="../images/icon_contact.png"/>
                 <img src="../images/icon_pano.png" @click="close"/>
-            </div>
+            </div-->
             <div class="carousel_div">
-                <el-carousel :interval="4000" type="card" height="200px" v-for="item in attachmentContent.filter(item => item.title ==='轮播图')" :key="item.id">>
+                <el-carousel ::interval="4000" arrow="always" height="200px"
+                             v-for="item in attachmentContent.filter(item => item.title ==='轮播图')" :key="item.id">
                     <el-carousel-item v-for="i in item.contents" :key="i.id">
                         <img :src="globalConfig.imagePath + i.extra" class="carousel-image">
                     </el-carousel-item>
                 </el-carousel>
             </div>
+            <div style="font-size: 18px; font-weight: bold; padding: 10px 0px; margin: 10px 0px;"> {{title}}</div>
             <div style="font-size: 14px; line-height: 21px">
                 <el-row :gutter="12" v-for="item in attachmentContent.filter(item => item.title ==='官方链接')" :key="item.id">
                     <el-col :span="24" v-for="i in item.contents" :key="i.id" >
@@ -52,6 +52,11 @@
                 default: []
             }
         },
+        data(){
+            return {
+                title:""
+            }
+        },
         methods:{
             open() {
                 console.log("打开");
@@ -59,6 +64,10 @@
             close(){
                 this.$emit("close_content");
             }
+        },
+        mounted() {
+            var pData=this.$store.getters.getProjectData;
+            this.title=pData.name;
         }
     };
 </script>
@@ -95,15 +104,13 @@
         }
     }
     .content{
-        padding: 10px 30px;
-        width: 80%;
-    //height:100%;
-        max-width: 800px;
+        padding: 15px 15px;
+        width: 100%;
+        //height:100%;
         margin: auto;
         background-color: rgba(255,255,255,1);
     }
     .carousel_div{
-        margin-top: 60px;
     }
     .en_title{
         font-size: 16px; font-weight: bold; padding: 10px 0px; margin: 10px 0px;

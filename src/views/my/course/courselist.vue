@@ -24,7 +24,7 @@
 
 <script>
     import { mapGetters } from 'vuex';
-    import { project,projectDetail } from "@/model/api";
+    import { project,projectDetail, scene } from "@/model/api";
 
     export default {
         name: "courselist",
@@ -60,6 +60,7 @@
                     }
                 });
             },
+            /*
             goDetail({ id, name }) {
                 if (!window.localStorage.getItem("authorization")) {
                     return this.$store.commit("TOGGLE_LOGIN");
@@ -92,6 +93,76 @@
                         this.$store.commit("SET_PROJECT_DATA",res.data);
                     }
                 });
+            },
+
+             */
+            goDetail({ id, name, blockId }) {
+                const getProjectDetail = () => {
+                    // 通过任务id获取项目的有关信息
+                    projectDetail(
+                        {
+                            type: "GET"
+                        },
+                        id
+                    ).then(res => {
+                        if (res.suceeded) {
+                            this.$store.commit("SET_PROJECT_DATA",res.data);
+                            const params = {
+                                taskId: "0",
+                                projectId: id,
+                                from: "2",
+                                name
+                            };
+                            this.$router.push({
+                                name: "panoEditor",
+                                params
+                            });
+                            this.$store.commit("SETHISTROY", {
+                                path: `0/${id}/1`,
+                                params
+                            });
+                        }
+                    });
+                };
+
+                const getSceneAllList = () => {
+                    // 通过任务id获取项目的有关信息
+                    scene(
+                        {
+                            type: "GET",
+                            data:{
+                                blockId,
+                                page:1,
+                                size:1000
+                            }
+                        },
+                    ).then(res => {
+                        if (res.suceeded) {
+                            this.$store.commit("SET_SCENEALLLIST",res.data.content);
+                            getProjectDetail();
+                        }
+                    });
+                };
+                const getSceneList = () => {
+                    // 通过任务id获取项目的有关信息
+                    scene(
+                        {
+                            type: "GET",
+                            data:{
+                                blockId,
+                                projectId: id,
+                                page:1,
+                                size:1000
+                            }
+                        },
+                    ).then(res => {
+                        if (res.suceeded) {
+                            this.$store.commit("SET_SCENELIST",res.data.content);
+                            getSceneAllList();
+                        }
+                    });
+                };
+                getSceneList();
             }
         },
         computed:{
