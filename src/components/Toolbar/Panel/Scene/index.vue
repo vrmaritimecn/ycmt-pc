@@ -78,7 +78,7 @@ export default {
             isOpenEditHotContent: false,
             engType: false, // 是否专业英语
             orderList: [],
-            sceneAllList:[]
+            sceneAllList:this.$store.state.messageStore.sceneAllList
         };
     },
     components: {
@@ -106,7 +106,6 @@ export default {
                             return;
                         }
                     }
-                    //this.attachmentList.length > 0 && this.select(0, this.attachmentList[0]);
                 });
             }
         },
@@ -135,7 +134,21 @@ export default {
                     this.attachmentList = data;
                     this.$store.commit("SET_SCENELIST",data)
                     var k = document.getElementById("kr");
-                    k.call("loadscene("+ k.get("xml.scene") +",null, MERGE|KEEPVIEW, BLEND(1));");
+                    if(this.attachmentList.length>0){
+                        for(var i=0; i<this.attachmentList.length; i++){
+                            var code=k.get("xml.scene");
+                            var tCode="scene_"+this.attachmentList[i]["code"];
+                            if(code==tCode){
+                                k.call("loadscene("+ code +",null, MERGE|KEEPVIEW, BLEND(1));");
+                                return
+                            }
+                        }
+                        k.call("loadscene(scene_"+ this.attachmentList[0]["code"] +",null, MERGE, BLEND(1));");
+                    }else{
+                        k.call("loadscene(scene_"+ this.sceneAllList[0]["code"] +",null, MERGE, BLEND(1));");
+                    }
+
+
                 }
             } catch (error) {
                 console.error(error);
@@ -193,23 +206,6 @@ export default {
                 });
             }
         },
-        getSceneAllList(){
-            var pData=this.$store.getters.getProjectData;
-            scene({
-                    type: "GET",
-                    data:{
-                        blockId: pData.blockId,
-                        page:1,
-                        size:1000
-                    }
-                },
-            ).then(res => {
-                if (res.suceeded) {
-                    this.sceneAllList=res.data.content;
-                    this.$store.commit("SET_SCENEALLLIST",res.data.content);
-                }
-            });
-        },
         deleteScene(val) {
             this.$confirm(`此操作仅删除${val.name}场景，场景标签将被暂时保留, 是否继续?`, "提示", {
                 confirmButtonText: "确定",
@@ -242,15 +238,13 @@ export default {
         loadpanoscene(item) {
             this.sceneIndex=item.id;
             this.hotspotIndex=-1;
-            //window.loadpanoscene && window.loadpanoscene(val.id, val.code);
             var k = document.getElementById("kr");
             k.call("loadscene(scene_"+item.code+",null, MERGE, BLEND(1));");
         },
         backFindHotspot(val) {
             this.hotspotIndex=val.id
-            const getScenePara = window.getScenePara && window.getScenePara();
-            //window.backFindHotspot && backFindHotspot(getScenePara[0], val.locationX, val.locationY);
-            window.backFindHotspot && backFindHotspot(getScenePara[0], val.locationX, val.locationY);
+            var k = document.getElementById("kr");
+            k.call("lookto("+ val.locationX +","+ val.locationY +");");
         },
         addHotspot() {
             //const getScenePara = window.getScenePara && window.getScenePara();
@@ -450,7 +444,7 @@ export default {
         }
     },
     mounted() {
-        this.getSceneAllList();
+        //this.getSceneAllList();
         window._hban_addScene = () => {
             if (!this.drawerHotContent) {
                 Bus.$emit("toolbar-hander", { type: "drawerHotContent", index: 3 });

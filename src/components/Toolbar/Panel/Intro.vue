@@ -220,22 +220,13 @@ export default {
 
         width: 296px;
         padding: 0px 0px !important;
-        /*
-        height: 100%;
-        //background: #fff;
-
-        // transform: translateX(296px);
-        // display: none;
-
-        top: 0;
-        right: 46px;
-        //overflow: hidden;*/
         top: 0px;
         right: 46px;
         position: absolute;
         height: 100%;
         overflow: hidden;
         background-color: #ffffff;
+        box-shadow: -2px 0 3px -1px  rgba(0, 0, 0, .12);
         .panel_sidebar_title{
             width: 290px !important;
             height:44px;

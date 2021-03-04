@@ -56,7 +56,6 @@ export default {
     data() {
         return {
             shows: {
-                // isOpenAttachment: false, // 附件弹窗
                 isOpenHotspotConent: false, // 批量新增弹窗
                 isOpenEditAttachment: false // 修改附件弹窗
             },
@@ -120,6 +119,7 @@ export default {
                 );
                 if (suceeded) {
                     this.attachmentList = data || [];
+                    console.log(this.attachmentList);
                     const currentIndex = this.currentIndex;
                     if (this.attachmentList[currentIndex]) {
                         //this.editOpenEditAttachmentName(this.attachmentList[currentIndex]);
@@ -129,51 +129,53 @@ export default {
                 console.error(error);
             }
         },
-        /*
-        getSceneList() {
-            const projectId = this.$route.params.projectId;
-            // 通过任务id获取项目的有关信息
-            projectDetail(
-                {
-                    type: "GET",
-                    data: {
-                        projectId,
-                        page: "1",
-                        size: "1000"
-                    }
-                },
-                `${projectId}/panoInfo`
-            ).then(res => {
-                if (res.suceeded) {
-                    this.sceneList = res.data;
-                }
-            });
-        },
-         */
         selectGuide(val){
             this.guideIndex=val.id;
             this.sceneList=this.$store.state.messageStore.sceneList;
-
-            console.log(this.sceneList);
             if(val.sceneId){
                 for(var i=0; i<this.sceneList.length; i++){
                     if(val.sceneId==this.sceneList[i]["id"]) {
                         this.sceneIndex=val.sceneId;
-                        const guideLocation={
-                                id: val.sceneId,
-                                code: "scene_"+this.sceneList[i]["code"],
-                                locationX: val.locationX,
-                                locationY: val.locationY,
-                                fov: val.locationFov
-                            };
-                        //window.loadpanoscene && window.loadpanoscene(this.sceneList[i]["id"], this.sceneList[i]["code"]);
-                        window.gotoSceneLocation && window.gotoSceneLocation(guideLocation);
+                        var k = document.getElementById("kr");
+                        var code=k.get("xml.scene");
+                        var tCode="scene_"+this.sceneList[i]["code"]
+                        if(code==tCode){
+                            k.call("lookto("+ val.locationX +","+ val.locationY +","+ val.locationFov +");");
+                        }else{
+                            k.call("loadscene(scene_"+this.sceneList[i]["code"]+",view.hlookat="+ val.locationX +"&view.vlookat="+ val.locationY +"&view.fov="+ val.locationFov +", MERGE, BLEND(1));");
+                        }
                     }
                 }
             }
             else{
                 this.sceneIndex=-1;
             }
+        },
+        autoGuide(index){
+            console.log(index)
+            var audio = document.getElementById('guideSound');
+            audio.src = globalConfig.imagePath + this.attachmentList[index]["contents"][1]["extra"];
+            audio.loop = false;
+            audio.play();
+            audio.addEventListener('ended', function () {
+                index=index+1;
+                this.autuGuide(index);
+                /*
+                console.log("addEventListener")
+                console.log(this.attachmentList)
+                if(index < this.attachmentList.length)
+                {
+                    index=index+1;
+                    this.autuGuide(index);
+                }
+                else{
+                    index=0;
+                    return
+                }
+
+                 */
+            }, false);
+
         },
         addGuide() {
             const projectId = this.$route.params.projectId;
@@ -248,7 +250,9 @@ export default {
         },
         loadpanoscene(val) {
             this.sceneIndex=val.id;
-            window.loadpanoscene && window.loadpanoscene(val.id, val.code);
+            //window.loadpanoscene && window.loadpanoscene(val.id, val.code);
+            var k = document.getElementById("kr");
+            k.call("loadscene(scene_"+val.code+",null, MERGE, BLEND(1));");
         },
         findGuide(val) {
             const { locationX, locationY, sceneId } = val;

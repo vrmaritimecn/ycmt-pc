@@ -141,7 +141,9 @@ export default {
                     this.list = list;
                     const id = this.$store.state.toolbarStore.id;
                     const code = this.$store.state.toolbarStore.code;
-                    window.loadpanoscene && window.loadpanoscene(id, code);
+                    //window.loadpanoscene && window.loadpanoscene(id, code);
+                    var k = document.getElementById("kr");
+                    k.call("loadscene(scene_"+code+",null, MERGE, BLEND(1));");
                 }
             });
         },

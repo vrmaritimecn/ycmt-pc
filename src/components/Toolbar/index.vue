@@ -83,11 +83,13 @@ export default {
                     text: "场景地图",
                     icon: "icontubiaoweb-41",
                     type: "",
-                    call:"TOGGLESCENETHUMB",
+                    call:"goMap",
                     status:"100"
                 }
             ],
             currentIndex: null,
+            mapStatus:false,
+            originalSceneCode:"",
             proStatus: this.$store.state.messageStore.projectData.status
         };
     },
@@ -111,18 +113,76 @@ export default {
                 this.$store.commit("SETTOGGLETOOLBR", type);
             }
             else if(this.toolbarList[index]["call"]){
-                const call=this.toolbarList[index]["call"];
-                this.$store.commit(call);
-                this.$store.commit("SETTOGGLETOOLBR", "none");
+                this.conductCall(this.toolbarList[index]["call"]);
             }
 
+        },
+        conductCall(fucName){
+            this.$options.methods[fucName].call(this);
+        },
+        SETISOPENMESSAGE(){
+            this.$store.commit("SETISOPENMESSAGE");
+            this.$store.commit("SETTOGGLETOOLBR", "none");
+        },
+        goMap(){
+            var pData=this.$store.state.messageStore.projectData;
+            var sceneList=this.$store.state.messageStore.sceneAllList;
+            var k = document.getElementById("kr");
+            var code=k.get("xml.scene")
+            for(var i=0; i<sceneList.length; i++){
+                var tCode="scene_"+sceneList[i]["code"];
+                if(tCode==code) {
+                    this.originalSceneId=sceneList[i]["id"];
+                    var address="loadpanoscene('%FIRSTXML%/xmls/block_id_"+ pData.blockPanoPath +"/panos.xml',scene_"+ sceneList[i]["imageUrl"] +",null, MERGE, BLEND(0.5));"
+                    address=address+"lookto("+sceneList[i].locationX/1000+","+sceneList[i].locationY/1000+",,,true,true,js(_ycmt_renderMapPoint("+ sceneList[i]["id"] +")))；";
+                     console.log(address)
+                    k.call(address);
+                    this.$store.commit("SETTOGGLETOOLBR", "none");
+                    this.originalSceneCode=sceneList[i]["code"]
+                    return;
+                }
+            }
+            k.call("loadscene(scene_"+ this.originalSceneCode +",null, MERGE, BLEND(1));");
+
+        },
+        renderMapPoint(val){
+            console.log("renderMapPoint");
+            var k = document.getElementById("kr");
+            var kstr = "";
+            var hotspotList=this.$store.state.messageStore.sceneAllList;
+            for (var i = 0; i < hotspotList.length; i++) {
+                var code = hotspotList[i]["code"];
+                var h0H ="hotspot" + hotspotList[i]["code"];
+                var h0B ="hLayer" + hotspotList[i]["code"] + "0B";
+                var h0T ="hLayer" + hotspotList[i]["code"] + "0T";
+                var hH = hotspotList[i]["locationX"]/1000;
+                var hV = hotspotList[i]["locationY"]/1000;
+
+                kstr=kstr + "addhotspot("+ h0H +");";
+                kstr=kstr + "set(hotspot["+ h0H +"].ath,"+ hH +");";
+                kstr=kstr + "set(hotspot["+ h0H +"].atv,"+ hV +");";
+                kstr=kstr + "set(hotspot["+ h0H +"].keep, false);";
+                kstr=kstr + "set(hotspot["+ h0H +"].visible,true);";
+                kstr=kstr + "set(hotspot["+ h0H +"].type,'image');";
+                kstr=kstr + "set(hotspot["+ h0H +"].width,25);";
+                kstr=kstr + "set(hotspot["+ h0H +"].height,25);";
+                if(val==hotspotList[i]["id"]){
+                    kstr=kstr + "set(hotspot["+ h0H +"].url,'%FIRSTXML%/image/redpoint.png');";
+                }
+                else{
+                    kstr=kstr + "set(hotspot["+ h0H +"].url,'%FIRSTXML%/image/ppoint.png');";
+                }
+                kstr=kstr + "set(hotspot["+ h0H +"].onclick, 'loadscene(scene_"+hotspotList[i]["code"]+",null, MERGE, BLEND(1));');";
+                kstr=kstr + "set(hotspot["+ h0H +"].onhover, 'showtext("+hotspotList[i]["name"]+", ycmt)');";
+            }
+            k.call(kstr);
         },
         initBus() {
             Bus.$on("toolbar-hander", data => {
                 const { type, index } = data;
                 this.toolbarHander(type, index);
             });
-        }
+        },
     },
     mounted() {
         this.initBus();
@@ -131,6 +191,9 @@ export default {
         window._hban_openToolbarType = type => {
             return this.isCurrentOpen[type];
         };
+        window._ycmt_renderMapPoint=(id)=>{
+            this.renderMapPoint(id);
+        }
     }
 };
 </script>
