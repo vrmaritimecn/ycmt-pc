@@ -76,7 +76,7 @@ export default {
                     text: "用户点评",
                     icon: "icontubiaoweb-13",
                     type: "",
-                    call:"SETISOPENMESSAGE",
+                    call:"TOGGLESCENETHUMB",
                     status:"100"
                 },
                 {
@@ -122,6 +122,11 @@ export default {
         },
         SETISOPENMESSAGE(){
             this.$store.commit("SETISOPENMESSAGE");
+            this.$store.commit("SETTOGGLETOOLBR", "none");
+        },
+        TOGGLESCENETHUMB(){
+
+            this.$store.commit("TOGGLESCENETHUMB");
             this.$store.commit("SETTOGGLETOOLBR", "none");
         },
         goMap(){

@@ -28,7 +28,7 @@
                         <div class="chat_inner_div">
                             <div class="chat_header" @click="closeMessage">您正在对“{{projectName}}”开展讨论</div>
                             <div class="chat_main" id="_message_container">
-                                <div :class="item.userId==userId && item.projectId==messageItem.projectId? 'chat_div_right':'chat_div_left'" v-for="item in messageList">
+                                <div  v-if="item.projectId==projectId" :class="item.userId==userId? 'chat_div_right':'chat_div_left'" v-for="item in messageList">
                                     <img class="chat_div_icon" :src="globalConfig.imagePath + item.userAvatar" width="100%" height="100%"/>
                                     <span class="chat_div_info" @click="findMessageLocation(item)">
                                 <img :src="globalConfig.imagePath + item.imageUrl" v-if="item.imageUrl"/>
@@ -56,37 +56,6 @@
                         <span v-for="item in sceneAllList" @click="gotoScene(item)">{{item.name}}</span>
                     </div>
                 </div>
-            <!--/div-->
-            <!--
-            <div style="z-index:100; width:100%; position: absolute; top:5px; text-align: center;" visible="false"><el-button size="mini" type="warning">警告按钮</el-button></div>
-            <div style="z-index:100; width:120px; position: absolute; bottom:5px; left:5px; text-align: center;" visible="false">
-                <el-button style="margin:10px" size="mini" type="primary" icon="el-icon-edit" circle></el-button>
-                <el-button style="margin:10px" size="mini" type="success" icon="el-icon-check" circle></el-button>
-            </div>
-            <div style="z-index:100; width:50px; height: 300px; position: absolute; bottom:5px; right:50px; text-align: center;" visible="false">
-                <el-button style="margin:10px" size="mini" type="primary" icon="el-icon-edit" circle></el-button>
-                <el-button style="margin:10px" size="mini" type="success" icon="el-icon-check" circle></el-button>
-                <el-button style="margin:10px" size="mini" type="info" icon="el-icon-message" circle></el-button>
-                <el-button style="margin:10px" size="mini" type="warning" icon="el-icon-star-off" circle></el-button>
-                <el-button style="margin:10px" size="mini" type="danger" icon="el-icon-delete" circle></el-button>
-                <SceneList ref="SceneList" v-if="isShowToobar"></SceneList>
-                <GuideList v-if="isShowToobar"></GuideList>
-            </div>
-            <div style="z-index:100; position: absolute; top:5px; right:50px; text-align: center;" visible="false">
-                <el-card style="margin: 10px;" shadow="always">
-                    总是显示
-                </el-card>
-            </div>
-            <el-drawer  title="场景列表区" :visible.sync="drawer" :direction="direction" :before-close="handleClose">
-                <div>水平场景</div>
-                <div>水平场景分类</div>
-            </el-drawer>
-            <el-drawer  title="地图列表区" :visible.sync="drawer" :direction="direction" :before-close="handleClose">
-                <div>地图列表</div>
-            </el-drawer>
-            -->
-            <!-- 右侧工具条 -->
-            <!--Toolbar v-if="isShowToobar"></Toolbar-->
         </div>
         <Toolbar v-if="ToolbarStatus"></Toolbar>
     </div>
@@ -102,12 +71,10 @@ import archives from "./dialog/archives.vue";
 import english from "./dialog/english.vue";
 import inspection from "./dialog/inspection.vue";
 import Title from "@/components/common/Title";
-//import SceneList from "@/components/Toolbar/Panel/Scene/sceneList";
-//import GuideList from "@/components/Toolbar/Panel/Guide/guideList.vue";
 import { mapGetters } from "vuex";
 import SockJS from  'sockjs-client';
 import Stomp from 'stompjs';
-import { hotspot, hotspotContent, scene } from "@/model/api";
+import { hotspot, hotspotContent, scene ,upload} from "@/model/api";
 import utils from "@/widget/utils";
 
 export default {
@@ -346,7 +313,7 @@ export default {
                 embedpano({
                     id: "kr",
                     swf: "/pano/tour.swf",
-                    xml: `/pano/${this.isShowToobar ? "enter" : "enter"}.xml`,
+                    xml: "/pano/enter.xml",
                     target: "p_editor",
                     html5: "prefer",
                     mobilescale: 1.0,
@@ -694,6 +661,156 @@ export default {
                     color: #FFFFFF;
                 }
             }
+            .chat_outer_div{
+                z-index:100;
+                height: 90%;
+                min-height: 400px;
+                max-height: 600px;
+                width:360px;
+                position: absolute;
+                bottom:15px;
+                right:15px;
+                text-align: center;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+                //    background-color: #ff6900;
+                border-radius: 5px;
+                overflow: hidden;
+                .chat_inner_div{
+                    position:relative; width: 100%; height:100%;
+                    .chat_header{
+                        position:absolute;
+                        top:0px;
+                        width:100%;
+                        height:40px;
+                        background-color: #324155;
+                        color:#F7F7F7;
+                        line-height: 40px;
+                    }
+                    .chat_main{
+                        position:absolute;
+                        top:40px;
+                        width:100%;
+                        height:calc(100% - 80px);
+                        background-color: #ffffff;
+                        overflow-y: auto;
+                        padding: 20px 0px;
+                        .chat_div_right {
+                            position: relative;
+                            width: 260px;
+                            margin-top: 15px;
+                            margin-bottom: 15px;
+                            margin-left: 85px;
+                            margin-right: 15px;
+                            overflow: hidden;
+
+                            .chat_div_icon {
+                                position: absolute;
+                                width: 30px;
+                                height: 30px;
+                                border-radius: 5px;
+                                right: 0px;
+                                //margin-right: 10px;
+                            }
+
+                            .chat_div_info {
+                                //position: absolute;
+                                width: 180px;
+                                min-width: 10px;
+                                margin-right: 40px;
+                                border-radius: 2px 2px 2px 2px;
+                                background-color: #324155;
+                                text-align: left;
+                                padding: 8px;
+                                color: #F7F7F7;
+                                font-family: "PingFang SC";
+                                font-size: 12px;
+                                letter-spacing: 1px;
+                                line-height: 20px;
+                                align-content: start;
+                                display: inline-block;
+                                img{
+                                    display: block;
+                                    width: 94%;
+                                    margin:auto;
+                                    margin-top: 5px;
+                                    margin-bottom: 5px;
+                                }
+                            }
+                        }
+                        .chat_div_left{
+                            position: relative;
+                            width: 260px;
+                            margin-top: 15px;
+                            margin-bottom: 15px;
+                            margin-left: 15px;
+                            margin-right: 85px;
+                            overflow:hidden;
+                            .chat_div_icon{
+                                position: absolute;
+                                width: 30px;
+                                height: 30px;
+                                border-radius: 5px;
+                                left:0px;
+                                //margin-right: 10px;
+                            }
+                            .chat_div_info{
+                                //position: absolute;
+                                width: 180px;
+                                min-width: 10px;
+                                margin-left: 40px;
+                                border-radius: 2px 2px 2px 2px;
+                                background-color: #324155;
+                                text-align: left;
+                                padding: 8px;
+                                color: #F7F7F7;
+                                font-family: "PingFang SC";
+                                font-size: 12px;
+                                letter-spacing: 1px;
+                                line-height: 20px;
+                                align-content: start;
+                                display: inline-block;
+                                span{
+
+                                }
+                                img{
+                                    display: block;
+                                    width: 94%;
+                                    margin:auto;
+                                    margin-top: 5px;
+                                    margin-bottom: 5px;
+                                }
+                            }
+                        }
+                    }
+                    .chat_footer{
+                        position:absolute;
+                        bottom:0px;
+                        width:100%;
+                        height:40px;
+                        background-color: #e9e9e9;
+                        padding: 8px 8px;
+                        display: flex;
+                        justify-content: space-between;
+                        vertical-align: center;
+                        input{
+                            background-color: #ffffff;
+                            outline-style: none ;
+                            border: 1px solid #ccc;
+                            border-radius: 4px;
+                            width: 260px;
+                            padding: 0px 5px;
+                            //margin-top: 8px;
+                            height: 24px;
+                        }
+                        img{
+                            width: 16px;
+                            height: 16px;
+                            margin-top: 4px;
+                            cursor: pointer;
+                        }
+                    }
+                }
+            }
             .panel_sidebar {
                 width: 296px;
                 height: 100%;
@@ -725,156 +842,7 @@ export default {
                 }
             }
         }
-        .chat_outer_div{
-            z-index:100;
-            height: 90%;
-            min-height: 400px;
-            max-height: 600px;
-            width:360px;
-            position: absolute;
-            bottom:15px;
-            right:15px;
-            text-align: center;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
-            //    background-color: #ff6900;
-            border-radius: 5px;
-            overflow: hidden;
-            .chat_inner_div{
-                position:relative; width: 100%; height:100%;
-                .chat_header{
-                    position:absolute;
-                    top:0px;
-                    width:100%;
-                    height:40px;
-                    background-color: #324155;
-                    color:#F7F7F7;
-                    line-height: 40px;
-                }
-                .chat_main{
-                    position:absolute;
-                    top:40px;
-                    width:100%;
-                    height:calc(100% - 80px);
-                    background-color: #ffffff;
-                    overflow-y: auto;
-                    padding: 20px 0px;
-                    .chat_div_right {
-                        position: relative;
-                        width: 260px;
-                        margin-top: 15px;
-                        margin-bottom: 15px;
-                        margin-left: 85px;
-                        margin-right: 15px;
-                        overflow: hidden;
 
-                        .chat_div_icon {
-                            position: absolute;
-                            width: 30px;
-                            height: 30px;
-                            border-radius: 5px;
-                            right: 0px;
-                            //margin-right: 10px;
-                        }
-
-                        .chat_div_info {
-                            //position: absolute;
-                            width: 180px;
-                            min-width: 10px;
-                            margin-right: 40px;
-                            border-radius: 2px 2px 2px 2px;
-                            background-color: #324155;
-                            text-align: left;
-                            padding: 8px;
-                            color: #F7F7F7;
-                            font-family: "PingFang SC";
-                            font-size: 12px;
-                            letter-spacing: 1px;
-                            line-height: 20px;
-                            align-content: start;
-                            display: inline-block;
-                            img{
-                                display: block;
-                                width: 94%;
-                                margin:auto;
-                                margin-top: 5px;
-                                margin-bottom: 5px;
-                            }
-                        }
-                    }
-                    .chat_div_left{
-                        position: relative;
-                        width: 260px;
-                        margin-top: 15px;
-                        margin-bottom: 15px;
-                        margin-left: 15px;
-                        margin-right: 85px;
-                        overflow:hidden;
-                        .chat_div_icon{
-                            position: absolute;
-                            width: 30px;
-                            height: 30px;
-                            border-radius: 5px;
-                            left:0px;
-                            //margin-right: 10px;
-                        }
-                        .chat_div_info{
-                            //position: absolute;
-                            width: 180px;
-                            min-width: 10px;
-                            margin-left: 40px;
-                            border-radius: 2px 2px 2px 2px;
-                            background-color: #324155;
-                            text-align: left;
-                            padding: 8px;
-                            color: #F7F7F7;
-                            font-family: "PingFang SC";
-                            font-size: 12px;
-                            letter-spacing: 1px;
-                            line-height: 20px;
-                            align-content: start;
-                            display: inline-block;
-                            span{
-
-                            }
-                            img{
-                                display: block;
-                                width: 94%;
-                                margin:auto;
-                                margin-top: 5px;
-                                margin-bottom: 5px;
-                            }
-                        }
-                    }
-                }
-                .chat_footer{
-                    position:absolute;
-                    bottom:0px;
-                    width:100%;
-                    height:40px;
-                    background-color: #e9e9e9;
-                    padding: 8px 8px;
-                    display: flex;
-                    justify-content: space-between;
-                    vertical-align: center;
-                    input{
-                        background-color: #ffffff;
-                        outline-style: none ;
-                        border: 1px solid #ccc;
-                        border-radius: 4px;
-                        width: 260px;
-                        padding: 0px 5px;
-                        //margin-top: 8px;
-                        height: 24px;
-                    }
-                    img{
-                        width: 16px;
-                        height: 16px;
-                        margin-top: 4px;
-                        cursor: pointer;
-                    }
-                }
-            }
-        }
         .title-box {
             height: 55px;
             background: #fff;
