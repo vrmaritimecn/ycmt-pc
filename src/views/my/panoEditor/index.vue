@@ -17,6 +17,7 @@
                     <english v-if="mainSite.isOpenEnglish" :hotspotContent="hotspotContent" @close_content="close_content"></english>
                     <archives v-if="mainSite.isOpenArchives" :hotspotContent="hotspotContent" @close_content="close_content"></archives>
                     <inspection v-if="mainSite.isOpenInspection" :hotspotContent="hotspotContent" @close_content="close_content"></inspection>
+                    <attachment v-if="mainSite.isOpenAttachment" :attachmentContent="attachmentContent" @close_content="close_content"></attachment>
                 </div>
             </div>
         </div>
@@ -26,34 +27,51 @@
                 <div id="p_editor" >
                     <div class="chat_outer_div" v-show="isOpenMessage">
                         <div class="chat_inner_div">
-                            <div class="chat_header" @click="closeMessage">您正在对“{{projectName}}”开展讨论</div>
-                            <div class="chat_main" id="_message_container">
+                            <!--div class="chat_header" @click="closeMessage">您正在对“{{projectName}}”开展讨论</div-->
+                            <div class="chat_main" id="_message_container" v-show="childDivStatus.chat">
                                 <div  v-if="item.projectId==projectId" :class="item.userId==userId? 'chat_div_right':'chat_div_left'" v-for="item in messageList">
                                     <img class="chat_div_icon" :src="globalConfig.imagePath + item.userAvatar" width="100%" height="100%"/>
                                     <span class="chat_div_info" @click="findMessageLocation(item)">
-                                <img :src="globalConfig.imagePath + item.imageUrl" v-if="item.imageUrl"/>
-                                <p>{{item.message}}</p>
-                            </span>
-
+                                        <img :src="globalConfig.imagePath + item.imageUrl" v-if="item.imageUrl"/>
+                                        <p>{{item.message}}</p>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="scene_content" v-if="childDivStatus.thumb">
+                                <span v-for="item in sceneList" @click="gotoScene(item)">{{item.name}}</span>
+                            </div>
+                            <div class="guide_content" v-if="childDivStatus.guide">
+                                <div class="guide_item" v-for="(item,index) in guideContent" :key="item.id">
+                                    <img class="guide_item_icon" src="./images/icon_rob.png" @click="controlAutoGuide(index,'all')"/>
+                                     <span class="guide_item_info" @click="controlAutoGuide(index,'single')">
+                                        <p>{{item.title}}</p>
+                                    </span>
                                 </div>
                             </div>
                             <div class="chat_footer">
-                                <input  v-model="messageItem.message"></input>
-                                <img src="./images/icon_sent.png" @click="sendMessage"/>
+                                <!--input  v-model="messageItem.message"></input-->
+                                <img src="./images/icon_back.png"  @click=""/>
+                                <input  v-model="messageItem.message" @click="setChildDivStatus('chat')" :style="{width: inputActive? '4rem' : '1rem'}" ></input>
+                                <img src="./images/icon_sent.png" @click="sendMessage" v-show="inputActive"/>
                                 <el-upload
                                         class="upload-demo"
                                         :action="uploadUrl"
                                         :show-file-list="false"
                                         :on-success="handleAvatarSuccess"
                                         :before-upload="beforeAvatarUpload">
-                                    <img src="./images/icon_pic.png"/>
+                                    <img src="./images/icon_pic.png" v-show="inputActive"/>
                                 </el-upload>
-                                <img src="./images/icon_mic.png" @click="cleanMessage"/>
+                                <img src="./images/icon_ser.png" v-if="butStatus.isThumbBnt" v-show="!inputActive" @click="showThumb"/>
+                                <img src="./images/icon_link.png" v-if="butStatus.isLinKBut" v-show="!inputActive" @click="showAttachment"/>
+                                <img src="./images/icon_play.png" v-if="butStatus.isPlayBut" v-show="!inputActive" @click="showGuideContent"/>
+                                <img src="./images/icon_pos.png" v-if="butStatus.isPosBut" v-show="!inputActive" @click="goMap"/>
+                                <img src="./images/icon_share.png" v-show="!inputActive" @click="cleanMessage"/>
+                                <img v-if="inputActive" src="./images/icon_pro.png"  @click="setChildDivStatus('shift')"/>
+                                <img v-if="!inputActive" src="./images/icon_contact.png"  @click="setChildDivStatus('shift')"/>
+
+
                             </div>
                         </div>
-                    </div>
-                    <div class="scene_content" v-show="isOpenSceneThumb">
-                        <span v-for="item in sceneAllList" @click="gotoScene(item)">{{item.name}}</span>
                     </div>
                 </div>
         </div>
@@ -74,22 +92,33 @@ import Title from "@/components/common/Title";
 import { mapGetters } from "vuex";
 import SockJS from  'sockjs-client';
 import Stomp from 'stompjs';
-import { hotspot, hotspotContent, scene ,upload} from "@/model/api";
+import { hotspot, hotspotContent, scene,projectDetail,user} from "@/model/api";
 import utils from "@/widget/utils";
+import messageStore from "../../../store/message";
+
+var k = null;
+function krpano_onready_callback (krpano_interface) {
+    k = krpano_interface;
+}
 
 export default {
     data() {
         return {
-            isOpenMessage : false,
+            address:"",
+            originalSceneCode:"",
+            inputActive:false,
+            isShow: false,
+            isOpenMessage : true,
             //isOpenSceneThumb: false,
             stompClient:'',
             timer:'',
             text:"",
             isSend:false,
+            projectData:{},
             projectId:"",
             projectName:"",
             projectModuleName:"",
-            ToolbarStatus:false,
+            ToolbarStatus:true,
             contentTitle:"",
             contentLock:false,
             sceneId:"",
@@ -113,19 +142,35 @@ export default {
                 isOpenTechnology:false,
                 isOpenEnglish:false,
                 isOpenArchives:false,
-                isOpenInspection:false
+                isOpenInspection:false,
+                isOpenAttachment:false
             },
+            childDivStatus:{
+                chat: false,
+                message : true,
+                thumb: false,
+                map:false,
+                guide:false
+            },
+            butStatus:{
+                isThumbBnt:true,
+                isLinKBut:true,
+                isPlayBut:true,
+                isPosBut:true,
+            },
+            guideContent:[],
             hotspotContent:[],
             attachmentContent:[],
-            sceneAllList:[]
+            sceneAllList:[],
+            sceneList:[],
+            userData:{},
+            autoGuideStatus:false
         };
     },
 
     components: {
         Title,
         Toolbar,
-        //SceneList,
-        //GuideList,
         company,
         organization,
         technology,
@@ -189,6 +234,7 @@ export default {
         ])
     },
     watch:{
+        /*
         getIsOpenMessage:function(){
             this.isOpenMessage=this.$store.getters.getIsOpenMessage
             console.log(this.isOpenMessage)
@@ -198,6 +244,7 @@ export default {
                 //this.disconnect();
             }
         },
+
         getProjectData:function() {
             var pData=this.$store.state.messageStore.projectData;
             console.log(pData);
@@ -205,6 +252,7 @@ export default {
             this.projectId=pData.id;
             this.attachmentContent=pData.attachments;
         },
+        */
         getMessageList:function() {
             this.$nextTick(() => {
                 var container = this.$el.querySelector("#_message_container");
@@ -218,6 +266,190 @@ export default {
         }
     },
     methods: {
+        getUserDetail() {
+            this.$nextTick(() => {
+                user(
+                    {
+                        type: "get"
+                    },
+                    "/personal"
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.$store.commit({
+                            type: "SET_USERBLOCKLIST_INFO",
+                            plylaod: res.data.blocks
+                        });
+                        this.$store.commit("SET_USERID", res.data.id);
+                        this.$store.commit("SET_USERDATA", res.data);
+                        this.userData = res.data;
+                        this.userId = res.data.id;
+                    }
+                });
+            });
+        },
+        getProject() {
+            const projectId = this.$route.params.projectId;
+            this.$nextTick(() => {
+                projectDetail(
+                    {
+                        type: "get"
+                    },
+                    projectId
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.projectData = res.data;
+                        this.projectId=res.data.id;
+                        this.projectName=res.data.name;
+                        this.initModule(res.data)
+                        this.initSceneAllList();
+                        this.initWebSocket();
+                        this.$store.commit("SET_PROJECT_DATA", res.data);
+                    }
+                });
+            });
+        },
+        initSceneAllList(){
+            this.sceneList=this.$store.state.messageStore.sceneList;
+            this.sceneAllList=this.$store.state.messageStore.sceneAllList;
+            this.initPano();
+        },
+        initPano() {
+            const projectId = this.$route.params.projectId;
+            this.$store.commit("SETPROJECTID",projectId);
+            this.$nextTick(() => {
+                embedpano({
+                    swf: "/pano/tour.swf",
+                    xml: `/pano/enter.xml?${new Date().getTime()}`,
+                    target: "p_editor",
+                    html5: "prefer",
+                    mobilescale: 1.0,
+                    passQueryParameters: true,
+                    onready: krpano_onready_callback
+                });
+                this._ycmt_buildProject();
+            });
+        },
+        async _ycmt_buildProject() {
+            console.log("_ycmt_buildProject");
+            if(this.sceneList.length>0) {
+                this.address="loadpanoscene('%FIRSTXML%/xmls/block_id_"+ this.projectData.blockPanoPath +"/panos.xml',scene_"+ this.sceneList[0].code +",null, MERGE, BLEND(2));"
+            }else{
+                this.address="loadpanoscene('%FIRSTXML%/xmls/block_id_"+ this.projectData.blockPanoPath +"/panos.xml',scene_"+ this.sceneAllList[0].code +",null, MERGE, BLEND(2));"
+            }
+            k.call(this.address);
+        },
+        initModule(data){
+            if(data.moduleName=="船商在线"){
+                this.contentTitle="云船码头企业微官网"
+                this.attachmentContent=[];
+                this.attachmentContent=data.attachments;
+                console.log("moduleName")
+                console.log(this.attachmentContent)
+                this.isShowContent=true
+                this.mainSite.isOpenCompany=true
+                this.mainSite.isOpenOrganization=false
+                this.mainSite.isOpenTechnology=false
+                this.mainSite.isOpenEnglish=false
+                this.mainSite.isOpenArchives=false
+                this.mainSite.isOpenInspection=false
+                if(this.projectData.status<3){
+                    this.ToolbarStatus=true
+                }
+                else{
+                    this.ToolbarStatus=false
+                }
+                this.contentLock=true
+                this.butStatus.isThumbBnt=false
+                this.butStatus.isLinKBut=true;
+                this.butStatus.isPlayBut=false;
+                this.butStatus.isPosBut=false;
+            }
+            if(data.moduleName=="机构直通车"){
+                this.contentTitle="云船码头海事机构直通车"
+                this.attachmentContent=[];
+                this.attachmentContent=data.attachments;
+                this.isShowContent=true
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=true
+                this.mainSite.isOpenTechnology=false
+                this.mainSite.isOpenEnglish=false
+                this.mainSite.isOpenArchives=false
+                this.mainSite.isOpenInspection=false
+                if(this.projectData.status<3){
+                    this.ToolbarStatus=true
+                }
+                else{
+                    this.ToolbarStatus=false
+                }
+                this.contentLock=true
+                this.butStatus.isThumbBnt=false
+                this.butStatus.isLinKBut=true;
+                this.butStatus.isPlayBut=false;
+                this.butStatus.isPosBut=false;
+            }
+            if(data.moduleName=="技术热点"){
+                this.contentTitle="云船码头技术热点解读"
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=false
+                this.mainSite.isOpenTechnology=true
+                this.mainSite.isOpenEnglish=false
+                this.mainSite.isOpenArchives=false
+                this.mainSite.isOpenInspection=false
+                this.ToolbarStatus=true
+                this.contentLock=false
+
+                this.butStatus.isThumbBnt=true
+                this.butStatus.isLinKBut= this.projectData.attachments.length>0? true : false;
+                this.butStatus.isPlayBut= this.projectData.guidances.length>0? true : false;
+                this.butStatus.isPosBut=true;
+            }
+            if(data.moduleName=="航运英语"){
+                this.contentTitle="云船码头航运英语大家学"
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=false
+                this.mainSite.isOpenTechnology=false
+                this.mainSite.isOpenEnglish=true
+                this.mainSite.isOpenArchives=false
+                this.mainSite.isOpenInspection=false
+                this.ToolbarStatus=true
+                this.contentLock=false
+                this.butStatus.isThumbBnt=true
+                this.butStatus.isLinKBut= this.projectData.attachments.length>0? true : false;
+                this.butStatus.isPlayBut= this.projectData.guidances.length>0? true : false;
+                this.butStatus.isPosBut=true;
+            }
+            if(data.moduleName=="船东宝"){
+                this.contentTitle="云船码头船舶档案卡"
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=false
+                this.mainSite.isOpenTechnology=false
+                this.mainSite.isOpenEnglish=false
+                this.mainSite.isOpenArchives=true
+                this.mainSite.isOpenInspection=false
+                this.ToolbarStatus=true
+                this.contentLock=false
+                this.butStatus.isThumbBnt=true
+                this.butStatus.isLinKBut= this.projectData.attachments.length>0? true : false;
+                this.butStatus.isPlayBut= this.projectData.guidances.length>0? true : false;
+                this.butStatus.isPosBut=true;
+            }
+            if(data.moduleName=="远程检查"){
+                this.contentTitle="云船码头项目检验卡"
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=false
+                this.mainSite.isOpenTechnology=false
+                this.mainSite.isOpenEnglish=false
+                this.mainSite.isOpenArchives=false
+                this.mainSite.isOpenInspection=true
+                this.ToolbarStatus=true
+                this.contentLock=false
+                this.butStatus.isThumbBnt=true
+                this.butStatus.isLinKBut= this.projectData.attachments.length>0? true : false;
+                this.butStatus.isPlayBut= this.projectData.guidances.length>0? true : false;
+                this.butStatus.isPosBut=true;
+            }
+        },
+        /*
         initModule(data){
             if(data.moduleName=="船商在线"){
                 this.contentTitle="云船码头企业微官网"
@@ -306,6 +538,7 @@ export default {
                 this.contentLock=false
             }
         },
+
         initPano(a1,a2,a3) {
             const projectId = this.$route.params.projectId;
             this.$store.commit("SETPROJECTID",projectId);
@@ -322,6 +555,7 @@ export default {
                 });
             });
         },
+        */
         close_content(){
           this.isShowContent=false;
         },
@@ -427,33 +661,6 @@ export default {
             }
             return isJPG && isLt2M;
         },
-        initSceneAllList(){
-            console.log("___scene")
-            console.log("___scene")
-            var pData=this.$store.getters.getProjectData;
-            var sList=this.$store.getters.getSceneList;
-            console.log(pData);
-            console.log(sList);
-            this.projectName=pData.name;
-            this.projectId=pData.id;
-            scene(
-                {
-                    type: "GET",
-                    data:{
-                        blockId: pData.blockId,
-                        page:1,
-                        size:1000
-                    }
-                },
-            ).then(res => {
-                if (res.suceeded) {
-                    this.sceneAllList=res.data.content;
-                    this.$store.commit("SET_SCENEALLLIST",res.data.content);
-                    this.initPano(pData,sList,this.sceneAllList);
-                    this.initModule(pData);
-                }
-            });
-        },
         gotoScene(data){
             console.log(data);
             var k = document.getElementById("kr");
@@ -551,7 +758,142 @@ export default {
                     this.loading = false;
                 }
             });
-        }
+        },
+        showAttachment(){
+            //var pData=this.$store.state.message.projectData;
+            this.attachmentContent=this.projectData.attachments;
+            this.isShowContent=true;
+            this.mainSite.isOpenCompany=false
+            this.mainSite.isOpenOrganization=false
+            this.mainSite.isOpenTechnology=false
+            this.mainSite.isOpenEnglish=false
+            this.mainSite.isOpenArchives=false
+            this.mainSite.isOpenInspection=false
+            if(this.projectData.moduleName=="船商在线"){
+                this.mainSite.isOpenCompany=true
+                this.mainSite.isOpenOrganization=false
+                this.mainSite.isOpenAttachment=false
+            }
+            if(this.projectData.moduleName=="机构直通车"){
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=true
+                this.mainSite.isOpenAttachment=false
+            }else{
+                this.mainSite.isOpenCompany=false
+                this.mainSite.isOpenOrganization=false
+                this.mainSite.isOpenAttachment=true
+            }
+        },
+        showGuideContent(){
+            if(this.childDivStatus.guide){
+                this.setChildDivStatus('none');
+            }else
+            {
+                this.setChildDivStatus('guide');
+                this.guideContent=this.projectData.guidances
+                console.log(this.guideContent);
+            }
+        },
+        showThumb(){
+            if(this.childDivStatus.thumb){
+                this.setChildDivStatus('none');
+            }else{
+                this.setChildDivStatus('thumb');
+                this.sceneList=this.$store.state.message.sceneList
+                console.log(this.sceneList)
+            }
+
+        },
+        goMap(){
+            this.setChildDivStatus('none')
+            var sceneList=this.$store.state.message.sceneAllList;
+            // var k = document.getElementById("kr");
+            var code=k.get("xml.scene")
+            for(var i=0; i<sceneList.length; i++){
+                var tCode="scene_"+sceneList[i]["code"];
+                if(tCode==code) {
+                    this.originalSceneId=sceneList[i]["id"];
+                    var address="loadpanoscene('%FIRSTXML%/xmls/block_id_"+ this.projectData.blockPanoPath +"/panos.xml',scene_"+ sceneList[i]["imageUrl"] +",null, MERGE, BLEND(0.5));"
+                    address=address+"lookto("+sceneList[i].locationX/1000+","+sceneList[i].locationY/1000+",,,true,true,js(_ycmt_renderMapPoint("+ sceneList[i]["id"] +")))；";
+                    k.call(address);
+                    this.isOpenMap=true;
+                    //this.$store.commit("SETTOGGLETOOLBR", "none");
+                    this.originalSceneCode=sceneList[i]["code"]
+                    return;
+                }
+            }
+            k.call("loadscene(scene_"+ this.originalSceneCode +",null, MERGE, BLEND(1));");
+
+        },
+        renderMapPoint(val){
+            console.log("renderMapPoint");
+            //var k = document.getElementById("kr");
+            var kstr = "";
+            var hotspotList=this.$store.state.message.sceneAllList;
+            for (var i = 0; i < hotspotList.length; i++) {
+                var code = hotspotList[i]["code"];
+                var h0H ="hotspot" + hotspotList[i]["code"];
+                var h0B ="hLayer" + hotspotList[i]["code"] + "0B";
+                var h0T ="hLayer" + hotspotList[i]["code"] + "0T";
+                var hH = hotspotList[i]["locationX"]/1000;
+                var hV = hotspotList[i]["locationY"]/1000;
+
+                kstr=kstr + "addhotspot("+ h0H +");";
+                kstr=kstr + "set(hotspot["+ h0H +"].ath,"+ hH +");";
+                kstr=kstr + "set(hotspot["+ h0H +"].atv,"+ hV +");";
+                kstr=kstr + "set(hotspot["+ h0H +"].keep, false);";
+                kstr=kstr + "set(hotspot["+ h0H +"].visible,true);";
+                kstr=kstr + "set(hotspot["+ h0H +"].type,'image');";
+                kstr=kstr + "set(hotspot["+ h0H +"].width,25);";
+                kstr=kstr + "set(hotspot["+ h0H +"].height,25);";
+                if(val==hotspotList[i]["id"]){
+                    kstr=kstr + "set(hotspot["+ h0H +"].url,'%FIRSTXML%/image/redpoint.png');";
+                }
+                else{
+                    kstr=kstr + "set(hotspot["+ h0H +"].url,'%FIRSTXML%/image/ppoint.png');";
+                }
+                kstr=kstr + "set(hotspot["+ h0H +"].onclick, 'loadscene(scene_"+hotspotList[i]["code"]+",null, MERGE, BLEND(1));');";
+                kstr=kstr + "set(hotspot["+ h0H +"].onhover, 'showtext("+hotspotList[i]["name"]+", ycmt)');";
+            }
+            k.call(kstr);
+        },
+        setChildDivStatus(val){
+            console.log(val)
+            if(val=="shift"){
+                if(this.inputActive){
+                    this.inputActive=false
+                    this.childDivStatus.chat=false
+                }else{
+                    this.inputActive=true
+                    this.childDivStatus.chat=true
+                    this.childDivStatus.thumb=false
+                    this.childDivStatus.guide=false
+                }
+            }
+            if(val=="none"){
+                this.childDivStatus.chat=false
+                this.childDivStatus.thumb=false
+                this.childDivStatus.guide=false
+            }
+            if(val=="chat"){
+                this.inputActive=true
+                this.childDivStatus.chat=true
+                this.childDivStatus.thumb=false
+                this.childDivStatus.guide=false
+            }
+            if(val=="thumb"){
+                this.inputActive=false
+                this.childDivStatus.chat=false
+                this.childDivStatus.thumb=true
+                this.childDivStatus.guide=false
+            }
+            if(val=="guide"){
+                this.inputActive=false
+                this.childDivStatus.chat=false
+                this.childDivStatus.thumb=false
+                this.childDivStatus.guide=true
+            }
+        },
     },
     beforeDestroy() {
         window.removepano && window.removepano("kr");
@@ -561,6 +903,24 @@ export default {
         clearInterval(this.timer);
     },
     mounted() {
+        this.getProject();
+        this.getUserDetail();
+        window._ycmt_setSceneId = () => {
+            this.getSceneId();
+        };
+        window._show_content=(hotspotId)=>{
+            this.getHotContent(hotspotId);
+        };
+        window._ycmt_buildProject = () => {
+            this._ycmt_buildProject();
+        };
+        window._ycmt_initialScene = () => {
+            this._ycmt_initialScene();
+        };
+        window._ycmt_playSound = (index) => {
+            this._ycmt_playSound(index);
+        };
+        /*
         this.$store.commit("RESETSCENETHUMB");
         this.initSceneAllList();
         this.initWebSocket();
@@ -574,6 +934,7 @@ export default {
             this.getHotContent(hotspotId);
         };
         this.$store.commit("ISOPENORG");
+         */
     }
 }
 </script>
@@ -618,13 +979,6 @@ export default {
             }
         }
         .p_editor_container {
-            /*
-            height: 100%;
-            display: flex;
-            position: relative;
-            padding-right: 46px;
-
-             */
             flex: 1;
             height: 100%;
             background-size: 100%;
@@ -639,31 +993,9 @@ export default {
                 transition: width 300ms;
                 position: relative;
             }
-            .scene_content{
-                width: 100%;
-                height:100px;
-                bottom:0px;
-                z-index:12;
-                background-color: #ffffff;
-                //margin-right: 6px;
-                position: absolute;
-                padding: 10px;
-                overflow-y: scroll;
-                span{
-                    display: inline-block;
-                    height: 24px;
-                    line-height: 24px;
-                    //width: 80px;
-                    padding: 5px 8px;
-                    border-radius: 2px;
-                    background-color: #324155;
-                    margin: 5px 10px;
-                    color: #FFFFFF;
-                }
-            }
             .chat_outer_div{
                 z-index:100;
-                height: 90%;
+                height: 70%;
                 min-height: 400px;
                 max-height: 600px;
                 width:360px;
@@ -671,12 +1003,16 @@ export default {
                 bottom:15px;
                 right:15px;
                 text-align: center;
-                box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
+                pointer-events: none;
+                //box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
                 //    background-color: #ff6900;
-                border-radius: 5px;
+                border-radius: 2px;
                 overflow: hidden;
                 .chat_inner_div{
-                    position:relative; width: 100%; height:100%;
+                    position:relative;
+                    width: 100%;
+                    height:100%;
+                    pointer-events: none;
                     .chat_header{
                         position:absolute;
                         top:0px;
@@ -688,12 +1024,14 @@ export default {
                     }
                     .chat_main{
                         position:absolute;
-                        top:40px;
+                        border-radius: 2px;
+                        top:0px;
                         width:100%;
-                        height:calc(100% - 80px);
-                        background-color: #ffffff;
+                        height:calc(100% - 42px);
+                        background: #F7F7F7;
                         overflow-y: auto;
                         padding: 20px 0px;
+                        pointer-events: auto;
                         .chat_div_right {
                             position: relative;
                             width: 260px;
@@ -782,21 +1120,92 @@ export default {
                             }
                         }
                     }
+                    .scene_content{
+                        position:absolute;
+                        border-radius: 2px;
+                        top:0px;
+                        width:100%;
+                        height:calc(100% - 42px);
+                        background: rgba(0,0,0,0.4);
+                        overflow-y: auto;
+                        padding: 20px 0px;
+                        pointer-events: auto;
+                        span{
+                            display: inline-block;
+                            height: 24px;
+                            line-height: 24px;
+                            //width: 80px;
+                            padding: 5px 8px;
+                            border-radius: 2px;
+                            background-color: #324155;
+                            margin: 5px 10px;
+                            color: #FFFFFF;
+                        }
+                    }
+                    .guide_content{
+                        position:absolute;
+                        border-radius: 2px;
+                        top:0px;
+                        width:100%;
+                        height:calc(100% - 42px);
+                        background: rgba(0,0,0,0.4);
+                        overflow-y: auto;
+                        padding: 20px 0px;
+                        pointer-events: auto;
+                        .guide_item{
+                            position: relative;
+                            width: 260px;
+                            margin-top: 15px;
+                            margin-bottom: 15px;
+                            margin-left: 85px;
+                            margin-right: 15px;
+                            overflow: hidden;
+                            pointer-events: auto;
+                            .guide_item_icon {
+                                position: absolute;
+                                width: 30px;
+                                height: 30px;
+                                border-radius: 5px;
+                                right: 0px;
+                            }
+
+                            .guide_item_info {
+                                //position: absolute;
+                                width: 180px;
+                                margin-right: 40px;
+                                border-radius: 0.08rem;
+                                background-color: #F7F7F7;
+                                text-align: left;
+                                padding: 0.2rem;
+                                color: #324155;
+                                font-family: "PingFang SC";
+                                font-size: 12px;
+                                letter-spacing: 1px;
+                                line-height: 20px;
+                                align-content: start;
+                                display: inline-block;
+                                pointer-events: auto;
+                            }
+                        }
+                    }
                     .chat_footer{
                         position:absolute;
                         bottom:0px;
+                        border-radius: 4px;
                         width:100%;
                         height:40px;
-                        background-color: #e9e9e9;
+                        background-color: #f7f7f7;
                         padding: 8px 8px;
                         display: flex;
                         justify-content: space-between;
                         vertical-align: center;
+                        pointer-events: auto;
                         input{
                             background-color: #ffffff;
                             outline-style: none ;
                             border: 1px solid #ccc;
                             border-radius: 4px;
+                            flex: 1;
                             width: 260px;
                             padding: 0px 5px;
                             //margin-top: 8px;
@@ -806,6 +1215,8 @@ export default {
                             width: 16px;
                             height: 16px;
                             margin-top: 4px;
+                            margin-left: 5px;
+                            margin-right: 5px;
                             cursor: pointer;
                         }
                     }

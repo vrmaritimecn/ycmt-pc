@@ -9,6 +9,7 @@ const state = {
     moduleId: 0,
     moduleList:[],
     classId: -1,
+    userData:{},
     userId:-1,
     userblock: [],
     userState:false,
@@ -63,6 +64,9 @@ const mutations = {
     SETCLASSLIST(state, plylaod) {
         state.classList = plylaod;
     },
+    SET_USERDATA(state,plylaod){
+        state.userData=plylaod
+    },
     SET_USERID(state,index){
         state.userId=index
     },
@@ -112,6 +116,9 @@ const getters ={
     getClassList(state)
     {
         return state.classList
+    },
+    getUserData(state){
+        return state.userData
     },
     getUserId(state){
         return state.userId
