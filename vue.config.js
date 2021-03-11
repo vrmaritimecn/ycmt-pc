@@ -136,7 +136,8 @@ module.exports = {
                 changeOrigin: true
             },
             "/wss":{
-                target: "http://47.102.199.232:8089/panopipe",
+                //target: "https://api-tutor.vr2shipping.com/panopipe",
+                target: "https://tutor-pc.vr2shipping.com",
                 changeOrigin: true,
                 pathRewrite: (path, req) => path.replace("/wss", "")
             }

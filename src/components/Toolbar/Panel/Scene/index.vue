@@ -166,7 +166,6 @@ export default {
             getScenePara[1]=k.get("view.fov");
             getScenePara[2]=k.get("view.hlookat");
             getScenePara[3]=k.get("view.vlookat");
-            console.log(code);
             for(var i=0; i<this.sceneAllList.length; i++){
                 var tempC="scene_"+this.sceneAllList[i]["code"];
                 if(tempC==code) {
@@ -279,7 +278,6 @@ export default {
                     var k = document.getElementById("kr");
                     k.call("loadscene("+ k.get("xml.scene") +",null, MERGE|KEEPVIEW, BLEND(1));");
                     this.getSceneList();
-                    //window.loadpanoscene && window.loadpanoscene(res.data.id, res.data.code);
                     this.$message({
                         type: "success",
                         message: "新增成功!"
@@ -315,8 +313,11 @@ export default {
         },
         updateHotspot(val) {
             const id = val.id;
-            const getScenePara = window.getScenePara && window.getScenePara();
-            const parasm = { locationFov:getScenePara[1], locationX: getScenePara[2], locationY: getScenePara[3] };
+            const parasm = {
+                locationFov: k.get("view.fov"),
+                locationX: k.get("view.hlookat"),
+                locationY: k.get("view.vlookat")
+            };
             hotspotDetail({ type: "put", data: parasm }, id).then(res => {
                 if (res.suceeded) {
                     this.getSceneList();

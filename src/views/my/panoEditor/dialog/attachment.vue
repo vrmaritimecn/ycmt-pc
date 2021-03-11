@@ -32,13 +32,17 @@
 
 <script>
     export default {
-        name: "inspection",
+        name: "attachment",
+        data(){
+            return{
+                aId:0,
+            }
+        },
         props: {
-            hotspotContent: {
+            attachmentContent: {
                 type: Array,
                 default: []
             },
-            aId:0,
         },
         methods:{
             close(){
@@ -48,11 +52,7 @@
                 return val.replace(/↵/g,"\n");
             },
             set_aId(index){
-                if(this.aId==index){
-                    this.aId=-1
-                }else{
-                    this.aId=index
-                }
+                this.aId=index
             }
         }
     };
@@ -96,6 +96,15 @@
                 margin-right: 20px;
                 cursor: pointer;
             }
+        }
+        .en_title{
+            font-size: 16px; font-weight: bold; padding: 10px 0px; margin: 10px 0px;
+        }
+        .en_detail{
+            font-size: 14px;
+            line-height: 28px;
+            text-indent: 20px;
+            white-space: pre-line;
         }
         .tech_title{
             font-size: 16px; font-weight: bold; padding: 0px 0px; margin-top: 60px;

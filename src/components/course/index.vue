@@ -43,6 +43,7 @@
 </template>
 <script>
 import "@/widget/lazyLoad";
+import { projectDetail, scene } from "@/model/api";
 export default {
     data() {
         return {};
@@ -54,7 +55,7 @@ export default {
         }
     },
     methods: {
-        goDetail({ id, name }) {
+/*        goDetail({ id, name }) {
             if (!window.localStorage.getItem("authorization")) {
                 return this.$store.commit("TOGGLE_LOGIN");
             }
@@ -72,6 +73,76 @@ export default {
                 path: `0/${id}/1`,
                 params
             });
+        },
+
+  */
+            goDetail( {id, blockId} ) {
+                console.log("goDetail");
+            const getProjectDetail = () => {
+                // 通过任务id获取项目的有关信息
+                projectDetail(
+                    {
+                        type: "GET"
+                    },
+                    id
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.$store.commit("SET_PROJECT_DATA",res.data);
+                        this.$router.push({
+                            name: "panoEditor",
+                            params: {
+                                taskId: "0",
+                                projectId: id,
+                                from: "2"
+                            }
+                        });
+                    }
+                });
+            };
+            const getSceneAllList = () => {
+                // 通过任务id获取项目的有关信息
+                scene(
+                    {
+                        type: "GET",
+                        data:{
+                            blockId,
+                            page:1,
+                            size:1000
+                        }
+                    },
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.$store.commit("SET_SCENEALLLIST",res.data.content);
+                        console.log("sceneAllList")
+                        console.log(res.data.content)
+                        getProjectDetail();
+                    }
+                });
+            };
+            const getSceneList = () => {
+                // 通过任务id获取项目的有关信息
+                console.log("getSceneList")
+                scene(
+                    {
+                        type: "GET",
+                        data:{
+                            blockId,
+                            projectId: id,
+                            page:1,
+                            size:1000
+                        }
+                    },
+                ).then(res => {
+                    if (res.suceeded) {
+                        this.$store.commit("SET_SCENELIST",res.data.content);
+                        console.log("sceneList")
+                        console.log(res.data.content)
+                        //getSceneAllList();
+
+                    }
+                });
+            };
+            getSceneList();
         }
     }
 };

@@ -25,9 +25,8 @@
         <div class="p_editor_container">
             <!--div :style="{ width: isOpenedWidth.width }"-->
                 <div id="p_editor" >
-                    <div class="chat_outer_div" v-show="isOpenMessage">
+                    <!--div class="chat_outer_div" v-show="isOpenMessage">
                         <div class="chat_inner_div">
-                            <!--div class="chat_header" @click="closeMessage">您正在对“{{projectName}}”开展讨论</div-->
                             <div class="chat_main" id="_message_container" v-show="childDivStatus.chat">
                                 <div  v-if="item.projectId==projectId" :class="item.userId==userId? 'chat_div_right':'chat_div_left'" v-for="item in messageList">
                                     <img class="chat_div_icon" :src="globalConfig.imagePath + item.userAvatar" width="100%" height="100%"/>
@@ -49,8 +48,6 @@
                                 </div>
                             </div>
                             <div class="chat_footer">
-                                <!--input  v-model="messageItem.message"></input-->
-                                <img src="./images/icon_back.png"  @click=""/>
                                 <input  v-model="messageItem.message" @click="setChildDivStatus('chat')" :style="{width: inputActive? '4rem' : '1rem'}" ></input>
                                 <img src="./images/icon_sent.png" @click="sendMessage" v-show="inputActive"/>
                                 <el-upload
@@ -67,11 +64,47 @@
                                 <img src="./images/icon_pos.png" v-if="butStatus.isPosBut" v-show="!inputActive" @click="goMap"/>
                                 <img src="./images/icon_share.png" v-show="!inputActive" @click="cleanMessage"/>
                                 <img v-if="inputActive" src="./images/icon_pro.png"  @click="setChildDivStatus('shift')"/>
-                                <img v-if="!inputActive" src="./images/icon_contact.png"  @click="setChildDivStatus('shift')"/>
-
-
                             </div>
                         </div>
+                    </div-->
+                    <div class="chat_main" id="_message_container" v-show="childDivStatus.chat">
+                        <div  v-if="item.projectId==projectId" :class="item.userId==userId? 'chat_div_right':'chat_div_left'" v-for="item in messageList">
+                            <img class="chat_div_icon" :src="globalConfig.imagePath + item.userAvatar" width="100%" height="100%"/>
+                            <span class="chat_div_info" @click="findMessageLocation(item)">
+                                        <img :src="globalConfig.imagePath + item.imageUrl" v-if="item.imageUrl"/>
+                                        <p>{{item.message}}</p>
+                                    </span>
+                        </div>
+                    </div>
+                    <div class="scene_content" v-if="childDivStatus.thumb">
+                        <span v-for="item in sceneList" @click="gotoScene(item)">{{item.name}}</span>
+                    </div>
+                    <div class="guide_content" v-if="childDivStatus.guide">
+                        <div class="guide_item" v-for="(item,index) in guideContent" :key="item.id">
+                            <img class="guide_item_icon" src="./images/icon_rob.png" @click="controlAutoGuide(index,'all')"/>
+                            <span class="guide_item_info" @click="controlAutoGuide(index,'single')">
+                                        <p>{{item.title}}</p>
+                                    </span>
+                        </div>
+                    </div>
+                    <div class="chat_footer">
+                        <input  v-model="messageItem.message" @click="setChildDivStatus('chat')" :style="{width: inputActive? '4rem' : '1rem'}" ></input>
+                        <img src="./images/icon_sent.png" @click="sendMessage" v-show="inputActive"/>
+                        <el-upload
+                                class="upload-demo"
+                                :action="uploadUrl"
+                                :show-file-list="false"
+                                :on-success="handleAvatarSuccess"
+                                :before-upload="beforeAvatarUpload">
+                            <img src="./images/icon_pic.png" v-show="inputActive"/>
+                        </el-upload>
+                        <img src="./images/icon_ser.png" v-if="butStatus.isThumbBnt" v-show="!inputActive" @click="showThumb"/>
+                        <img src="./images/icon_link.png" v-if="butStatus.isLinKBut" v-show="!inputActive" @click="showAttachment"/>
+                        <img src="./images/icon_play.png" v-if="butStatus.isPlayBut" v-show="!inputActive" @click="showGuideContent"/>
+                        <img src="./images/icon_pos.png" v-if="butStatus.isPosBut" v-show="!inputActive" @click="goMap"/>
+                        <img src="./images/icon_share.png" v-show="!inputActive" @click="cleanMessage"/>
+                        <img v-if="inputActive" src="./images/icon_pro.png"  @click="setChildDivStatus('shift')"/>
+                        <!--img v-if="!inputActive" src="./images/icon_contact.png"  @click="setChildDivStatus('shift')"/-->
                     </div>
                 </div>
         </div>
@@ -88,15 +121,15 @@ import technology from "./dialog/technology.vue";
 import archives from "./dialog/archives.vue";
 import english from "./dialog/english.vue";
 import inspection from "./dialog/inspection.vue";
+import attachment from "./dialog/attachment.vue";
 import Title from "@/components/common/Title";
 import { mapGetters } from "vuex";
-import SockJS from  'sockjs-client';
-import Stomp from 'stompjs';
-import { hotspot, hotspotContent, scene,projectDetail,user} from "@/model/api";
-import utils from "@/widget/utils";
-import messageStore from "../../../store/message";
+//import SockJS from  'sockjs-client';
+//import Stomp from 'stompjs';
+import { hotspot, hotspotContent, scene, projectDetail, user } from "@/model/api";
 
 var k = null;
+
 function krpano_onready_callback (krpano_interface) {
     k = krpano_interface;
 }
@@ -118,7 +151,7 @@ export default {
             projectId:"",
             projectName:"",
             projectModuleName:"",
-            ToolbarStatus:true,
+            ToolbarStatus:false,
             contentTitle:"",
             contentLock:false,
             sceneId:"",
@@ -164,6 +197,7 @@ export default {
             sceneAllList:[],
             sceneList:[],
             userData:{},
+            userId:"",
             autoGuideStatus:false
         };
     },
@@ -176,7 +210,8 @@ export default {
         technology,
         english,
         archives,
-        inspection
+        inspection,
+        attachment
     },
     computed: {
         isOpenOrg:function(){
@@ -220,9 +255,6 @@ export default {
             // 1 我的任务过 2课件过来
             return this.$route.params.from === "1";
         },
-        userId(){
-            return this.$store.getters.getUserId
-        },
         messageList(){
             return this.$store.getters.getMessageList
         },
@@ -230,29 +262,10 @@ export default {
             "getIsOpenMessage",
             "getProjectData",
             "getMessageList",
-            "getIsOpenOrg"
+            "getIsOpenOrg",
         ])
     },
     watch:{
-        /*
-        getIsOpenMessage:function(){
-            this.isOpenMessage=this.$store.getters.getIsOpenMessage
-            console.log(this.isOpenMessage)
-            if(this.isOpenMessage){
-            }
-            else{
-                //this.disconnect();
-            }
-        },
-
-        getProjectData:function() {
-            var pData=this.$store.state.messageStore.projectData;
-            console.log(pData);
-            this.projectName=pData.name;
-            this.projectId=pData.id;
-            this.attachmentContent=pData.attachments;
-        },
-        */
         getMessageList:function() {
             this.$nextTick(() => {
                 var container = this.$el.querySelector("#_message_container");
@@ -309,15 +322,31 @@ export default {
             });
         },
         initSceneAllList(){
-            this.sceneList=this.$store.state.messageStore.sceneList;
-            this.sceneAllList=this.$store.state.messageStore.sceneAllList;
-            this.initPano();
+            this.sceneList=this.$store.getters.getSceneList;
+            scene(
+                {
+                    type: "GET",
+                    data:{
+                        blockId: this.projectData.blockId,
+                        page:1,
+                        size:1000
+                    }
+                },
+            ).then(res => {
+                if (res.suceeded) {
+                    console.log(this.sceneAllList)
+                    this.sceneAllList = res.data.content;
+                    this.initPano();
+                }
+            });
+            console.log(this.sceneAllList)
         },
         initPano() {
             const projectId = this.$route.params.projectId;
             this.$store.commit("SETPROJECTID",projectId);
             this.$nextTick(() => {
                 embedpano({
+                    id:"kr",
                     swf: "/pano/tour.swf",
                     xml: `/pano/enter.xml?${new Date().getTime()}`,
                     target: "p_editor",
@@ -331,6 +360,8 @@ export default {
         },
         async _ycmt_buildProject() {
             console.log("_ycmt_buildProject");
+            console.log(this.sceneList);
+            console.log(this.sceneAllList);
             if(this.sceneList.length>0) {
                 this.address="loadpanoscene('%FIRSTXML%/xmls/block_id_"+ this.projectData.blockPanoPath +"/panos.xml',scene_"+ this.sceneList[0].code +",null, MERGE, BLEND(2));"
             }else{
@@ -339,6 +370,12 @@ export default {
             k.call(this.address);
         },
         initModule(data){
+            if(this.projectData.status<3){
+                this.ToolbarStatus=true
+            }
+            else{
+                this.ToolbarStatus=false
+            }
             if(data.moduleName=="船商在线"){
                 this.contentTitle="云船码头企业微官网"
                 this.attachmentContent=[];
@@ -352,15 +389,9 @@ export default {
                 this.mainSite.isOpenEnglish=false
                 this.mainSite.isOpenArchives=false
                 this.mainSite.isOpenInspection=false
-                if(this.projectData.status<3){
-                    this.ToolbarStatus=true
-                }
-                else{
-                    this.ToolbarStatus=false
-                }
                 this.contentLock=true
                 this.butStatus.isThumbBnt=false
-                this.butStatus.isLinKBut=true;
+                this.butStatus.isLinKBut=false;
                 this.butStatus.isPlayBut=false;
                 this.butStatus.isPosBut=false;
             }
@@ -375,15 +406,10 @@ export default {
                 this.mainSite.isOpenEnglish=false
                 this.mainSite.isOpenArchives=false
                 this.mainSite.isOpenInspection=false
-                if(this.projectData.status<3){
-                    this.ToolbarStatus=true
-                }
-                else{
-                    this.ToolbarStatus=false
-                }
+
                 this.contentLock=true
                 this.butStatus.isThumbBnt=false
-                this.butStatus.isLinKBut=true;
+                this.butStatus.isLinKBut=false;
                 this.butStatus.isPlayBut=false;
                 this.butStatus.isPosBut=false;
             }
@@ -449,136 +475,31 @@ export default {
                 this.butStatus.isPosBut=true;
             }
         },
-        /*
-        initModule(data){
-            if(data.moduleName=="船商在线"){
-                this.contentTitle="云船码头企业微官网"
-                var pData=this.$store.getters.getProjectData;
-                this.attachmentContent=[];
-                this.attachmentContent=data.attachments;
-                this.isShowContent=true
-                this.mainSite.isOpenCompany=true
-                this.mainSite.isOpenOrganization=false
-                this.mainSite.isOpenTechnology=false
-                this.mainSite.isOpenEnglish=false
-                this.mainSite.isOpenArchives=false
-                this.mainSite.isOpenInspection=false
-                var pData=this.$store.state.messageStore.projectData
-                if(pData.status<3){
-                    this.ToolbarStatus=true
-                }
-                else{
-                    this.ToolbarStatus=false
-                }
-                this.contentLock=true
-            }
-            if(data.moduleName=="机构直通车"){
-                this.contentTitle="云船码头海事机构直通车"
-                var pData=this.$store.getters.getProjectData;
-                this.attachmentContent=[];
-                this.attachmentContent=data.attachments;
-                this.isShowContent=true
-                this.mainSite.isOpenCompany=false
-                this.mainSite.isOpenOrganization=true
-                this.mainSite.isOpenTechnology=false
-                this.mainSite.isOpenEnglish=false
-                this.mainSite.isOpenArchives=false
-                this.mainSite.isOpenInspection=false
-                if(pData.status<3){
-                    this.ToolbarStatus=true
-                }
-                else{
-                    this.ToolbarStatus=false
-                }
-                this.contentLock=true
-
-            }
-            if(data.moduleName=="技术热点"){
-                this.contentTitle="云船码头技术热点解读"
-                this.mainSite.isOpenCompany=false
-                this.mainSite.isOpenOrganization=false
-                this.mainSite.isOpenTechnology=true
-                this.mainSite.isOpenEnglish=false
-                this.mainSite.isOpenArchives=false
-                this.mainSite.isOpenInspection=false
-                this.ToolbarStatus=true
-                this.contentLock=false
-            }
-            if(data.moduleName=="航运英语"){
-                this.contentTitle="云船码头航运英语大家学"
-                this.mainSite.isOpenCompany=false
-                this.mainSite.isOpenOrganization=false
-                this.mainSite.isOpenTechnology=false
-                this.mainSite.isOpenEnglish=true
-                this.mainSite.isOpenArchives=false
-                this.mainSite.isOpenInspection=false
-                this.ToolbarStatus=true
-                this.contentLock=false
-            }
-            if(data.moduleName=="船东宝"){
-                this.contentTitle="云船码头船舶档案卡"
-                this.mainSite.isOpenCompany=false
-                this.mainSite.isOpenOrganization=false
-                this.mainSite.isOpenTechnology=false
-                this.mainSite.isOpenEnglish=false
-                this.mainSite.isOpenArchives=true
-                this.mainSite.isOpenInspection=false
-                this.ToolbarStatus=true
-                this.contentLock=false
-            }
-            if(data.moduleName=="远程检查"){
-                this.contentTitle="云船码头项目检验卡"
-                this.mainSite.isOpenCompany=false
-                this.mainSite.isOpenOrganization=false
-                this.mainSite.isOpenTechnology=false
-                this.mainSite.isOpenEnglish=false
-                this.mainSite.isOpenArchives=false
-                this.mainSite.isOpenInspection=true
-                this.ToolbarStatus=true
-                this.contentLock=false
-            }
-        },
-
-        initPano(a1,a2,a3) {
-            const projectId = this.$route.params.projectId;
-            this.$store.commit("SETPROJECTID",projectId);
-            this.$nextTick(() => {
-                embedpano({
-                    id: "kr",
-                    swf: "/pano/tour.swf",
-                    xml: "/pano/enter.xml",
-                    target: "p_editor",
-                    html5: "prefer",
-                    mobilescale: 1.0,
-                    passQueryParameters: true,
-                    onready: buildProject(a1,a2,a3)
-                });
-            });
-        },
-        */
         close_content(){
-          this.isShowContent=false;
+            this.isShowContent=false;
+            this.mainSite.isOpenAttachment=false;
+            this.attachmentContent=[];
         },
         initWebSocket(){
             this.connection();
             let that= this;
-            // 断开重连机制,尝试发送消息,捕获异常发生时重连
             this.timer = setInterval(() => {
                 try {
-                    that.stompClient.send("/user/client/getLocation/0",{} ,"test");
+                    that.stompClient.send("/wss/ws/sendLocation",{} ,"test");
                 } catch (err) {
                     console.log("断线了: " + err);
                     that.connection();
                 }
-            }, 5000)
+            }, 1000)
         },
         connection() {
             console.log("建立联线");
-            let socket = new SockJS("/wss");
+            let socket = new SockJS("/wss/panopipe");
             this.stompClient = Stomp.over(socket);
+            console.log(this.stompClient)
             let headers = {"code":"123"}
             this.stompClient.connect(headers,() => {
-                this.stompClient.subscribe('/user/client/getLocation/'+this.$route.params.projectId, (msg) => { // 订阅服务端提供的某个topic
+                this.stompClient.subscribe('/wss/user/client/getLocation', (msg) => { // 订阅服务端提供的某个topic
                     console.log('广播成功')
                     console.log(msg);  // msg.body存放的是服务端发送给我们的信息
                     console.log("追加数据")
@@ -597,19 +518,17 @@ export default {
                    message:"输入信息不能为空"
                 });
             }else{
-                var getScenePara = window.getScenePara && window.getScenePara();
-                this.messageItem.sceneCode=getScenePara[0];
-                this.messageItem.locationFov=getScenePara[1];
-                this.messageItem.locationX=getScenePara[2];
-                this.messageItem.locationY=getScenePara[3];
-                this.messageItem.sceneId=getScenePara[4];
+                this.messageItem.sceneCode=k.get("xml.scene")
+                this.messageItem.locationFov=k.get("view.fov");
+                this.messageItem.locationX=k.get("view.hlookat");
+                this.messageItem.locationY=k.get("view.vlookat");
+                this.messageItem.sceneId=this.sceneId;
                 this.messageItem.message=this.messageItem.message;
                 this.messageItem.projectId =this.$route.params.projectId;
-                this.messageItem.userId =this.$store.getters.getUserId;
-                this.messageItem.userAvatar =this.$store.getters.getUserAvatar;
+                this.messageItem.userId =this.userId;
+                this.messageItem.userAvatar =this.userData.avatar;
                 this.messageItem.imageUrl =this.messageItem.imageUrl;
-                console.log(this.$store.getters.getUserAvatar);
-                this.stompClient.send("/user/client/getLocation/"+this.$route.params.projectId, {"code":"123"} , JSON.stringify(this.messageItem));
+                this.stompClient.send("/wss/ws/sendLocation", {"code":"123"} , JSON.stringify(this.messageItem));
                 this.messageItem.imageUrl ="";
                 this.messageItem.message = ""
             }
@@ -630,12 +549,14 @@ export default {
         },
         findMessageLocation(item){
             console.log(item);
-            var k = document.getElementById("kr");
-            var sN = "scene_" + item.sceneCode;
+            //var k = document.getElementById("kr");
+            var sN = item.sceneCode;
+            console.log(sN)
             if (sN == k.get("xml.scene")) {
+                console.log("相同")
                 k.call("lookto(" + item.locationX + "," + item.locationY + ");");
             } else {
-                k.call("tween(layer[sRS].alpha,1,0.2,DEFAULT,tween(layer[sRS].alpha,0);); loadscene(" + sN + ",view.hlookat=" + item.locationX + "&view.vlookat=" + item.locationY + "&view.fov=90,MERGE,BLEND(0.5));");
+                k.call("loadscene(" + sN + ",view.hlookat=" + item.locationX + "&view.vlookat=" + item.locationY + "&view.fov=90,MERGE,BLEND(0.5)");
             }
         },
         disconnect() {
@@ -663,13 +584,12 @@ export default {
         },
         gotoScene(data){
             console.log(data);
-            var k = document.getElementById("kr");
-            var pData=this.$store.getters.getProjectData;
-            k.call("loadpanoscene('%FIRSTXML%/xmls/block_id_"+ pData.blockPanoPath +"/panos.xml',scene_"+ data.code +");");
-            console.log("loadpanoscene('%FIRSTXML%/xmls/block_id_"+ pData.blockPanoPath +"/panos.xml',scene_"+ data.code +");");
+            this.sceneId=data.id
+            k.call("loadpanoscene('%FIRSTXML%/xmls/block_id_"+ this.projectData.blockPanoPath +"/panos.xml',scene_"+ data.code +");");
+            console.log("loadpanoscene('%FIRSTXML%/xmls/block_id_"+ this.projectData.blockPanoPath +"/panos.xml',scene_"+ data.code +");");
         },
         getSceneId(){
-            var k = document.getElementById("kr");
+
             var code=k.get("xml.scene")
             for(var i=0; i<this.sceneAllList.length; i++){
                 var tCode="scene_"+this.sceneAllList[i]["code"];
@@ -706,7 +626,7 @@ export default {
         },
         renderHotspot(val){
             console.log("renderHotspot");
-            var k = document.getElementById("kr");
+            //var k = document.getElementById("kr");
             var kstr = "";
             var hotspotList=val;
             for (var i = 0; i < hotspotList.length; i++) {
@@ -752,7 +672,24 @@ export default {
                 if (res.suceeded) {
                     this.hotspotContent = res.data || [];
                     this.isShowContent = true;
-                    console.log(this.hotspotContent);
+                    var data=this.projectData;
+                    if(data.moduleName=="技术热点"){
+                        this.contentTitle="云船码头技术热点解读"
+                        this.mainSite.isOpenTechnology=true
+                    }
+                    if(data.moduleName=="航运英语"){
+                        this.contentTitle="云船码头航运英语大家学"
+                        this.mainSite.isOpenEnglish=true
+                    }
+                    if(data.moduleName=="船东宝"){
+                        this.contentTitle="云船码头船舶档案卡"
+                        this.mainSite.isOpenArchives=true
+                    }
+                    if(data.moduleName=="远程检查"){
+                        this.contentTitle="云船码头项目检验卡"
+                        this.mainSite.isOpenInspection=true
+                    }
+                    this.mainSite.isOpenAttachment=false;
                     this.loading = false;
                 } else {
                     this.loading = false;
@@ -763,6 +700,12 @@ export default {
             //var pData=this.$store.state.message.projectData;
             this.attachmentContent=this.projectData.attachments;
             this.isShowContent=true;
+            this.mainSite.isOpenAttachment=true;
+            this.mainSite.isOpenTechnology=false
+            this.mainSite.isOpenEnglish=false
+            this.mainSite.isOpenArchives=false
+            this.mainSite.isOpenInspection=false
+            /*
             this.mainSite.isOpenCompany=false
             this.mainSite.isOpenOrganization=false
             this.mainSite.isOpenTechnology=false
@@ -783,6 +726,8 @@ export default {
                 this.mainSite.isOpenOrganization=false
                 this.mainSite.isOpenAttachment=true
             }
+
+             */
         },
         showGuideContent(){
             if(this.childDivStatus.guide){
@@ -799,14 +744,14 @@ export default {
                 this.setChildDivStatus('none');
             }else{
                 this.setChildDivStatus('thumb');
-                this.sceneList=this.$store.state.message.sceneList
+                this.sceneList=this.$store.state.messageStore.sceneList
                 console.log(this.sceneList)
             }
 
         },
         goMap(){
             this.setChildDivStatus('none')
-            var sceneList=this.$store.state.message.sceneAllList;
+            var sceneList=this.sceneAllList;
             // var k = document.getElementById("kr");
             var code=k.get("xml.scene")
             for(var i=0; i<sceneList.length; i++){
@@ -817,19 +762,17 @@ export default {
                     address=address+"lookto("+sceneList[i].locationX/1000+","+sceneList[i].locationY/1000+",,,true,true,js(_ycmt_renderMapPoint("+ sceneList[i]["id"] +")))；";
                     k.call(address);
                     this.isOpenMap=true;
-                    //this.$store.commit("SETTOGGLETOOLBR", "none");
                     this.originalSceneCode=sceneList[i]["code"]
                     return;
                 }
             }
             k.call("loadscene(scene_"+ this.originalSceneCode +",null, MERGE, BLEND(1));");
-
         },
         renderMapPoint(val){
             console.log("renderMapPoint");
             //var k = document.getElementById("kr");
             var kstr = "";
-            var hotspotList=this.$store.state.message.sceneAllList;
+            var hotspotList=this.sceneAllList;
             for (var i = 0; i < hotspotList.length; i++) {
                 var code = hotspotList[i]["code"];
                 var h0H ="hotspot" + hotspotList[i]["code"];
@@ -894,6 +837,47 @@ export default {
                 this.childDivStatus.guide=true
             }
         },
+        controlAutoGuide(index, val){
+            if(val=="all"){
+                if(this.autoGuideStatus){
+                    this.autoGuideStatus=false
+                }else{
+                    this.autoGuideStatus=true
+                    this._ycmt_playSound(index);
+                }
+            }
+            if(val=="single"){
+                this.autoGuideStatus=false
+                k.call("playsound(guideSound,'%FIRSTXML%/"+ this.guideContent[index]["contents"][1]["extra"] +"');");
+                var sN ="scene_" + this.guideContent[index]["sceneCode"];
+                if (sN == k.get("xml.scene")) {
+                    k.call("lookto(" + this.guideContent[index]["locationX"] + "," + this.guideContent[index]["locationY"] + ");");
+                } else {
+                    k.call("loadscene(" + sN + ",view.hlookat=" + this.guideContent[index]["locationX"] + "&view.vlookat=" + this.guideContent[index]["locationY"] + "&view.fov=90,MERGE,BLEND(0.5)");
+                }
+            }
+        },
+        _ycmt_playSound(index){
+            if(this.autoGuideStatus){
+                if(index<this.guideContent.length)
+                {
+                    k.call("playsound(guideSound,'%FIRSTXML%/"+ this.guideContent[index]["contents"][1]["extra"] +"',false, js(_ycmt_playSound("+(parseInt(index)+1)+")) );");
+                    var sN ="scene_" + this.guideContent[index]["sceneCode"];
+                    if (sN == k.get("xml.scene")) {
+                        k.call("lookto(" + this.guideContent[index]["locationX"] + "," + this.guideContent[index]["locationY"] + ");");
+                    } else {
+                        k.call("loadscene(" + sN + ",view.hlookat=" + this.guideContent[index]["locationX"] + "&view.vlookat=" + this.guideContent[index]["locationY"] + "&view.fov=90,MERGE,BLEND(0.5)");
+                    }
+                }
+                else{
+                    this.autoGuideStatus=false
+                    return
+                }
+            }
+
+
+
+        }
     },
     beforeDestroy() {
         window.removepano && window.removepano("kr");
@@ -920,21 +904,6 @@ export default {
         window._ycmt_playSound = (index) => {
             this._ycmt_playSound(index);
         };
-        /*
-        this.$store.commit("RESETSCENETHUMB");
-        this.initSceneAllList();
-        this.initWebSocket();
-        window._ycmt_setSceneId = () => {
-            this.getSceneId();
-        };
-        window._ycmt_mainContent = () => {
-
-        };
-        window._show_content=(hotspotId)=>{
-            this.getHotContent(hotspotId);
-        };
-        this.$store.commit("ISOPENORG");
-         */
     }
 }
 </script>
@@ -986,13 +955,13 @@ export default {
             cursor: move;
             position: relative;
             #p_editor {
-
                 width: 100%;
                 height: 100%;
                 margin-right: 8px;
                 transition: width 300ms;
                 position: relative;
             }
+            /*
             .chat_outer_div{
                 z-index:100;
                 height: 70%;
@@ -1003,16 +972,13 @@ export default {
                 bottom:15px;
                 right:15px;
                 text-align: center;
-                pointer-events: none;
-                //box-shadow: 0 2px 4px rgba(0, 0, 0, .12), 0 0 6px rgba(0, 0, 0, .04);
-                //    background-color: #ff6900;
                 border-radius: 2px;
                 overflow: hidden;
                 .chat_inner_div{
                     position:relative;
                     width: 100%;
                     height:100%;
-                    pointer-events: none;
+                    background: #F7F7F0;
                     .chat_header{
                         position:absolute;
                         top:0px;
@@ -1031,7 +997,7 @@ export default {
                         background: #F7F7F7;
                         overflow-y: auto;
                         padding: 20px 0px;
-                        pointer-events: auto;
+                        cursor: none;
                         .chat_div_right {
                             position: relative;
                             width: 260px;
@@ -1040,13 +1006,13 @@ export default {
                             margin-left: 85px;
                             margin-right: 15px;
                             overflow: hidden;
-
                             .chat_div_icon {
                                 position: absolute;
                                 width: 30px;
                                 height: 30px;
                                 border-radius: 5px;
                                 right: 0px;
+                                cursor: pointer;
                                 //margin-right: 10px;
                             }
 
@@ -1066,12 +1032,14 @@ export default {
                                 line-height: 20px;
                                 align-content: start;
                                 display: inline-block;
+                                cursor: pointer;
                                 img{
                                     display: block;
                                     width: 94%;
                                     margin:auto;
                                     margin-top: 5px;
                                     margin-bottom: 5px;
+                                    cursor: pointer;
                                 }
                             }
                         }
@@ -1089,7 +1057,7 @@ export default {
                                 height: 30px;
                                 border-radius: 5px;
                                 left:0px;
-                                //margin-right: 10px;
+                                cursor: pointer;
                             }
                             .chat_div_info{
                                 //position: absolute;
@@ -1107,6 +1075,7 @@ export default {
                                 line-height: 20px;
                                 align-content: start;
                                 display: inline-block;
+                                cursor: pointer;
                                 span{
 
                                 }
@@ -1129,7 +1098,7 @@ export default {
                         background: rgba(0,0,0,0.4);
                         overflow-y: auto;
                         padding: 20px 0px;
-                        pointer-events: auto;
+                        display: flex;
                         span{
                             display: inline-block;
                             height: 24px;
@@ -1151,7 +1120,6 @@ export default {
                         background: rgba(0,0,0,0.4);
                         overflow-y: auto;
                         padding: 20px 0px;
-                        pointer-events: auto;
                         .guide_item{
                             position: relative;
                             width: 260px;
@@ -1160,13 +1128,13 @@ export default {
                             margin-left: 85px;
                             margin-right: 15px;
                             overflow: hidden;
-                            pointer-events: auto;
                             .guide_item_icon {
                                 position: absolute;
                                 width: 30px;
                                 height: 30px;
                                 border-radius: 5px;
                                 right: 0px;
+                                cursor: pointer;
                             }
 
                             .guide_item_info {
@@ -1184,7 +1152,7 @@ export default {
                                 line-height: 20px;
                                 align-content: start;
                                 display: inline-block;
-                                pointer-events: auto;
+                                cursor: pointer;
                             }
                         }
                     }
@@ -1199,7 +1167,7 @@ export default {
                         display: flex;
                         justify-content: space-between;
                         vertical-align: center;
-                        pointer-events: auto;
+                        cursor: pointer;
                         input{
                             background-color: #ffffff;
                             outline-style: none ;
@@ -1220,6 +1188,222 @@ export default {
                             cursor: pointer;
                         }
                     }
+                }
+            }
+             */
+
+            .chat_main{
+                z-index:100;
+                position:absolute;
+                border-radius: 2px;
+                bottom:50px;
+                right:10px;
+                width:360px;
+                height: 60%;
+                min-height: 280px;
+                max-height: 700px;
+                background: #F7F7F7;
+                overflow-y: auto;
+                padding: 20px 0px;
+                cursor: none;
+                .chat_div_right {
+                    position: relative;
+                    width: 260px;
+                    margin-top: 15px;
+                    margin-bottom: 15px;
+                    margin-left: 85px;
+                    margin-right: 15px;
+                    overflow: hidden;
+                    .chat_div_icon {
+                        position: absolute;
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 5px;
+                        right: 0px;
+                        cursor: pointer;
+                        //margin-right: 10px;
+                    }
+
+                    .chat_div_info {
+                        //position: absolute;
+                        width: 180px;
+                        min-width: 10px;
+                        margin-right: 40px;
+                        border-radius: 2px 2px 2px 2px;
+                        background-color: #324155;
+                        text-align: left;
+                        padding: 8px;
+                        color: #F7F7F7;
+                        font-family: "PingFang SC";
+                        font-size: 12px;
+                        letter-spacing: 1px;
+                        line-height: 20px;
+                        align-content: start;
+                        display: inline-block;
+                        cursor: pointer;
+                        img{
+                            display: block;
+                            width: 94%;
+                            margin:auto;
+                            margin-top: 5px;
+                            margin-bottom: 5px;
+                            cursor: pointer;
+                        }
+                    }
+                }
+                .chat_div_left{
+                    position: relative;
+                    width: 260px;
+                    margin-top: 15px;
+                    margin-bottom: 15px;
+                    margin-left: 15px;
+                    margin-right: 85px;
+                    overflow:hidden;
+                    .chat_div_icon{
+                        position: absolute;
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 5px;
+                        left:0px;
+                        cursor: pointer;
+                    }
+                    .chat_div_info{
+                        //position: absolute;
+                        width: 180px;
+                        min-width: 10px;
+                        margin-left: 40px;
+                        border-radius: 2px 2px 2px 2px;
+                        background-color: #324155;
+                        text-align: left;
+                        padding: 8px;
+                        color: #F7F7F7;
+                        font-family: "PingFang SC";
+                        font-size: 12px;
+                        letter-spacing: 1px;
+                        line-height: 20px;
+                        align-content: start;
+                        display: inline-block;
+                        cursor: pointer;
+                        span{
+
+                        }
+                        img{
+                            display: block;
+                            width: 94%;
+                            margin:auto;
+                            margin-top: 5px;
+                            margin-bottom: 5px;
+                        }
+                    }
+                }
+            }
+            .scene_content{
+                z-index:100;
+                position:absolute;
+                border-radius: 2px;
+                bottom:50px;
+                right:10px;
+                width:360px;
+                height: 60%;
+                min-height: 280px;
+                max-height: 700px;
+                background: rgba(0,0,0,0.4);
+                overflow-y: auto;
+                padding: 20px 0px;
+                display: flex;
+                span{
+                    display: inline-block;
+                    height: 24px;
+                    line-height: 24px;
+                    //width: 80px;
+                    padding: 5px 8px;
+                    border-radius: 2px;
+                    background-color: #324155;
+                    margin: 5px 10px;
+                    color: #FFFFFF;
+                }
+            }
+            .guide_content{
+                z-index:100;
+                position:absolute;
+                border-radius: 2px;
+                bottom:50px;
+                right:10px;
+                width:360px;
+                height: 60%;
+                min-height: 280px;
+                max-height: 700px;
+                background: rgba(0,0,0,0.4);
+                overflow-y: auto;
+                padding: 20px 0px;
+                .guide_item{
+                    position: relative;
+                    width: 260px;
+                    margin-top: 15px;
+                    margin-bottom: 15px;
+                    margin-left: 85px;
+                    margin-right: 15px;
+                    overflow: hidden;
+                    .guide_item_icon {
+                        position: absolute;
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 5px;
+                        right: 0px;
+                        cursor: pointer;
+                    }
+
+                    .guide_item_info {
+                        //position: absolute;
+                        width: 180px;
+                        margin-right: 40px;
+                        border-radius: 0.08rem;
+                        background-color: #F7F7F7;
+                        text-align: left;
+                        padding: 0.2rem;
+                        color: #324155;
+                        font-family: "PingFang SC";
+                        font-size: 12px;
+                        letter-spacing: 1px;
+                        line-height: 20px;
+                        align-content: start;
+                        display: inline-block;
+                        cursor: pointer;
+                    }
+                }
+            }
+            .chat_footer{
+                position:absolute;
+                z-index:100;
+                bottom:5px;
+                right:10px;
+                border-radius: 2px;
+                width:360px;
+                height:40px;
+                background-color: #f7f7f7;
+                padding: 8px 8px;
+                display: flex;
+                justify-content: space-between;
+                vertical-align: center;
+                cursor: pointer;
+                input{
+                    background-color: #ffffff;
+                    outline-style: none ;
+                    border: 1px solid #ccc;
+                    border-radius: 4px;
+                    flex: 1;
+                    width: 260px;
+                    padding: 0px 5px;
+                    //margin-top: 8px;
+                    height: 24px;
+                }
+                img{
+                    width: 16px;
+                    height: 16px;
+                    margin-top: 4px;
+                    margin-left: 5px;
+                    margin-right: 5px;
+                    cursor: pointer;
                 }
             }
             .panel_sidebar {
@@ -1253,7 +1437,6 @@ export default {
                 }
             }
         }
-
         .title-box {
             height: 55px;
             background: #fff;

@@ -60,42 +60,6 @@
                     }
                 });
             },
-            /*
-            goDetail({ id, name }) {
-                if (!window.localStorage.getItem("authorization")) {
-                    return this.$store.commit("TOGGLE_LOGIN");
-                }
-                this.getProjectDetail(id);
-                const params = {
-                    taskId: "0",
-                    projectId: id,
-                    from: "2",
-                    name
-                };
-                this.$router.push({
-                    name: "panoEditor",
-                    params
-                });
-                this.$store.commit("SETHISTROY", {
-                    path: `0/${id}/1`,
-                    params
-                });
-            },
-            getProjectDetail(projectId){
-
-                projectDetail(
-                    {
-                        type: "GET"
-                    },
-                    projectId
-                ).then(res => {
-                    if (res.suceeded) {
-                        this.$store.commit("SET_PROJECT_DATA",res.data);
-                    }
-                });
-            },
-
-             */
             goDetail({ id, name, blockId }) {
                 const getProjectDetail = () => {
                     // 通过任务id获取项目的有关信息
@@ -106,6 +70,8 @@
                         id
                     ).then(res => {
                         if (res.suceeded) {
+
+                            console.log(res.data)
                             this.$store.commit("SET_PROJECT_DATA",res.data);
                             const params = {
                                 taskId: "0",
@@ -124,7 +90,6 @@
                         }
                     });
                 };
-
                 const getSceneAllList = () => {
                     // 通过任务id获取项目的有关信息
                     scene(
@@ -158,7 +123,7 @@
                     ).then(res => {
                         if (res.suceeded) {
                             this.$store.commit("SET_SCENELIST",res.data.content);
-                            getSceneAllList();
+                            getProjectDetail();
                         }
                     });
                 };

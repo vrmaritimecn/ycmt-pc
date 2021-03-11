@@ -65,7 +65,7 @@ export default {
             currentIndex: null,
             isUpDown: false,
             guideIndex:-1,
-            sceneList:this.$store.state.sceneList,
+            sceneList:this.$store.state.messageStore.sceneList,
             sceneIndex:-1
         };
     },
@@ -122,7 +122,6 @@ export default {
                     console.log(this.attachmentList);
                     const currentIndex = this.currentIndex;
                     if (this.attachmentList[currentIndex]) {
-                        //this.editOpenEditAttachmentName(this.attachmentList[currentIndex]);
                     }
                 }
             } catch (error) {
@@ -180,10 +179,11 @@ export default {
         addGuide() {
             const projectId = this.$route.params.projectId;
             // 通过任务id获取项目的有关信息
-            const getScenePara = window.getScenePara && window.getScenePara();
+            var k = document.getElementById("kr");
             var isSceneRes=false;
+            var sId=this.$store.getters.getSceneId;
             for(var i=0; i<this.sceneList.length; i++){
-                if(this.sceneList[i]["id"]==getScenePara[4]){
+                if(this.sceneList[i]["id"]==sId){
                     isSceneRes=true;
                 }
             }
@@ -194,10 +194,10 @@ export default {
                         projectId,
                         type: "GUIDE",
                         title: "请修改脚本介绍",
-                        locationFov: getScenePara[1],//场景的视角
-                        locationX: getScenePara[2], //获取的热点横坐标
-                        locationY: getScenePara[3], //获取的热点垂向坐标,
-                        sceneId: getScenePara[4], //场景ID
+                        locationFov: k.get("view.fov"), //场景的视角
+                        locationX: k.get("view.hlookat"), //获取的热点横坐标
+                        locationY: k.get("view.vlookat"), //获取的热点垂向坐标
+                        sceneId: sId, //场景ID
                     }
                 }).then(res => {
                     if (res.suceeded) {
@@ -250,27 +250,25 @@ export default {
         },
         loadpanoscene(val) {
             this.sceneIndex=val.id;
-            //window.loadpanoscene && window.loadpanoscene(val.id, val.code);
             var k = document.getElementById("kr");
             k.call("loadscene(scene_"+val.code+",null, MERGE, BLEND(1));");
         },
         findGuide(val) {
-            const { locationX, locationY, sceneId } = val;
-            if (sceneId) {
-                window.backFindHotspotId && backFindHotspotId(sceneId, locationX, locationY);
-            }
+            const { locationX, locationY, sceneId, sceneCode } = val;
+            var k = document.getElementById("kr");
+            k.call("loadscene( scene_"+ sceneCode +",hlookat="+ locationX +"&vlookat="+ locationY +", MERGE, BLEND(1));");
             this.$store.commit("SETGuIDELIST", data);
         },   //未完成
         changeGuideLocation(val) {
-            const getScenePara = window.getScenePara && window.getScenePara();
             const projectId = this.$route.params.projectId;
-            //const GuideData = this.$store.state.toolbarStore.GuideData;
+            var k = document.getElementById("kr");
+            var sId=this.$store.getters.getSceneId;
             const data = {
                 projectId, //项目ID
-                locationFov: getScenePara[1], //场景的视角
-                locationX: getScenePara[2], //获取的热点横坐标
-                locationY: getScenePara[3], //获取的热点垂向坐标
-                sceneId: getScenePara[4], //场景ID
+                locationFov: k.get("view.fov"), //场景的视角
+                locationX: k.get("view.hlookat"), //获取的热点横坐标
+                locationY: k.get("view.vlookat"), //获取的热点垂向坐标
+                sceneId: sId, //场景ID
                 id: val.id, // 引导脚本列表id
                 type: "GUIDE" //热点类型
             };
@@ -278,7 +276,7 @@ export default {
             hotspotDetail({ type: "put", data }, val.id).then(res => {
                 if (res.suceeded) {
                     this.getGuideList();
-                    window.loadpanoscene && window.loadpanoscene(val.id, val.code);
+                    k.call("loadscene("+ k.get("xml.scene") +",null, MERGE|KEEPVIEW, BLEND(1));");
                     this.currentIndex = null;
                     Bus.$emit("updetaSuccess");
                     this.$message({

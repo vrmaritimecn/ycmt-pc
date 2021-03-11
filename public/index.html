@@ -19,7 +19,6 @@
             content="width=device-width,initial-scale=1, minimum-scale=1.0,maximum-scale=1.0,user-scalable=no"
         />
         <title>加载中...</title>
-        
         <% htmlWebpackPlugin.options.src &&
         htmlWebpackPlugin.options.src.map(function(item) { %> <% if(item.async){ %>
         <script
@@ -45,6 +44,10 @@
         
         <script type="text/javascript" src="/pano/tour.js"></script>
         <script type="text/javascript" src="/pano/jquery.js"></script>
+
+        <script src="/pano/src/stomp.js"></script>
+        <script src="/pano/src/sockjs.min.js"></script>
+
         <script src="/pano/layui/layui.js"></script>
         <script
             type="text/javascript"
