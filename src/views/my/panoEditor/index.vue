@@ -124,8 +124,8 @@ import inspection from "./dialog/inspection.vue";
 import attachment from "./dialog/attachment.vue";
 import Title from "@/components/common/Title";
 import { mapGetters } from "vuex";
-//import SockJS from  'sockjs-client';
-//import Stomp from 'stompjs';
+import SockJS from  'sockjs-client';
+import Stomp from 'stompjs';
 import { hotspot, hotspotContent, scene, projectDetail, user } from "@/model/api";
 
 var k = null;
@@ -315,7 +315,7 @@ export default {
                         this.projectName=res.data.name;
                         this.initModule(res.data)
                         this.initSceneAllList();
-                        this.initWebSocket();
+                        //this.initWebSocket();
                         this.$store.commit("SET_PROJECT_DATA", res.data);
                     }
                 });
@@ -485,26 +485,24 @@ export default {
             let that= this;
             this.timer = setInterval(() => {
                 try {
-                    that.stompClient.send("/wss/ws/sendLocation",{} ,"test");
+                    that.stompClient.send("/wss/ws/sendLocation",{"code":"123"} ,"test");
                 } catch (err) {
                     console.log("断线了: " + err);
                     that.connection();
                 }
-            }, 1000)
+            }, 5000)
         },
         connection() {
             console.log("建立联线");
             let socket = new SockJS("/wss/panopipe");
             this.stompClient = Stomp.over(socket);
-            console.log(this.stompClient)
             let headers = {"code":"123"}
-            this.stompClient.connect(headers,() => {
+            this.stompClient.connect({"code":"123"},() => {
                 this.stompClient.subscribe('/wss/user/client/getLocation', (msg) => { // 订阅服务端提供的某个topic
                     console.log('广播成功')
                     console.log(msg);  // msg.body存放的是服务端发送给我们的信息
-                    console.log("追加数据")
                     this.addMessage(JSON.parse(msg.body))
-                },headers);
+                },{"code":"123"});
             }, (err) => {
                 console.log('失败')
                 console.log(err);
@@ -823,6 +821,7 @@ export default {
                 this.childDivStatus.chat=true
                 this.childDivStatus.thumb=false
                 this.childDivStatus.guide=false
+                this.initWebSocket();
             }
             if(val=="thumb"){
                 this.inputActive=false
